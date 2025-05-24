@@ -76,6 +76,12 @@ export function generateGalaxy(seed: number): Galaxy {
   const numSystems = 1000;
   const numArms = 4;
   
+  // Define star types with proper typing
+  const starTypes: StarSystem['starType'][] = [
+    'main-sequence', 'main-sequence', 'main-sequence', 'main-sequence',
+    'red-giant', 'white-dwarf', 'neutron', 'magnetar', 'pulsar', 'quasar'
+  ];
+  
   for (let i = 0; i < numSystems; i++) {
     const arm = Math.floor(i / (numSystems / numArms));
     const armProgress = (i % (numSystems / numArms)) / (numSystems / numArms);
@@ -88,10 +94,7 @@ export function generateGalaxy(seed: number): Galaxy {
     const z = Math.sin(angle) * distance + rng.range(-2000, 2000);
     const y = rng.range(-1000, 1000); // Galaxy thickness
     
-    const starType = rng.choice([
-      'main-sequence', 'main-sequence', 'main-sequence', 'main-sequence',
-      'red-giant', 'white-dwarf', 'neutron', 'magnetar', 'pulsar', 'quasar'
-    ]);
+    const starType = rng.choice(starTypes);
     
     const planets = generatePlanets(rng, starType);
     
