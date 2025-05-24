@@ -32,20 +32,19 @@ const StarSystemPoint: React.FC<{
 
   const size = useMemo(() => {
     const sizes = {
-      'main-sequence': 1,
-      'red-giant': 2,
-      'white-dwarf': 0.5,
-      'neutron': 0.3,
-      'magnetar': 0.4,
-      'pulsar': 0.3,
-      'quasar': 3
+      'main-sequence': 50,
+      'red-giant': 80,
+      'white-dwarf': 30,
+      'neutron': 20,
+      'magnetar': 25,
+      'pulsar': 20,
+      'quasar': 100
     };
-    return sizes[system.starType] || 1;
+    return sizes[system.starType] || 50;
   }, [system.starType]);
 
   useFrame((state) => {
     if (meshRef.current) {
-      meshRef.current.rotation.z += 0.01;
       if (isSelected) {
         meshRef.current.scale.setScalar(Math.sin(state.clock.elapsedTime * 2) * 0.3 + 1.2);
       } else {
@@ -57,19 +56,22 @@ const StarSystemPoint: React.FC<{
   return (
     <mesh
       ref={meshRef}
-      position={system.position}
-      onClick={onClick}
+      position={[system.position[0], system.position[1], system.position[2]]}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
       scale={[size, size, size]}
     >
       <sphereGeometry args={[1, 8, 6]} />
       <meshBasicMaterial 
         color={color} 
         transparent 
-        opacity={system.explored ? 1 : 0.6}
+        opacity={system.explored ? 1 : 0.8}
       />
       {isSelected && (
         <mesh>
-          <ringGeometry args={[2, 2.5, 16]} />
+          <ringGeometry args={[2, 3, 16]} />
           <meshBasicMaterial color="#00ff00" transparent opacity={0.8} />
         </mesh>
       )}
@@ -88,12 +90,12 @@ const NebulaCloud: React.FC<{ nebula: Nebula }> = ({ nebula }) => {
   });
 
   return (
-    <mesh ref={meshRef} position={nebula.position}>
-      <sphereGeometry args={[nebula.size / 100, 16, 12]} />
+    <mesh ref={meshRef} position={[nebula.position[0], nebula.position[1], nebula.position[2]]}>
+      <sphereGeometry args={[nebula.size / 50, 16, 12]} />
       <meshBasicMaterial 
         color={nebula.color} 
         transparent 
-        opacity={0.3}
+        opacity={0.2}
         wireframe
       />
     </mesh>
@@ -109,17 +111,20 @@ const GalaxyScene: React.FC<{
   
   // Set initial camera position
   React.useEffect(() => {
-    camera.position.set(0, 10000, 20000);
-  }, [camera]);
+    camera.position.set(0, 15000, 30000);
+    camera.lookAt(0, 0, 0);
+    console.log('Camera positioned at:', camera.position);
+    console.log('Galaxy has', galaxy.starSystems.length, 'star systems');
+  }, [camera, galaxy]);
 
   return (
     <>
-      <ambientLight intensity={0.2} />
-      <pointLight position={[0, 0, 0]} intensity={1} color="#ffaa00" />
+      <ambientLight intensity={0.4} />
+      <pointLight position={[0, 0, 0]} intensity={2} color="#ffaa00" />
       
       {/* Galactic Center */}
-      <mesh position={galaxy.galacticCenter}>
-        <sphereGeometry args={[500, 32, 24]} />
+      <mesh position={[0, 0, 0]}>
+        <sphereGeometry args={[800, 32, 24]} />
         <meshBasicMaterial color="#ffaa00" />
       </mesh>
       
@@ -140,10 +145,10 @@ const GalaxyScene: React.FC<{
       
       {/* Background Stars */}
       <Stars 
-        radius={100000} 
-        depth={50000} 
-        count={5000} 
-        factor={4} 
+        radius={150000} 
+        depth={80000} 
+        count={3000} 
+        factor={6} 
         saturation={0} 
         fade 
       />
@@ -152,8 +157,10 @@ const GalaxyScene: React.FC<{
         enablePan={true} 
         enableZoom={true} 
         enableRotate={true}
-        maxDistance={100000}
-        minDistance={100}
+        maxDistance={200000}
+        minDistance={1000}
+        dampingFactor={0.1}
+        enableDamping={true}
       />
     </>
   );
@@ -165,17 +172,30 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
 }) => {
   const [selectedSystem, setSelectedSystem] = useState<StarSystem | null>(null);
   
-  const galaxy = useMemo(() => generateGalaxy(seed), [seed]);
+  const galaxy = useMemo(() => {
+    console.log('Generating galaxy with seed:', seed);
+    const newGalaxy = generateGalaxy(seed);
+    console.log('Generated galaxy:', newGalaxy);
+    return newGalaxy;
+  }, [seed]);
   
   const handleSystemSelect = useCallback((system: StarSystem) => {
+    console.log('Selected system:', system);
     setSelectedSystem(system);
     onSystemSelect?.(system);
-    console.log('Selected system:', system);
   }, [onSystemSelect]);
 
   return (
-    <div className="w-full h-full relative">
-      <Canvas camera={{ position: [0, 10000, 20000], fov: 75 }}>
+    <div className="w-full h-full relative bg-black">
+      <Canvas 
+        camera={{ 
+          position: [0, 15000, 30000], 
+          fov: 75,
+          near: 1,
+          far: 500000
+        }}
+        gl={{ antialias: true }}
+      >
         <GalaxyScene 
           galaxy={galaxy}
           selectedSystem={selectedSystem}
