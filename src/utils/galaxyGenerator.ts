@@ -1,4 +1,3 @@
-
 export interface StarSystem {
   id: string;
   position: [number, number, number];
@@ -135,7 +134,7 @@ export function generateGalaxy(seed: number): Galaxy {
   };
 }
 
-function generatePlanets(rng: SeededRandom, starType: string): Planet[] {
+function generatePlanets(rng: SeededRandom, starType: StarSystem['starType']): Planet[] {
   const numPlanets = Math.floor(rng.range(0, 12));
   const planets: Planet[] = [];
   
@@ -163,7 +162,7 @@ function generatePlanets(rng: SeededRandom, starType: string): Planet[] {
   return planets;
 }
 
-function getStarTemperature(starType: string, rng: SeededRandom): number {
+function getStarTemperature(starType: StarSystem['starType'], rng: SeededRandom): number {
   const temps = {
     'main-sequence': [3000, 30000],
     'red-giant': [3000, 5000],
@@ -173,11 +172,11 @@ function getStarTemperature(starType: string, rng: SeededRandom): number {
     'pulsar': [1000000, 1000000],
     'quasar': [10000000, 100000000]
   };
-  const range = temps[starType as keyof typeof temps] || [5000, 6000];
+  const range = temps[starType] || [5000, 6000];
   return rng.range(range[0], range[1]);
 }
 
-function getStarMass(starType: string, rng: SeededRandom): number {
+function getStarMass(starType: StarSystem['starType'], rng: SeededRandom): number {
   const masses = {
     'main-sequence': [0.1, 50],
     'red-giant': [0.5, 8],
@@ -187,7 +186,7 @@ function getStarMass(starType: string, rng: SeededRandom): number {
     'pulsar': [1.4, 2],
     'quasar': [1000000, 10000000000]
   };
-  const range = masses[starType as keyof typeof masses] || [1, 1];
+  const range = masses[starType] || [1, 1];
   return rng.range(range[0], range[1]);
 }
 
