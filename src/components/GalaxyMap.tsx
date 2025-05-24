@@ -32,21 +32,21 @@ const StarSystemPoint: React.FC<{
 
   const size = useMemo(() => {
     const sizes = {
-      'main-sequence': 50,
-      'red-giant': 80,
-      'white-dwarf': 30,
-      'neutron': 20,
-      'magnetar': 25,
-      'pulsar': 20,
-      'quasar': 100
+      'main-sequence': 100,
+      'red-giant': 150,
+      'white-dwarf': 60,
+      'neutron': 40,
+      'magnetar': 50,
+      'pulsar': 40,
+      'quasar': 200
     };
-    return sizes[system.starType] || 50;
+    return sizes[system.starType] || 100;
   }, [system.starType]);
 
   useFrame((state) => {
     if (meshRef.current) {
       if (isSelected) {
-        meshRef.current.scale.setScalar(Math.sin(state.clock.elapsedTime * 2) * 0.3 + 1.2);
+        meshRef.current.scale.setScalar(Math.sin(state.clock.elapsedTime * 3) * 0.5 + 1.5);
       } else {
         meshRef.current.scale.setScalar(1);
       }
@@ -59,11 +59,12 @@ const StarSystemPoint: React.FC<{
       position={[system.position[0], system.position[1], system.position[2]]}
       onClick={(e) => {
         e.stopPropagation();
+        console.log('Star system clicked:', system.id);
         onClick();
       }}
       scale={[size, size, size]}
     >
-      <sphereGeometry args={[1, 8, 6]} />
+      <sphereGeometry args={[1, 12, 8]} />
       <meshBasicMaterial 
         color={color} 
         transparent 
@@ -71,8 +72,8 @@ const StarSystemPoint: React.FC<{
       />
       {isSelected && (
         <mesh>
-          <ringGeometry args={[2, 3, 16]} />
-          <meshBasicMaterial color="#00ff00" transparent opacity={0.8} />
+          <ringGeometry args={[2.5, 3.5, 32]} />
+          <meshBasicMaterial color="#00ff00" transparent opacity={0.9} />
         </mesh>
       )}
     </mesh>
@@ -109,22 +110,23 @@ const GalaxyScene: React.FC<{
 }> = ({ galaxy, selectedSystem, onSystemSelect }) => {
   const { camera } = useThree();
   
-  // Set initial camera position
+  // Set initial camera position for better galaxy overview
   React.useEffect(() => {
-    camera.position.set(0, 15000, 30000);
+    camera.position.set(0, 25000, 50000);
     camera.lookAt(0, 0, 0);
     console.log('Camera positioned at:', camera.position);
     console.log('Galaxy has', galaxy.starSystems.length, 'star systems');
+    console.log('First few star positions:', galaxy.starSystems.slice(0, 5).map(s => ({ id: s.id, pos: s.position })));
   }, [camera, galaxy]);
 
   return (
     <>
-      <ambientLight intensity={0.4} />
-      <pointLight position={[0, 0, 0]} intensity={2} color="#ffaa00" />
+      <ambientLight intensity={0.6} />
+      <pointLight position={[0, 0, 0]} intensity={3} color="#ffaa00" />
       
-      {/* Galactic Center */}
+      {/* Galactic Center - make it smaller so it doesn't dominate */}
       <mesh position={[0, 0, 0]}>
-        <sphereGeometry args={[800, 32, 24]} />
+        <sphereGeometry args={[400, 32, 24]} />
         <meshBasicMaterial color="#ffaa00" />
       </mesh>
       
@@ -145,10 +147,10 @@ const GalaxyScene: React.FC<{
       
       {/* Background Stars */}
       <Stars 
-        radius={150000} 
-        depth={80000} 
-        count={3000} 
-        factor={6} 
+        radius={200000} 
+        depth={100000} 
+        count={2000} 
+        factor={8} 
         saturation={0} 
         fade 
       />
@@ -157,10 +159,13 @@ const GalaxyScene: React.FC<{
         enablePan={true} 
         enableZoom={true} 
         enableRotate={true}
-        maxDistance={200000}
-        minDistance={1000}
-        dampingFactor={0.1}
+        maxDistance={300000}
+        minDistance={500}
+        dampingFactor={0.05}
         enableDamping={true}
+        zoomSpeed={2}
+        panSpeed={2}
+        rotateSpeed={1}
       />
     </>
   );
@@ -189,10 +194,10 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
     <div className="w-full h-full relative bg-black">
       <Canvas 
         camera={{ 
-          position: [0, 15000, 30000], 
-          fov: 75,
-          near: 1,
-          far: 500000
+          position: [0, 25000, 50000], 
+          fov: 60,
+          near: 10,
+          far: 1000000
         }}
         gl={{ antialias: true }}
       >
@@ -205,29 +210,31 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
       
       {/* UI Overlay */}
       {selectedSystem && (
-        <div className="absolute top-4 left-4 bg-black bg-opacity-80 text-white p-4 rounded max-w-sm">
-          <h3 className="text-lg font-bold mb-2">{selectedSystem.id}</h3>
-          <p>Type: {selectedSystem.starType}</p>
-          <p>Temperature: {Math.round(selectedSystem.temperature).toLocaleString()}K</p>
-          <p>Mass: {selectedSystem.mass.toFixed(2)} solar masses</p>
-          <p>Planets: {selectedSystem.planets.length}</p>
-          <p>Status: {selectedSystem.explored ? 'Explored' : 'Unexplored'}</p>
+        <div className="absolute top-4 left-4 bg-black bg-opacity-90 text-white p-4 rounded-lg max-w-sm border border-gray-600">
+          <h3 className="text-lg font-bold mb-2 text-yellow-400">{selectedSystem.id}</h3>
+          <p><span className="text-gray-300">Type:</span> <span className="text-white">{selectedSystem.starType}</span></p>
+          <p><span className="text-gray-300">Temperature:</span> <span className="text-white">{Math.round(selectedSystem.temperature).toLocaleString()}K</span></p>
+          <p><span className="text-gray-300">Mass:</span> <span className="text-white">{selectedSystem.mass.toFixed(2)} solar masses</span></p>
+          <p><span className="text-gray-300">Planets:</span> <span className="text-white">{selectedSystem.planets.length}</span></p>
+          <p><span className="text-gray-300">Status:</span> <span className={selectedSystem.explored ? "text-green-400" : "text-red-400"}>{selectedSystem.explored ? 'Explored' : 'Unexplored'}</span></p>
           {selectedSystem.specialFeatures.length > 0 && (
-            <p>Features: {selectedSystem.specialFeatures.join(', ')}</p>
+            <p><span className="text-gray-300">Features:</span> <span className="text-blue-400">{selectedSystem.specialFeatures.join(', ')}</span></p>
           )}
         </div>
       )}
       
-      <div className="absolute bottom-4 left-4 bg-black bg-opacity-80 text-white p-2 rounded">
-        <p className="text-sm">Galaxy Seed: {seed}</p>
-        <p className="text-sm">Systems: {galaxy.starSystems.length}</p>
-        <p className="text-sm">Nebulae: {galaxy.nebulae.length}</p>
+      <div className="absolute bottom-4 left-4 bg-black bg-opacity-90 text-white p-3 rounded-lg border border-gray-600">
+        <p className="text-sm"><span className="text-gray-300">Galaxy Seed:</span> <span className="text-yellow-400">{seed}</span></p>
+        <p className="text-sm"><span className="text-gray-300">Systems:</span> <span className="text-white">{galaxy.starSystems.length}</span></p>
+        <p className="text-sm"><span className="text-gray-300">Nebulae:</span> <span className="text-white">{galaxy.nebulae.length}</span></p>
       </div>
       
-      <div className="absolute top-4 right-4 bg-black bg-opacity-80 text-white p-2 rounded text-sm">
-        <p>Mouse: Orbit camera</p>
-        <p>Scroll: Zoom in/out</p>
-        <p>Click: Select star system</p>
+      <div className="absolute top-4 right-4 bg-black bg-opacity-90 text-white p-3 rounded-lg text-sm border border-gray-600">
+        <p className="text-yellow-400 font-semibold mb-1">Navigation:</p>
+        <p>🖱️ Drag: Rotate view</p>
+        <p>🖱️ Scroll: Zoom in/out</p>
+        <p>🖱️ Click: Select star system</p>
+        <p className="text-gray-400 text-xs mt-2">Start zoomed out to see galaxy structure</p>
       </div>
     </div>
   );
