@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { GalaxyMap } from '../components/GalaxyMap';
 import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
@@ -38,6 +39,12 @@ const Index = () => {
     setSelectedBody(body);
   };
 
+  // Log when we're about to render the panel
+  if (selectedSystem) {
+    console.log('Rendering panel for system:', selectedSystem.id);
+    console.log('About to render SystemView component');
+  }
+
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
       <header className="bg-gray-900 p-4 border-b border-gray-700">
@@ -76,8 +83,6 @@ const Index = () => {
         {/* System Details Panel */}
         {selectedSystem && (
           <div className="w-80 bg-gray-900 border-l border-gray-700 p-4 overflow-y-auto space-y-4">
-            {console.log('Rendering panel for system:', selectedSystem.id)}
-            
             {/* System Overview */}
             <Card className="bg-gray-800 border-gray-600">
               <CardHeader>
@@ -120,7 +125,6 @@ const Index = () => {
             </Card>
 
             {/* System View - This should show the orbital diagram */}
-            {console.log('About to render SystemView component')}
             <SystemView 
               system={selectedSystem} 
               onBodySelect={handleBodySelect}
