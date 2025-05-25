@@ -1,7 +1,7 @@
-
 import React, { useState } from 'react';
 import { GalaxyMap } from '../components/GalaxyMap';
-import { StarSystem } from '../utils/galaxyGenerator';
+import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
+import { SystemView } from '../components/galaxy/SystemView';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,11 +10,13 @@ const Index = () => {
   const [galaxySeed, setGalaxySeed] = useState(12345);
   const [inputSeed, setInputSeed] = useState('12345');
   const [selectedSystem, setSelectedSystem] = useState<StarSystem | null>(null);
+  const [selectedBody, setSelectedBody] = useState<Planet | Moon | null>(null);
 
   const handleSeedChange = () => {
     const newSeed = parseInt(inputSeed) || 12345;
     setGalaxySeed(newSeed);
     setSelectedSystem(null);
+    setSelectedBody(null);
   };
 
   const generateRandomSeed = () => {
@@ -22,11 +24,20 @@ const Index = () => {
     setInputSeed(randomSeed.toString());
     setGalaxySeed(randomSeed);
     setSelectedSystem(null);
+    setSelectedBody(null);
+  };
+
+  const handleSystemSelect = (system: StarSystem) => {
+    setSelectedSystem(system);
+    setSelectedBody(null); // Reset body selection when system changes
+  };
+
+  const handleBodySelect = (body: Planet | Moon | null) => {
+    setSelectedBody(body);
   };
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
-      {/* Header */}
       <header className="bg-gray-900 p-4 border-b border-gray-700">
         <div className="container mx-auto flex items-center justify-between">
           <h1 className="text-2xl font-bold">Stardust Voyager Fleet</h1>
@@ -56,13 +67,14 @@ const Index = () => {
         <div className="flex-1">
           <GalaxyMap 
             seed={galaxySeed} 
-            onSystemSelect={setSelectedSystem}
+            onSystemSelect={handleSystemSelect}
           />
         </div>
 
         {/* System Details Panel */}
         {selectedSystem && (
-          <div className="w-80 bg-gray-900 border-l border-gray-700 p-4 overflow-y-auto">
+          <div className="w-80 bg-gray-900 border-l border-gray-700 p-4 overflow-y-auto space-y-4">
+            {/* System Overview */}
             <Card className="bg-gray-800 border-gray-600">
               <CardHeader>
                 <CardTitle className="text-white">{selectedSystem.id}</CardTitle>
@@ -92,30 +104,6 @@ const Index = () => {
                   </div>
                 )}
 
-                <div>
-                  <strong>Planetary Bodies:</strong> {selectedSystem.planets.length}
-                  {selectedSystem.planets.length > 0 && (
-                    <ul className="mt-2 space-y-2">
-                      {selectedSystem.planets.map((planet, index) => (
-                        <li key={planet.id} className="bg-gray-700 p-2 rounded text-sm">
-                          <div className="font-medium">{planet.name}</div>
-                          <div className="text-xs text-gray-400">
-                            Type: {planet.type} | Radius: {planet.radius.toFixed(1)}
-                          </div>
-                          {planet.inhabited && (
-                            <div className="text-xs text-green-400">Inhabited</div>
-                          )}
-                          {planet.civilization && (
-                            <div className="text-xs text-blue-400">
-                              Civilization: {planet.civilization.name} ({planet.civilization.type})
-                            </div>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-
                 <div className="pt-4 border-t border-gray-600">
                   <Button className="w-full" disabled={selectedSystem.explored}>
                     {selectedSystem.explored ? 'Already Explored' : 'Begin Exploration'}
@@ -123,11 +111,46 @@ const Index = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* System View */}
+            <SystemView 
+              system={selectedSystem} 
+              onBodySelect={handleBodySelect}
+            />
+
+            {/* Detailed Planet/Moon Info */}
+            {selectedBody && (
+              <Card className="bg-gray-800 border-gray-600">
+                <CardHeader>
+                  <CardTitle className="text-white text-lg">{selectedBody.name}</CardTitle>
+                </CardHeader>
+                <CardContent className="text-gray-300 space-y-2">
+                  <div><strong>Type:</strong> {selectedBody.type}</div>
+                  <div><strong>Radius:</strong> {selectedBody.radius.toFixed(1)} km</div>
+                  {'distanceFromStar' in selectedBody && (
+                    <div><strong>Distance from Star:</strong> {selectedBody.distanceFromStar.toFixed(2)} AU</div>
+                  )}
+                  {'inhabited' in selectedBody && selectedBody.inhabited && (
+                    <div className="text-green-400 font-medium">Inhabited World</div>
+                  )}
+                  {'civilization' in selectedBody && selectedBody.civilization && (
+                    <div>
+                      <strong>Civilization:</strong> {selectedBody.civilization.name}
+                      <div className="text-sm text-gray-400">Type: {selectedBody.civilization.type}</div>
+                    </div>
+                  )}
+                  {'moons' in selectedBody && selectedBody.moons && selectedBody.moons.length > 0 && (
+                    <div>
+                      <strong>Moons:</strong> {selectedBody.moons.length}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </div>
         )}
       </div>
 
-      {/* Footer Info */}
       <footer className="bg-gray-900 p-2 border-t border-gray-700 text-center text-sm text-gray-400">
         <p>Procedurally Generated Galaxy | Seed: {galaxySeed} | Click and drag to navigate, scroll to zoom</p>
       </footer>

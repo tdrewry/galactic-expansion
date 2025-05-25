@@ -1,10 +1,10 @@
-
-import React, { useEffect } from 'react';
-import { useThree } from '@react-three/fiber';
+import React, { useEffect, useRef } from 'react';
+import { useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
 import { Galaxy, StarSystem as StarSystemType } from '../../utils/galaxyGenerator';
 import { StarSystem } from './StarSystem';
 import { Nebula } from './Nebula';
+import * as THREE from 'three';
 
 interface GalaxySceneProps {
   galaxy: Galaxy;
@@ -18,6 +18,9 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
   onSystemSelect 
 }) => {
   const { camera, gl } = useThree();
+  const controlsRef = useRef<any>(null);
+  const targetPosition = useRef(new THREE.Vector3());
+  const isMoving = useRef(false);
   
   useEffect(() => {
     camera.position.set(0, 20000, 40000);
@@ -29,6 +32,31 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
     gl.domElement.style.touchAction = 'none';
     gl.domElement.style.pointerEvents = 'auto';
   }, [camera, galaxy, gl]);
+
+  // Center camera on selected system
+  useEffect(() => {
+    if (selectedSystem && controlsRef.current) {
+      console.log('Centering camera on system:', selectedSystem.id);
+      const [x, y, z] = selectedSystem.position;
+      targetPosition.current.set(x, y, z);
+      controlsRef.current.target.copy(targetPosition.current);
+      
+      // Move camera to a good viewing distance
+      const distance = 5000;
+      camera.position.set(x + distance, y + distance, z + distance);
+      isMoving.current = true;
+    }
+  }, [selectedSystem, camera]);
+
+  useFrame(() => {
+    if (isMoving.current && controlsRef.current) {
+      controlsRef.current.update();
+      // Stop moving after a short time
+      setTimeout(() => {
+        isMoving.current = false;
+      }, 1000);
+    }
+  });
 
   const handleBackgroundClick = (event: any) => {
     console.log('Background clicked - deselecting system');
@@ -82,6 +110,7 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
       </mesh>
       
       <OrbitControls 
+        ref={controlsRef}
         enablePan={true} 
         enableZoom={true} 
         enableRotate={true}
