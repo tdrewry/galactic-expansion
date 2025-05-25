@@ -17,14 +17,22 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
   selectedSystem, 
   onSystemSelect 
 }) => {
-  const { camera } = useThree();
+  const { camera, gl } = useThree();
   
   useEffect(() => {
     camera.position.set(0, 20000, 40000);
     camera.lookAt(0, 0, 0);
     console.log('Camera positioned for galaxy view');
     console.log('Galaxy systems:', galaxy.starSystems.length);
-  }, [camera, galaxy]);
+    
+    // Enable pointer events on the canvas
+    gl.domElement.style.touchAction = 'none';
+  }, [camera, galaxy, gl]);
+
+  const handleBackgroundClick = () => {
+    console.log('Background clicked - deselecting system');
+    onSystemSelect(null as any);
+  };
 
   return (
     <>
@@ -32,7 +40,7 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
       <pointLight position={[0, 0, 0]} intensity={5} color="#ffaa00" />
       
       {/* Galactic Center */}
-      <mesh position={[0, 0, 0]}>
+      <mesh position={[0, 0, 0]} onClick={handleBackgroundClick}>
         <sphereGeometry args={[800, 32, 24]} />
         <meshBasicMaterial color="#ffaa00" />
       </mesh>
@@ -61,6 +69,16 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
         saturation={0} 
         fade 
       />
+      
+      {/* Background plane for click detection */}
+      <mesh 
+        position={[0, 0, -50000]} 
+        onClick={handleBackgroundClick}
+        visible={false}
+      >
+        <planeGeometry args={[500000, 500000]} />
+        <meshBasicMaterial transparent opacity={0} />
+      </mesh>
       
       <OrbitControls 
         enablePan={true} 

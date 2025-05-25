@@ -1,6 +1,6 @@
 
 import React, { useRef, useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, ThreeEvent } from '@react-three/fiber';
 import { Mesh } from 'three';
 import { StarSystem as StarSystemType } from '../../utils/galaxyGenerator';
 
@@ -29,15 +29,15 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
 
   const size = useMemo(() => {
     const sizes = {
-      'main-sequence': 200,
-      'red-giant': 300,
-      'white-dwarf': 120,
-      'neutron': 80,
-      'magnetar': 100,
-      'pulsar': 80,
-      'quasar': 400
+      'main-sequence': 400,
+      'red-giant': 600,
+      'white-dwarf': 240,
+      'neutron': 160,
+      'magnetar': 200,
+      'pulsar': 160,
+      'quasar': 800
     };
-    return sizes[system.starType] || 200;
+    return sizes[system.starType] || 400;
   }, [system.starType]);
 
   useFrame((state) => {
@@ -52,10 +52,25 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
     }
   });
 
-  const handleClick = (event: any) => {
+  const handleClick = (event: ThreeEvent<MouseEvent>) => {
+    console.log('StarSystem click detected:', system.id, 'at position:', system.position);
     event.stopPropagation();
-    console.log('Star system clicked:', system.id);
     onSelect(system);
+  };
+
+  const handlePointerOver = (event: ThreeEvent<PointerEvent>) => {
+    console.log('StarSystem pointer over:', system.id);
+    if (meshRef.current) {
+      meshRef.current.scale.setScalar(1.2);
+    }
+    document.body.style.cursor = 'pointer';
+  };
+
+  const handlePointerOut = (event: ThreeEvent<PointerEvent>) => {
+    if (meshRef.current && !isSelected) {
+      meshRef.current.scale.setScalar(1);
+    }
+    document.body.style.cursor = 'default';
   };
 
   return (
@@ -63,9 +78,11 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
       <mesh
         ref={meshRef}
         onClick={handleClick}
+        onPointerOver={handlePointerOver}
+        onPointerOut={handlePointerOut}
         scale={[size, size, size]}
       >
-        <sphereGeometry args={[1, 16, 12]} />
+        <sphereGeometry args={[1, 8, 6]} />
         <meshBasicMaterial 
           color={color} 
           transparent 
@@ -75,7 +92,7 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
       
       {isSelected && (
         <mesh ref={ringRef}>
-          <ringGeometry args={[size * 2.5, size * 3.5, 32]} />
+          <ringGeometry args={[size * 2.5, size * 3.5, 16]} />
           <meshBasicMaterial color="#00ff00" transparent opacity={0.9} side={2} />
         </mesh>
       )}

@@ -24,10 +24,12 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
     return newGalaxy;
   }, [seed]);
   
-  const handleSystemSelect = useCallback((system: StarSystem) => {
-    console.log('Selected system:', system.id);
+  const handleSystemSelect = useCallback((system: StarSystem | null) => {
+    console.log('Selected system:', system?.id || 'none');
     setSelectedSystem(system);
-    onSystemSelect?.(system);
+    if (system) {
+      onSystemSelect?.(system);
+    }
   }, [onSystemSelect]);
 
   return (
@@ -40,6 +42,10 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
           far: 1000000
         }}
         gl={{ antialias: true }}
+        onCreated={({ gl }) => {
+          console.log('Canvas created, enabling pointer events');
+          gl.domElement.style.touchAction = 'none';
+        }}
       >
         <GalaxyScene 
           galaxy={galaxy}
