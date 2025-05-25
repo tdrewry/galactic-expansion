@@ -42,71 +42,158 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, onBodySelect }) 
     return colors[type] || '#888888';
   };
 
-  // Sort planets by distance from star (orbit)
+  // Sort planets by distance from star
   const sortedPlanets = [...system.planets].sort((a, b) => a.distanceFromStar - b.distanceFromStar);
 
+  // Calculate orbital positions for Elite Dangerous style layout
+  const centerX = 200;
+  const centerY = 200;
+  const baseRadius = 60;
+  const radiusIncrement = 35;
+
+  const planetPositions = sortedPlanets.map((planet, index) => {
+    const orbitRadius = baseRadius + (index * radiusIncrement);
+    const angle = (index * 45) + (Math.random() * 90 - 45); // Vary angle slightly
+    const x = centerX + Math.cos(angle * Math.PI / 180) * orbitRadius;
+    const y = centerY + Math.sin(angle * Math.PI / 180) * orbitRadius;
+    
+    return {
+      planet,
+      x,
+      y,
+      orbitRadius,
+      angle
+    };
+  });
+
   return (
-    <div className="bg-gray-800 p-4 rounded-lg">
-      <h4 className="text-white text-lg font-semibold mb-4">System View</h4>
+    <div className="bg-gray-800 rounded-lg overflow-hidden">
+      <h4 className="text-white text-lg font-semibold p-4 border-b border-gray-700">System Map</h4>
       
-      <div className="flex items-center space-x-4 overflow-x-auto pb-4">
+      {/* Elite Dangerous style system map */}
+      <div className="relative bg-black" style={{ height: '400px' }}>
+        <svg width="100%" height="100%" className="absolute inset-0">
+          {/* Orbital rings */}
+          {planetPositions.map((pos, index) => (
+            <circle
+              key={`orbit-${index}`}
+              cx={centerX}
+              cy={centerY}
+              r={pos.orbitRadius}
+              fill="none"
+              stroke="rgba(100, 116, 139, 0.3)"
+              strokeWidth="1"
+              strokeDasharray="2,2"
+            />
+          ))}
+          
+          {/* Orbital lines from star to planets */}
+          {planetPositions.map((pos, index) => (
+            <line
+              key={`line-${index}`}
+              x1={centerX}
+              y1={centerY}
+              x2={pos.x}
+              y2={pos.y}
+              stroke="rgba(100, 116, 139, 0.2)"
+              strokeWidth="1"
+            />
+          ))}
+        </svg>
+
         {/* Central Star */}
-        <div className="flex-shrink-0 flex flex-col items-center">
-          <div 
-            className="w-12 h-12 rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-transform"
-            style={{ backgroundColor: getStarColor(system.starType) }}
-            onClick={() => handleBodyClick(null)}
-            title={`${system.id} (${system.starType})`}
-          >
-            ⭐
-          </div>
-          <span className="text-xs text-gray-300 mt-1">Star</span>
+        <div 
+          className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer hover:scale-110 transition-transform"
+          style={{ 
+            left: centerX, 
+            top: centerY,
+            backgroundColor: getStarColor(system.starType),
+            width: '24px',
+            height: '24px',
+            borderRadius: '50%',
+            boxShadow: `0 0 20px ${getStarColor(system.starType)}`,
+            border: '2px solid rgba(255, 255, 255, 0.3)'
+          }}
+          onClick={() => handleBodyClick(null)}
+          title={`${system.id} (${system.starType})`}
+        >
         </div>
 
-        {/* Planets in orbital order */}
-        {sortedPlanets.map((planet, index) => (
-          <div key={planet.id} className="flex-shrink-0">
-            {/* Orbital line */}
-            <div className="w-8 h-px bg-gray-600 mx-auto mb-2"></div>
-            
-            <div className="flex flex-col items-center">
-              <div 
-                className={`w-8 h-8 rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-transform border-2 ${
-                  selectedBody?.id === planet.id ? 'border-green-400' : 'border-transparent'
-                }`}
-                style={{ backgroundColor: getPlanetColor(planet.type) }}
-                onClick={() => handleBodyClick(planet)}
-                title={`${planet.name} (${planet.type})`}
-              >
-                🪐
-              </div>
-              <span className="text-xs text-gray-300 mt-1 max-w-16 truncate">{planet.name}</span>
-              
-              {/* Moons */}
-              {planet.moons && planet.moons.length > 0 && (
-                <div className="flex space-x-1 mt-1">
-                  {planet.moons.map((moon) => (
+        {/* Planets */}
+        {planetPositions.map((pos, index) => (
+          <div key={pos.planet.id}>
+            {/* Planet */}
+            <div 
+              className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer hover:scale-125 transition-all duration-200 rounded-full border-2 ${
+                selectedBody?.id === pos.planet.id ? 'border-green-400 shadow-lg' : 'border-transparent'
+              }`}
+              style={{ 
+                left: pos.x, 
+                top: pos.y,
+                backgroundColor: getPlanetColor(pos.planet.type),
+                width: '16px',
+                height: '16px',
+                boxShadow: selectedBody?.id === pos.planet.id ? '0 0 15px rgba(34, 197, 94, 0.6)' : 'none'
+              }}
+              onClick={() => handleBodyClick(pos.planet)}
+              title={`${pos.planet.name} (${pos.planet.type})`}
+            >
+            </div>
+
+            {/* Planet label */}
+            <div 
+              className="absolute text-xs text-gray-300 pointer-events-none transform -translate-x-1/2"
+              style={{ 
+                left: pos.x, 
+                top: pos.y + 15,
+                fontSize: '10px'
+              }}
+            >
+              {pos.planet.name.length > 8 ? pos.planet.name.substring(0, 8) + '...' : pos.planet.name}
+            </div>
+
+            {/* Moons around planet */}
+            {pos.planet.moons && pos.planet.moons.length > 0 && (
+              <>
+                {pos.planet.moons.map((moon, moonIndex) => {
+                  const moonAngle = (moonIndex * 90) + pos.angle;
+                  const moonDistance = 25;
+                  const moonX = pos.x + Math.cos(moonAngle * Math.PI / 180) * moonDistance;
+                  const moonY = pos.y + Math.sin(moonAngle * Math.PI / 180) * moonDistance;
+                  
+                  return (
                     <div
                       key={moon.id}
-                      className={`w-3 h-3 rounded-full bg-gray-400 cursor-pointer hover:scale-110 transition-transform border ${
-                        selectedBody?.id === moon.id ? 'border-green-400' : 'border-transparent'
+                      className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer hover:scale-150 transition-all duration-200 rounded-full border ${
+                        selectedBody?.id === moon.id ? 'border-green-400 bg-green-400' : 'border-gray-400 bg-gray-400'
                       }`}
+                      style={{ 
+                        left: moonX, 
+                        top: moonY,
+                        width: '6px',
+                        height: '6px',
+                        boxShadow: selectedBody?.id === moon.id ? '0 0 10px rgba(34, 197, 94, 0.8)' : 'none'
+                      }}
                       onClick={() => handleBodyClick(moon)}
                       title={moon.name}
-                    >
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                    />
+                  );
+                })}
+              </>
+            )}
           </div>
         ))}
+
+        {/* Navigation hint */}
+        <div className="absolute bottom-2 right-2 text-xs text-gray-500">
+          Click celestial bodies for details
+        </div>
       </div>
 
       {/* Selected body details */}
       {selectedBody && (
-        <div className="mt-4 p-3 bg-gray-700 rounded border border-gray-600">
-          <h5 className="text-white font-medium">{selectedBody.name}</h5>
+        <div className="p-4 bg-gray-700 border-t border-gray-600">
+          <h5 className="text-white font-medium text-lg">{selectedBody.name}</h5>
           <div className="text-sm text-gray-300 space-y-1 mt-2">
             <p><span className="text-gray-400">Type:</span> {selectedBody.type}</p>
             <p><span className="text-gray-400">Radius:</span> {selectedBody.radius.toFixed(1)} km</p>
@@ -117,7 +204,7 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, onBodySelect }) 
               <p><span className="text-gray-400">Distance from Planet:</span> {selectedBody.distanceFromPlanet.toFixed(2)} km</p>
             )}
             {'inhabited' in selectedBody && selectedBody.inhabited && (
-              <p className="text-green-400">Inhabited</p>
+              <p className="text-green-400 font-medium">⚬ Inhabited World</p>
             )}
             {'civilization' in selectedBody && selectedBody.civilization && (
               <p><span className="text-gray-400">Civilization:</span> {selectedBody.civilization.name} ({selectedBody.civilization.type})</p>
