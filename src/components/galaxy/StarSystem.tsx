@@ -27,17 +27,18 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
     return colors[system.starType] || '#ffffff';
   }, [system.starType]);
 
+  // Make stars much larger for easier clicking
   const size = useMemo(() => {
     const sizes = {
-      'main-sequence': 400,
-      'red-giant': 600,
-      'white-dwarf': 240,
-      'neutron': 160,
-      'magnetar': 200,
-      'pulsar': 160,
-      'quasar': 800
+      'main-sequence': 800,
+      'red-giant': 1200,
+      'white-dwarf': 480,
+      'neutron': 320,
+      'magnetar': 400,
+      'pulsar': 320,
+      'quasar': 1600
     };
-    return sizes[system.starType] || 400;
+    return sizes[system.starType] || 800;
   }, [system.starType]);
 
   useFrame((state) => {
@@ -60,6 +61,7 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
 
   const handlePointerOver = (event: ThreeEvent<PointerEvent>) => {
     console.log('StarSystem pointer over:', system.id);
+    event.stopPropagation();
     if (meshRef.current) {
       meshRef.current.scale.setScalar(1.2);
     }
@@ -67,6 +69,7 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
   };
 
   const handlePointerOut = (event: ThreeEvent<PointerEvent>) => {
+    event.stopPropagation();
     if (meshRef.current && !isSelected) {
       meshRef.current.scale.setScalar(1);
     }
@@ -80,9 +83,8 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
         onClick={handleClick}
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}
-        scale={[size, size, size]}
       >
-        <sphereGeometry args={[1, 8, 6]} />
+        <sphereGeometry args={[size, 16, 12]} />
         <meshBasicMaterial 
           color={color} 
           transparent 

@@ -9,7 +9,7 @@ import { Nebula } from './Nebula';
 interface GalaxySceneProps {
   galaxy: Galaxy;
   selectedSystem: StarSystemType | null;
-  onSystemSelect: (system: StarSystemType) => void;
+  onSystemSelect: (system: StarSystemType | null) => void;
 }
 
 export const GalaxyScene: React.FC<GalaxySceneProps> = ({ 
@@ -27,11 +27,12 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
     
     // Enable pointer events on the canvas
     gl.domElement.style.touchAction = 'none';
+    gl.domElement.style.pointerEvents = 'auto';
   }, [camera, galaxy, gl]);
 
-  const handleBackgroundClick = () => {
+  const handleBackgroundClick = (event: any) => {
     console.log('Background clicked - deselecting system');
-    onSystemSelect(null as any);
+    onSystemSelect(null);
   };
 
   return (
