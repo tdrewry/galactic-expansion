@@ -19,6 +19,16 @@ export interface Planet {
   resources: string[];
   inhabited: boolean;
   civilization?: Civilization;
+  distanceFromStar: number;
+  moons?: Moon[];
+}
+
+export interface Moon {
+  id: string;
+  name: string;
+  type: 'rocky' | 'ice' | 'metallic';
+  radius: number;
+  distanceFromPlanet: number;
 }
 
 export interface Civilization {
@@ -144,6 +154,9 @@ function generatePlanets(rng: SeededRandom, starType: StarSystem['starType']): P
   for (let i = 0; i < numPlanets; i++) {
     const distance = (i + 1) * rng.range(50, 200);
     const angle = rng.next() * Math.PI * 2;
+    const distanceFromStar = (i + 1) * rng.range(0.5, 3.0);
+    
+    const moons = generateMoons(rng);
     
     planets.push({
       id: `planet-${i}`,
@@ -158,11 +171,36 @@ function generatePlanets(rng: SeededRandom, starType: StarSystem['starType']): P
       atmosphere: rng.choice(['none', 'thin', 'thick', 'toxic', 'breathable']),
       resources: generateResources(rng),
       inhabited: rng.next() < 0.1,
-      civilization: rng.next() < 0.05 ? generateCivilization(rng) : undefined
+      civilization: rng.next() < 0.05 ? generateCivilization(rng) : undefined,
+      distanceFromStar,
+      moons: moons.length > 0 ? moons : undefined
     });
   }
   
   return planets;
+}
+
+function generateMoons(rng: SeededRandom): Moon[] {
+  const numMoons = Math.floor(rng.range(0, 5));
+  const moons: Moon[] = [];
+  
+  for (let i = 0; i < numMoons; i++) {
+    moons.push({
+      id: `moon-${i}`,
+      name: generateMoonName(rng),
+      type: rng.choice(['rocky', 'ice', 'metallic']),
+      radius: rng.range(0.1, 2.0),
+      distanceFromPlanet: (i + 1) * rng.range(2, 10)
+    });
+  }
+  
+  return moons;
+}
+
+function generateMoonName(rng: SeededRandom): string {
+  const prefixes = ['Luna', 'Io', 'Titan', 'Europa', 'Ganymede', 'Callisto', 'Mimas', 'Enceladus'];
+  const suffixes = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
+  return rng.choice(prefixes) + ' ' + rng.choice(suffixes);
 }
 
 function getStarTemperature(starType: StarSystem['starType'], rng: SeededRandom): number {

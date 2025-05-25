@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { StarSystem, Planet, Moon } from '../../utils/galaxyGenerator';
 
@@ -109,6 +108,9 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, onBodySelect }) 
             <p><span className="text-gray-400">Radius:</span> {selectedBody.radius.toFixed(1)} km</p>
             {'distanceFromStar' in selectedBody && (
               <p><span className="text-gray-400">Distance from Star:</span> {selectedBody.distanceFromStar.toFixed(2)} AU</p>
+            )}
+            {'distanceFromPlanet' in selectedBody && (
+              <p><span className="text-gray-400">Distance from Planet:</span> {selectedBody.distanceFromPlanet.toFixed(2)} km</p>
             )}
             {'inhabited' in selectedBody && selectedBody.inhabited && (
               <p className="text-green-400">Inhabited</p>
