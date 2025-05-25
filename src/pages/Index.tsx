@@ -28,11 +28,13 @@ const Index = () => {
   };
 
   const handleSystemSelect = (system: StarSystem) => {
+    console.log('Index: System selected:', system.id);
     setSelectedSystem(system);
     setSelectedBody(null); // Reset body selection when system changes
   };
 
   const handleBodySelect = (body: Planet | Moon | null) => {
+    console.log('Index: Body selected:', body?.name || 'none');
     setSelectedBody(body);
   };
 
@@ -74,6 +76,8 @@ const Index = () => {
         {/* System Details Panel */}
         {selectedSystem && (
           <div className="w-80 bg-gray-900 border-l border-gray-700 p-4 overflow-y-auto space-y-4">
+            {console.log('Rendering panel for system:', selectedSystem.id)}
+            
             {/* System Overview */}
             <Card className="bg-gray-800 border-gray-600">
               <CardHeader>
@@ -88,6 +92,9 @@ const Index = () => {
                 </div>
                 <div>
                   <strong>Mass:</strong> {selectedSystem.mass.toFixed(2)} solar masses
+                </div>
+                <div>
+                  <strong>Planets:</strong> {selectedSystem.planets.length}
                 </div>
                 <div>
                   <strong>Status:</strong> {selectedSystem.explored ? 'Explored' : 'Unexplored'}
@@ -112,7 +119,8 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            {/* System View */}
+            {/* System View - This should show the orbital diagram */}
+            {console.log('About to render SystemView component')}
             <SystemView 
               system={selectedSystem} 
               onBodySelect={handleBodySelect}

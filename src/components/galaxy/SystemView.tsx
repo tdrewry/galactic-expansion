@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { StarSystem, Planet, Moon } from '../../utils/galaxyGenerator';
 
@@ -8,6 +9,8 @@ interface SystemViewProps {
 
 export const SystemView: React.FC<SystemViewProps> = ({ system, onBodySelect }) => {
   const [selectedBody, setSelectedBody] = useState<Planet | Moon | null>(null);
+
+  console.log('SystemView rendering with system:', system.id, 'planets:', system.planets.length);
 
   const handleBodyClick = (body: Planet | Moon) => {
     console.log('Selected celestial body:', body.name);
@@ -33,7 +36,8 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, onBodySelect }) 
       'terrestrial': '#8B7355',
       'gas-giant': '#FF6B35',
       'ice-giant': '#4A90E2',
-      'dwarf': '#D4AF37'
+      'dwarf-planet': '#D4AF37',
+      'asteroid-belt': '#888888'
     };
     return colors[type] || '#888888';
   };
