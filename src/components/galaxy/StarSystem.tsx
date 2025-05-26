@@ -30,7 +30,7 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
   }, [system.starType]);
 
   // Adjusted star sizes to be more realistic
-  const { coreSize, glowSize } = useMemo(() => {
+  const { core, glow } = useMemo(() => {
     const sizeMap = {
       'main-sequence': { core: 400, glow: 800 },
       'red-giant': { core: 600, glow: 1200 },
@@ -98,7 +98,7 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}
       >
-        <sphereGeometry args={[glowSize, 16, 12]} />
+        <sphereGeometry args={[glow, 16, 12]} />
         <meshBasicMaterial 
           color={glowColor}
           transparent 
@@ -113,7 +113,7 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}
       >
-        <sphereGeometry args={[coreSize, 16, 12]} />
+        <sphereGeometry args={[core, 16, 12]} />
         <meshBasicMaterial 
           color={color} 
           transparent 
@@ -124,7 +124,7 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
       {/* Selection ring */}
       {isSelected && (
         <mesh ref={ringRef}>
-          <ringGeometry args={[glowSize * 1.8, glowSize * 2.2, 32]} />
+          <ringGeometry args={[glow * 1.8, glow * 2.2, 32]} />
           <meshBasicMaterial color="#00ff88" transparent opacity={0.8} side={2} />
         </mesh>
       )}
