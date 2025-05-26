@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { GalaxyMap } from '../components/GalaxyMap';
 import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
@@ -17,6 +18,7 @@ const Index = () => {
   const [binaryFrequency, setBinaryFrequency] = useState(0.15);
   const [trinaryFrequency, setTriinaryFrequency] = useState(0.03);
   const [selectedSystem, setSelectedSystem] = useState<StarSystem | null>(null);
+  const [selectedStar, setSelectedStar] = useState<'primary' | 'binary' | 'trinary'>('primary');
   const [selectedBody, setSelectedBody] = useState<Planet | Moon | null>(null);
 
   const handleSeedChange = () => {
@@ -53,8 +55,14 @@ const Index = () => {
   const handleSystemSelect = (system: StarSystem) => {
     console.log('Index: System selected:', system.id);
     setSelectedSystem(system);
-    // When a system is selected, automatically select the star
-    setSelectedBody(null); // We'll show star details in the system overview
+    setSelectedStar('primary'); // Reset to primary when selecting new system
+    setSelectedBody(null);
+  };
+
+  const handleStarSelect = (star: 'primary' | 'binary' | 'trinary') => {
+    console.log('Index: Star selected:', star);
+    setSelectedStar(star);
+    setSelectedBody(null); // Clear selected body when switching stars
   };
 
   const handleBodySelect = (body: Planet | Moon | null) => {
@@ -107,6 +115,9 @@ const Index = () => {
                 binaryFrequency={binaryFrequency}
                 trinaryFrequency={trinaryFrequency}
                 onSystemSelect={handleSystemSelect}
+                selectedSystem={selectedSystem}
+                selectedStar={selectedStar}
+                onStarSelect={handleStarSelect}
               />
             </div>
           </ResizablePanel>
@@ -168,6 +179,7 @@ const Index = () => {
                       {/* System View - This shows the orbital diagram with celestial body details */}
                       <SystemView 
                         system={selectedSystem} 
+                        selectedStar={selectedStar}
                         onBodySelect={handleBodySelect}
                       />
                     </div>

@@ -4,10 +4,11 @@ import { StarSystem, Planet, Moon } from '../../utils/galaxyGenerator';
 
 interface SystemViewProps {
   system: StarSystem;
+  selectedStar?: 'primary' | 'binary' | 'trinary';
   onBodySelect: (body: Planet | Moon | null) => void;
 }
 
-export const SystemView: React.FC<SystemViewProps> = ({ system, onBodySelect }) => {
+export const SystemView: React.FC<SystemViewProps> = ({ system, selectedStar = 'primary', onBodySelect }) => {
   const [selectedBody, setSelectedBody] = useState<Planet | Moon | null>(null);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -15,7 +16,37 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, onBodySelect }) 
   const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
 
-  console.log('SystemView rendering with system:', system.id, 'planets:', system.planets.length);
+  console.log('SystemView rendering with system:', system.id, 'planets:', system.planets.length, 'selectedStar:', selectedStar);
+
+  // Get the current star's data and planets
+  const getCurrentStarData = () => {
+    switch (selectedStar) {
+      case 'binary':
+        return system.binaryCompanion ? {
+          starType: system.binaryCompanion.starType,
+          temperature: system.binaryCompanion.temperature,
+          mass: system.binaryCompanion.mass,
+          planets: system.binaryCompanion.planets || []
+        } : null;
+      case 'trinary':
+        return system.trinaryCompanion ? {
+          starType: system.trinaryCompanion.starType,
+          temperature: system.trinaryCompanion.temperature,
+          mass: system.trinaryCompanion.mass,
+          planets: system.trinaryCompanion.planets || []
+        } : null;
+      default:
+        return {
+          starType: system.starType,
+          temperature: system.temperature,
+          mass: system.mass,
+          planets: system.planets
+        };
+    }
+  };
+
+  const currentStarData = getCurrentStarData();
+  const planetsToShow = currentStarData?.planets || [];
 
   const handleBodyClick = (body: Planet | Moon | null) => {
     if (body) {
@@ -89,7 +120,7 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, onBodySelect }) 
 
   // Memoize planet positions to prevent recalculation on every render
   const planetPositions = useMemo(() => {
-    const sortedPlanets = [...system.planets].sort((a, b) => a.distanceFromStar - b.distanceFromStar);
+    const sortedPlanets = [...planetsToShow].sort((a, b) => a.distanceFromStar - b.distanceFromStar);
     const centerX = 200;
     const centerY = 200;
     const baseRadius = 60;
@@ -111,17 +142,27 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, onBodySelect }) 
         angle
       };
     });
-  }, [system.planets, system.id]);
+  }, [planetsToShow]);
 
   const transformStyle = {
     transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
     transformOrigin: 'center center'
   };
 
+  if (!currentStarData) {
+    return (
+      <div className="bg-gray-800 rounded-lg p-4">
+        <div className="text-white">Selected star data not available</div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-gray-800 rounded-lg overflow-hidden">
       <div className="flex items-center justify-between p-4 border-b border-gray-700">
-        <h4 className="text-white text-lg font-semibold">System Map</h4>
+        <h4 className="text-white text-lg font-semibold">
+          System Map - {selectedStar === 'primary' ? 'Primary Star' : selectedStar === 'binary' ? 'Binary Companion' : 'Trinary Companion'}
+        </h4>
         <button
           onClick={resetView}
           className="text-xs text-gray-400 hover:text-white px-2 py-1 rounded bg-gray-700 hover:bg-gray-600 transition-colors"
@@ -178,18 +219,18 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, onBodySelect }) 
             style={{ 
               left: 200, 
               top: 200,
-              backgroundColor: getStarColor(system.starType),
+              backgroundColor: getStarColor(currentStarData.starType),
               width: '24px',
               height: '24px',
               borderRadius: '50%',
-              boxShadow: `0 0 20px ${getStarColor(system.starType)}`,
+              boxShadow: `0 0 20px ${getStarColor(currentStarData.starType)}`,
               border: '2px solid rgba(255, 255, 255, 0.3)'
             }}
             onClick={(e) => {
               e.stopPropagation();
               handleBodyClick(null);
             }}
-            title={`${system.id} (${system.starType})`}
+            title={`${system.id} ${selectedStar} (${currentStarData.starType})`}
           >
           </div>
 

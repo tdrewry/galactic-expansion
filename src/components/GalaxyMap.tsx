@@ -13,6 +13,9 @@ interface GalaxyMapProps {
   binaryFrequency?: number;
   trinaryFrequency?: number;
   onSystemSelect?: (system: StarSystem) => void;
+  selectedSystem?: StarSystem | null;
+  selectedStar?: 'primary' | 'binary' | 'trinary';
+  onStarSelect?: (star: 'primary' | 'binary' | 'trinary') => void;
 }
 
 export const GalaxyMap: React.FC<GalaxyMapProps> = ({ 
@@ -21,7 +24,10 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
   numNebulae = 50,
   binaryFrequency = 0.15,
   trinaryFrequency = 0.03,
-  onSystemSelect 
+  onSystemSelect,
+  selectedSystem = null,
+  selectedStar = 'primary',
+  onStarSelect
 }) => {
   const [selectedSystem, setSelectedSystem] = useState<StarSystem | null>(null);
   const [selectedStar, setSelectedStar] = useState<'primary' | 'binary' | 'trinary'>('primary');
@@ -35,16 +41,14 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
   
   const handleSystemSelect = useCallback((system: StarSystem | null) => {
     console.log('Selected system:', system?.id || 'none');
-    setSelectedSystem(system);
-    setSelectedStar('primary'); // Reset to primary when selecting new system
     if (system) {
       onSystemSelect?.(system);
     }
   }, [onSystemSelect]);
 
   const handleStarSelect = useCallback((starType: 'primary' | 'binary' | 'trinary') => {
-    setSelectedStar(starType);
-  }, []);
+    onStarSelect?.(starType);
+  }, [onStarSelect]);
 
   return (
     <div className="w-full h-full relative bg-black">
