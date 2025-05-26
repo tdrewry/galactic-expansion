@@ -70,6 +70,18 @@ const Index = () => {
     setSelectedBody(body);
   };
 
+  // Calculate total planets across all stars in the system
+  const getTotalPlanets = (system: StarSystem) => {
+    let total = system.planets.length;
+    if (system.binaryCompanion) {
+      total += system.binaryCompanion.planets.length;
+    }
+    if (system.trinaryCompanion) {
+      total += system.trinaryCompanion.planets.length;
+    }
+    return total;
+  };
+
   return (
     <div className="h-screen bg-black text-white flex flex-col overflow-hidden">
       <header className="bg-gray-900 p-4 border-b border-gray-700 flex-shrink-0">
@@ -147,7 +159,7 @@ const Index = () => {
                           <strong>Mass:</strong> {selectedSystem.mass.toFixed(2)} solar masses
                         </div>
                         <div>
-                          <strong>Planets:</strong> {selectedSystem.planets.length}
+                          <strong>Total Planets:</strong> {getTotalPlanets(selectedSystem)}
                         </div>
                         <div>
                           <strong>Status:</strong> {selectedSystem.explored ? 'Explored' : 'Unexplored'}

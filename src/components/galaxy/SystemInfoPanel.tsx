@@ -51,6 +51,18 @@ export const SystemInfoPanel: React.FC<SystemInfoPanelProps> = ({
     return 'Single Star System';
   };
 
+  // Calculate total planets across all stars in the system
+  const getTotalPlanets = () => {
+    let total = system.planets.length;
+    if (system.binaryCompanion) {
+      total += system.binaryCompanion.planets.length;
+    }
+    if (system.trinaryCompanion) {
+      total += system.trinaryCompanion.planets.length;
+    }
+    return total;
+  };
+
   return (
     <div className="absolute top-4 left-4 bg-black bg-opacity-95 text-white p-4 rounded-lg max-w-sm border border-gray-600 shadow-lg">
       <h3 className="text-lg font-bold mb-2 text-yellow-400">{system.id}</h3>
@@ -119,7 +131,7 @@ export const SystemInfoPanel: React.FC<SystemInfoPanelProps> = ({
       )}
 
       <div className="space-y-1 text-sm mt-3 pt-3 border-t border-gray-600">
-        <p><span className="text-gray-300">Planets:</span> <span className="text-white">{system.planets.length}</span></p>
+        <p><span className="text-gray-300">Total Planets:</span> <span className="text-white">{getTotalPlanets()}</span></p>
         <p><span className="text-gray-300">Status:</span> <span className={system.explored ? "text-green-400" : "text-red-400"}>{system.explored ? 'Explored' : 'Unexplored'}</span></p>
         {system.specialFeatures.length > 0 && (
           <p><span className="text-gray-300">Features:</span> <span className="text-blue-400">{system.specialFeatures.join(', ')}</span></p>

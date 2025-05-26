@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useCallback, useMemo } from 'react';
 import { StarSystem, Planet, Moon } from '../../utils/galaxyGenerator';
 
@@ -307,7 +308,11 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, selectedStar = '
           ))}
         </div>
 
-        {/* Navigation hint */}
+        {/* Planet count and navigation hint */}
+        <div className="absolute bottom-2 left-2 text-xs text-gray-400 bg-black bg-opacity-75 p-2 rounded">
+          <div>Planets in view: {planetsToShow.length}</div>
+        </div>
+
         <div className="absolute bottom-2 right-2 text-xs text-gray-500">
           <div>Scroll: Zoom | Drag: Pan</div>
           <div>Click celestial bodies for details</div>
