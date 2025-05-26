@@ -8,21 +8,25 @@ import { GalaxyInfo } from './galaxy/GalaxyInfo';
 
 interface GalaxyMapProps {
   seed?: number;
+  numSystems?: number;
+  numNebulae?: number;
   onSystemSelect?: (system: StarSystem) => void;
 }
 
 export const GalaxyMap: React.FC<GalaxyMapProps> = ({ 
-  seed = 12345, 
+  seed = 12345,
+  numSystems = 1000,
+  numNebulae = 50,
   onSystemSelect 
 }) => {
   const [selectedSystem, setSelectedSystem] = useState<StarSystem | null>(null);
   
   const galaxy = useMemo(() => {
-    console.log('Generating galaxy with seed:', seed);
-    const newGalaxy = generateGalaxy(seed);
+    console.log('Generating galaxy with seed:', seed, 'systems:', numSystems, 'nebulae:', numNebulae);
+    const newGalaxy = generateGalaxy(seed, numSystems, numNebulae);
     console.log('Generated galaxy with', newGalaxy.starSystems.length, 'systems');
     return newGalaxy;
-  }, [seed]);
+  }, [seed, numSystems, numNebulae]);
   
   const handleSystemSelect = useCallback((system: StarSystem | null) => {
     console.log('Selected system:', system?.id || 'none');

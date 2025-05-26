@@ -87,7 +87,7 @@ class SeededRandom {
   }
 }
 
-export function generateGalaxy(seed: number): Galaxy {
+export function generateGalaxy(seed: number, numSystems: number = 1000, numNebulae: number = 50): Galaxy {
   const rng = new SeededRandom(seed);
   const galaxyRadius = 50000; // Light years
   const starSystems: StarSystem[] = [];
@@ -98,7 +98,6 @@ export function generateGalaxy(seed: number): Galaxy {
   const galaxyType = rng.choice(galaxyTypes);
 
   // Generate star systems based on galaxy type
-  const numSystems = 1000;
   
   // Define star types with proper typing
   const starTypes: StarSystem['starType'][] = [
@@ -166,7 +165,6 @@ export function generateGalaxy(seed: number): Galaxy {
   }
 
   // Generate nebulae
-  const numNebulae = 50;
   for (let i = 0; i < numNebulae; i++) {
     const angle = rng.next() * Math.PI * 2;
     const distance = rng.range(5000, galaxyRadius * 0.8);

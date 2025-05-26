@@ -7,10 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
+import { Label } from '@/components/ui/label';
 
 const Index = () => {
   const [galaxySeed, setGalaxySeed] = useState(12345);
   const [inputSeed, setInputSeed] = useState('12345');
+  const [numSystems, setNumSystems] = useState(1000);
+  const [numNebulae, setNumNebulae] = useState(50);
   const [selectedSystem, setSelectedSystem] = useState<StarSystem | null>(null);
   const [selectedBody, setSelectedBody] = useState<Planet | Moon | null>(null);
 
@@ -48,17 +51,41 @@ const Index = () => {
           <h1 className="text-2xl font-bold">Stardust Voyager Fleet</h1>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
+                <Label htmlFor="systems" className="text-sm text-gray-300">Systems:</Label>
+                <Input
+                  id="systems"
+                  type="number"
+                  value={numSystems}
+                  onChange={(e) => setNumSystems(parseInt(e.target.value) || 1000)}
+                  className="w-20 bg-gray-800 border-gray-600 text-white"
+                  min="100"
+                  max="5000"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="nebulae" className="text-sm text-gray-300">Nebulae:</Label>
+                <Input
+                  id="nebulae"
+                  type="number"
+                  value={numNebulae}
+                  onChange={(e) => setNumNebulae(parseInt(e.target.value) || 50)}
+                  className="w-16 bg-gray-800 border-gray-600 text-white"
+                  min="10"
+                  max="200"
+                />
+              </div>
               <Input
                 type="number"
                 value={inputSeed}
                 onChange={(e) => setInputSeed(e.target.value)}
-                className="w-24 bg-gray-800 border-gray-600"
+                className="w-24 bg-gray-800 border-gray-600 text-white"
                 placeholder="Seed"
               />
-              <Button onClick={handleSeedChange} variant="outline" size="sm">
+              <Button onClick={handleSeedChange} variant="secondary" size="sm">
                 Load Galaxy
               </Button>
-              <Button onClick={generateRandomSeed} variant="outline" size="sm">
+              <Button onClick={generateRandomSeed} variant="secondary" size="sm">
                 Random
               </Button>
             </div>
@@ -74,6 +101,8 @@ const Index = () => {
             <div className="h-full">
               <GalaxyMap 
                 seed={galaxySeed} 
+                numSystems={numSystems}
+                numNebulae={numNebulae}
                 onSystemSelect={handleSystemSelect}
               />
             </div>
@@ -148,7 +177,7 @@ const Index = () => {
       </div>
 
       <footer className="bg-gray-900 p-2 border-t border-gray-700 text-center text-sm text-gray-400 flex-shrink-0">
-        <p>Procedurally Generated Galaxy | Seed: {galaxySeed} | Click and drag to navigate, scroll to zoom</p>
+        <p>Procedurally Generated Galaxy | Seed: {galaxySeed} | Systems: {numSystems} | Nebulae: {numNebulae} | Click and drag to navigate, scroll to zoom</p>
       </footer>
     </div>
   );
