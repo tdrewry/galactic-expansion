@@ -1,9 +1,11 @@
+
 import React, { useEffect, useRef } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
 import { Galaxy, StarSystem as StarSystemType } from '../../utils/galaxyGenerator';
 import { StarSystem } from './StarSystem';
 import { Nebula } from './Nebula';
+import { InterstellarMaterial } from './InterstellarMaterial';
 import * as THREE from 'three';
 
 interface GalaxySceneProps {
@@ -73,6 +75,9 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
         <sphereGeometry args={[800, 32, 24]} />
         <meshBasicMaterial color="#ffaa00" />
       </mesh>
+      
+      {/* Interstellar Material - renders behind stars */}
+      <InterstellarMaterial galaxy={galaxy} />
       
       {/* Star Systems */}
       {galaxy.starSystems.map((system) => (
