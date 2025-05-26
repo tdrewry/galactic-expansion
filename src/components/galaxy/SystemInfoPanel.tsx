@@ -14,21 +14,26 @@ export const SystemInfoPanel: React.FC<SystemInfoPanelProps> = ({
   onStarSelect,
   selectedStar = 'primary'
 }) => {
+  console.log('SystemInfoPanel - System:', system.id, 'Has binary:', !!system.binaryCompanion, 'Has trinary:', !!system.trinaryCompanion, 'Selected star:', selectedStar);
+  
   const getCurrentStarData = () => {
     switch (selectedStar) {
       case 'binary':
+        console.log('Getting binary companion data:', system.binaryCompanion);
         return system.binaryCompanion ? {
           type: system.binaryCompanion.starType,
           temperature: system.binaryCompanion.temperature,
           mass: system.binaryCompanion.mass
         } : null;
       case 'trinary':
+        console.log('Getting trinary companion data:', system.trinaryCompanion);
         return system.trinaryCompanion ? {
           type: system.trinaryCompanion.starType,
           temperature: system.trinaryCompanion.temperature,
           mass: system.trinaryCompanion.mass
         } : null;
       default:
+        console.log('Getting primary star data');
         return {
           type: system.starType,
           temperature: system.temperature,
@@ -61,7 +66,10 @@ export const SystemInfoPanel: React.FC<SystemInfoPanelProps> = ({
             <Button
               size="sm"
               variant={selectedStar === 'primary' ? 'default' : 'outline'}
-              onClick={() => onStarSelect?.('primary')}
+              onClick={() => {
+                console.log('Primary star button clicked');
+                onStarSelect?.('primary');
+              }}
               className="text-xs h-6 px-2"
             >
               Primary
@@ -70,7 +78,10 @@ export const SystemInfoPanel: React.FC<SystemInfoPanelProps> = ({
               <Button
                 size="sm"
                 variant={selectedStar === 'binary' ? 'default' : 'outline'}
-                onClick={() => onStarSelect?.('binary')}
+                onClick={() => {
+                  console.log('Binary star button clicked');
+                  onStarSelect?.('binary');
+                }}
                 className="text-xs h-6 px-2"
               >
                 Binary
@@ -80,7 +91,10 @@ export const SystemInfoPanel: React.FC<SystemInfoPanelProps> = ({
               <Button
                 size="sm"
                 variant={selectedStar === 'trinary' ? 'default' : 'outline'}
-                onClick={() => onStarSelect?.('trinary')}
+                onClick={() => {
+                  console.log('Trinary star button clicked');
+                  onStarSelect?.('trinary');
+                }}
                 className="text-xs h-6 px-2"
               >
                 Trinary
@@ -95,6 +109,12 @@ export const SystemInfoPanel: React.FC<SystemInfoPanelProps> = ({
           <p><span className="text-gray-300">Type:</span> <span className="text-white">{currentStar.type}</span></p>
           <p><span className="text-gray-300">Temperature:</span> <span className="text-white">{Math.round(currentStar.temperature).toLocaleString()}K</span></p>
           <p><span className="text-gray-300">Mass:</span> <span className="text-white">{currentStar.mass.toFixed(2)} solar masses</span></p>
+        </div>
+      )}
+
+      {!currentStar && selectedStar !== 'primary' && (
+        <div className="space-y-1 text-sm">
+          <p className="text-red-400">No data available for {selectedStar} companion</p>
         </div>
       )}
 
