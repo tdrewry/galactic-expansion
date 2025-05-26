@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { generateGalaxy, Galaxy, StarSystem } from '../utils/galaxyGenerator';
@@ -23,6 +24,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
   onSystemSelect 
 }) => {
   const [selectedSystem, setSelectedSystem] = useState<StarSystem | null>(null);
+  const [selectedStar, setSelectedStar] = useState<'primary' | 'binary' | 'trinary'>('primary');
   
   const galaxy = useMemo(() => {
     console.log('Generating galaxy with seed:', seed, 'systems:', numSystems, 'nebulae:', numNebulae, 'binary:', binaryFrequency, 'trinary:', trinaryFrequency);
@@ -34,10 +36,15 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
   const handleSystemSelect = useCallback((system: StarSystem | null) => {
     console.log('Selected system:', system?.id || 'none');
     setSelectedSystem(system);
+    setSelectedStar('primary'); // Reset to primary when selecting new system
     if (system) {
       onSystemSelect?.(system);
     }
   }, [onSystemSelect]);
+
+  const handleStarSelect = useCallback((starType: 'primary' | 'binary' | 'trinary') => {
+    setSelectedStar(starType);
+  }, []);
 
   return (
     <div className="w-full h-full relative bg-black">
@@ -61,7 +68,13 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
         />
       </Canvas>
       
-      {selectedSystem && <SystemInfoPanel system={selectedSystem} />}
+      {selectedSystem && (
+        <SystemInfoPanel 
+          system={selectedSystem} 
+          onStarSelect={handleStarSelect}
+          selectedStar={selectedStar}
+        />
+      )}
       <GalaxyInfo galaxy={galaxy} />
     </div>
   );
