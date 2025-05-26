@@ -54,7 +54,6 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, onBodySelect }) 
   const handleWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const zoomFactor = 0.1;
     const newZoom = Math.max(0.5, Math.min(3, zoom - e.deltaY * 0.001));
     setZoom(newZoom);
   }, [zoom]);
@@ -141,6 +140,7 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, onBodySelect }) 
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
         onWheel={handleWheel}
+        onWheelCapture={handleWheel}
       >
         <div style={transformStyle}>
           <svg width="400" height="400" className="absolute inset-0">
@@ -272,7 +272,7 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, onBodySelect }) 
         </div>
       </div>
 
-      {/* Selected body details */}
+      {/* Selected body details - Only show if a planet/moon is selected, not for star */}
       {selectedBody && (
         <div className="p-4 bg-gray-700 border-t border-gray-600">
           <h5 className="text-white font-medium text-lg">{selectedBody.name}</h5>

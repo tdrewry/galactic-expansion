@@ -32,7 +32,8 @@ const Index = () => {
   const handleSystemSelect = (system: StarSystem) => {
     console.log('Index: System selected:', system.id);
     setSelectedSystem(system);
-    setSelectedBody(null);
+    // When a system is selected, automatically select the star
+    setSelectedBody(null); // We'll show star details in the system overview
   };
 
   const handleBodySelect = (body: Planet | Moon | null) => {
@@ -41,8 +42,8 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
-      <header className="bg-gray-900 p-4 border-b border-gray-700">
+    <div className="h-screen bg-black text-white flex flex-col overflow-hidden">
+      <header className="bg-gray-900 p-4 border-b border-gray-700 flex-shrink-0">
         <div className="container mx-auto flex items-center justify-between">
           <h1 className="text-2xl font-bold">Stardust Voyager Fleet</h1>
           <div className="flex items-center gap-4">
@@ -66,14 +67,16 @@ const Index = () => {
       </header>
 
       {/* Main Content with Resizable Layout */}
-      <div className="flex-1">
+      <div className="flex-1 min-h-0">
         <ResizablePanelGroup direction="horizontal" className="h-full">
           {/* Galaxy Map Panel */}
           <ResizablePanel defaultSize={70} minSize={30}>
-            <GalaxyMap 
-              seed={galaxySeed} 
-              onSystemSelect={handleSystemSelect}
-            />
+            <div className="h-full">
+              <GalaxyMap 
+                seed={galaxySeed} 
+                onSystemSelect={handleSystemSelect}
+              />
+            </div>
           </ResizablePanel>
 
           {/* Resizable Handle */}
@@ -83,83 +86,90 @@ const Index = () => {
               
               {/* System Details Panel */}
               <ResizablePanel defaultSize={30} minSize={20} maxSize={60}>
-                <div className="h-full bg-gray-900 border-l border-gray-700 p-4 overflow-y-auto space-y-4">
-                  {/* System Overview */}
-                  <Card className="bg-gray-800 border-gray-600">
-                    <CardHeader>
-                      <CardTitle className="text-white">{selectedSystem.id}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-gray-300 space-y-3">
-                      <div>
-                        <strong>Star Classification:</strong> {selectedSystem.starType}
-                      </div>
-                      <div>
-                        <strong>Temperature:</strong> {Math.round(selectedSystem.temperature).toLocaleString()}K
-                      </div>
-                      <div>
-                        <strong>Mass:</strong> {selectedSystem.mass.toFixed(2)} solar masses
-                      </div>
-                      <div>
-                        <strong>Planets:</strong> {selectedSystem.planets.length}
-                      </div>
-                      <div>
-                        <strong>Status:</strong> {selectedSystem.explored ? 'Explored' : 'Unexplored'}
-                      </div>
-                      
-                      {selectedSystem.specialFeatures.length > 0 && (
-                        <div>
-                          <strong>Special Features:</strong>
-                          <ul className="list-disc list-inside mt-1">
-                            {selectedSystem.specialFeatures.map((feature, index) => (
-                              <li key={index} className="capitalize">{feature.replace('-', ' ')}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-
-                      <div className="pt-4 border-t border-gray-600">
-                        <Button className="w-full" disabled={selectedSystem.explored}>
-                          {selectedSystem.explored ? 'Already Explored' : 'Begin Exploration'}
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* System View - This should show the orbital diagram */}
-                  <SystemView 
-                    system={selectedSystem} 
-                    onBodySelect={handleBodySelect}
-                  />
-
-                  {/* Detailed Planet/Moon Info */}
-                  {selectedBody && (
+                <div className="h-full bg-gray-900 border-l border-gray-700 flex flex-col">
+                  {/* Fixed System Overview */}
+                  <div className="flex-shrink-0 p-4 border-b border-gray-600">
                     <Card className="bg-gray-800 border-gray-600">
                       <CardHeader>
-                        <CardTitle className="text-white text-lg">{selectedBody.name}</CardTitle>
+                        <CardTitle className="text-white">{selectedSystem.id}</CardTitle>
                       </CardHeader>
-                      <CardContent className="text-gray-300 space-y-2">
-                        <div><strong>Type:</strong> {selectedBody.type}</div>
-                        <div><strong>Radius:</strong> {selectedBody.radius.toFixed(1)} km</div>
-                        {'distanceFromStar' in selectedBody && (
-                          <div><strong>Distance from Star:</strong> {selectedBody.distanceFromStar.toFixed(2)} AU</div>
-                        )}
-                        {'inhabited' in selectedBody && selectedBody.inhabited && (
-                          <div className="text-green-400 font-medium">Inhabited World</div>
-                        )}
-                        {'civilization' in selectedBody && selectedBody.civilization && (
+                      <CardContent className="text-gray-300 space-y-3">
+                        <div>
+                          <strong>Star Classification:</strong> {selectedSystem.starType}
+                        </div>
+                        <div>
+                          <strong>Temperature:</strong> {Math.round(selectedSystem.temperature).toLocaleString()}K
+                        </div>
+                        <div>
+                          <strong>Mass:</strong> {selectedSystem.mass.toFixed(2)} solar masses
+                        </div>
+                        <div>
+                          <strong>Planets:</strong> {selectedSystem.planets.length}
+                        </div>
+                        <div>
+                          <strong>Status:</strong> {selectedSystem.explored ? 'Explored' : 'Unexplored'}
+                        </div>
+                        
+                        {selectedSystem.specialFeatures.length > 0 && (
                           <div>
-                            <strong>Civilization:</strong> {selectedBody.civilization.name}
-                            <div className="text-sm text-gray-400">Type: {selectedBody.civilization.type}</div>
+                            <strong>Special Features:</strong>
+                            <ul className="list-disc list-inside mt-1">
+                              {selectedSystem.specialFeatures.map((feature, index) => (
+                                <li key={index} className="capitalize">{feature.replace('-', ' ')}</li>
+                              ))}
+                            </ul>
                           </div>
                         )}
-                        {'moons' in selectedBody && selectedBody.moons && selectedBody.moons.length > 0 && (
-                          <div>
-                            <strong>Moons:</strong> {selectedBody.moons.length}
-                          </div>
-                        )}
+
+                        <div className="pt-4 border-t border-gray-600">
+                          <Button className="w-full" disabled={selectedSystem.explored}>
+                            {selectedSystem.explored ? 'Already Explored' : 'Begin Exploration'}
+                          </Button>
+                        </div>
                       </CardContent>
                     </Card>
-                  )}
+                  </div>
+
+                  {/* Scrollable content area */}
+                  <div className="flex-1 overflow-y-auto">
+                    <div className="p-4 space-y-4">
+                      {/* System View - This should show the orbital diagram */}
+                      <SystemView 
+                        system={selectedSystem} 
+                        onBodySelect={handleBodySelect}
+                      />
+
+                      {/* Detailed Planet/Moon Info */}
+                      {selectedBody && (
+                        <Card className="bg-gray-800 border-gray-600">
+                          <CardHeader>
+                            <CardTitle className="text-white text-lg">{selectedBody.name}</CardTitle>
+                          </CardHeader>
+                          <CardContent className="text-gray-300 space-y-2">
+                            <div><strong>Type:</strong> {selectedBody.type}</div>
+                            <div><strong>Radius:</strong> {selectedBody.radius.toFixed(1)} km</div>
+                            {'distanceFromStar' in selectedBody && (
+                              <div><strong>Distance from Star:</strong> {selectedBody.distanceFromStar.toFixed(2)} AU</div>
+                            )}
+                            {'inhabited' in selectedBody && selectedBody.inhabited && (
+                              <div className="text-green-400 font-medium">Inhabited World</div>
+                            )}
+                            {'civilization' in selectedBody && selectedBody.civilization && (
+                              <div>
+                                <strong>Civilization:</strong> {selectedBody.civilization.name}
+                                <div className="text-sm text-gray-400">Type: {selectedBody.civilization.type}</div>
+                              </div>
+                            )}
+                            {'moons' in selectedBody && selectedBody.moons && selectedBody.moons.length > 0 && (
+                              <div>
+                                <strong>Moons:</strong> {selectedBody.moons.length}
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </ResizablePanel>
             </>
@@ -167,7 +177,7 @@ const Index = () => {
         </ResizablePanelGroup>
       </div>
 
-      <footer className="bg-gray-900 p-2 border-t border-gray-700 text-center text-sm text-gray-400">
+      <footer className="bg-gray-900 p-2 border-t border-gray-700 text-center text-sm text-gray-400 flex-shrink-0">
         <p>Procedurally Generated Galaxy | Seed: {galaxySeed} | Click and drag to navigate, scroll to zoom</p>
       </footer>
     </div>

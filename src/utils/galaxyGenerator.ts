@@ -7,6 +7,16 @@ export interface StarSystem {
   explored: boolean;
   planets: Planet[];
   specialFeatures: string[];
+  binaryCompanion?: {
+    starType: 'main-sequence' | 'red-giant' | 'white-dwarf' | 'neutron' | 'magnetar' | 'pulsar' | 'quasar';
+    temperature: number;
+    mass: number;
+  };
+  trinaryCompanion?: {
+    starType: 'main-sequence' | 'red-giant' | 'white-dwarf' | 'neutron' | 'magnetar' | 'pulsar' | 'quasar';
+    temperature: number;
+    mass: number;
+  };
 }
 
 export interface Planet {
@@ -53,6 +63,7 @@ export interface Galaxy {
   nebulae: Nebula[];
   galacticCenter: [number, number, number];
   playerPosition: [number, number, number];
+  galaxyType: 'spiral' | 'barred-spiral' | 'globular' | 'elliptical';
 }
 
 class SeededRandom {
@@ -81,10 +92,12 @@ export function generateGalaxy(seed: number): Galaxy {
   const galaxyRadius = 50000; // Light years
   const starSystems: StarSystem[] = [];
   const nebulae: Nebula[] = [];
+  
+  // Choose galaxy type
+  const galaxyType = rng.choice(['spiral', 'barred-spiral', 'globular', 'elliptical']);
 
-  // Generate star systems in a spiral galaxy pattern
+  // Generate star systems based on galaxy type
   const numSystems = 1000;
-  const numArms = 4;
   
   // Define star types with proper typing
   const starTypes: StarSystem['starType'][] = [
@@ -93,30 +106,61 @@ export function generateGalaxy(seed: number): Galaxy {
   ];
   
   for (let i = 0; i < numSystems; i++) {
-    const arm = Math.floor(i / (numSystems / numArms));
-    const armProgress = (i % (numSystems / numArms)) / (numSystems / numArms);
+    let position: [number, number, number];
     
-    // Spiral arm calculation
-    const angle = (arm * (2 * Math.PI / numArms)) + (armProgress * Math.PI * 4);
-    const distance = armProgress * galaxyRadius + rng.range(-5000, 5000);
-    
-    const x = Math.cos(angle) * distance + rng.range(-2000, 2000);
-    const z = Math.sin(angle) * distance + rng.range(-2000, 2000);
-    const y = rng.range(-1000, 1000); // Galaxy thickness
+    switch (galaxyType) {
+      case 'spiral':
+        position = generateSpiralPosition(rng, i, numSystems, galaxyRadius);
+        break;
+      case 'barred-spiral':
+        position = generateBarredSpiralPosition(rng, i, numSystems, galaxyRadius);
+        break;
+      case 'globular':
+        position = generateGlobularPosition(rng, galaxyRadius);
+        break;
+      case 'elliptical':
+        position = generateEllipticalPosition(rng, galaxyRadius);
+        break;
+      default:
+        position = generateSpiralPosition(rng, i, numSystems, galaxyRadius);
+    }
     
     const starType = rng.choice(starTypes);
-    
     const planets = generatePlanets(rng, starType);
+    
+    // Generate binary/trinary companions (15% chance for binary, 3% for trinary)
+    let binaryCompanion: StarSystem['binaryCompanion'] = undefined;
+    let trinaryCompanion: StarSystem['trinaryCompanion'] = undefined;
+    
+    if (rng.next() < 0.15) { // 15% chance for binary
+      const companionType = rng.choice(starTypes);
+      binaryCompanion = {
+        starType: companionType,
+        temperature: getStarTemperature(companionType, rng),
+        mass: getStarMass(companionType, rng)
+      };
+      
+      if (rng.next() < 0.2) { // 20% of binary systems have a third star
+        const trinaryType = rng.choice(starTypes);
+        trinaryCompanion = {
+          starType: trinaryType,
+          temperature: getStarTemperature(trinaryType, rng),
+          mass: getStarMass(trinaryType, rng)
+        };
+      }
+    }
     
     starSystems.push({
       id: `system-${i}`,
-      position: [x, y, z],
+      position,
       starType,
       temperature: getStarTemperature(starType, rng),
       mass: getStarMass(starType, rng),
       explored: false,
       planets,
-      specialFeatures: generateSpecialFeatures(rng)
+      specialFeatures: generateSpecialFeatures(rng),
+      binaryCompanion,
+      trinaryCompanion
     });
   }
 
@@ -143,8 +187,68 @@ export function generateGalaxy(seed: number): Galaxy {
     starSystems,
     nebulae,
     galacticCenter: [0, 0, 0],
-    playerPosition: starSystems[0]?.position || [0, 0, 0]
+    playerPosition: starSystems[0]?.position || [0, 0, 0],
+    galaxyType
   };
+}
+
+function generateSpiralPosition(rng: SeededRandom, index: number, total: number, radius: number): [number, number, number] {
+  const numArms = 4;
+  const arm = Math.floor(index / (total / numArms));
+  const armProgress = (index % (total / numArms)) / (total / numArms);
+  
+  const angle = (arm * (2 * Math.PI / numArms)) + (armProgress * Math.PI * 4);
+  const distance = armProgress * radius + rng.range(-5000, 5000);
+  
+  const x = Math.cos(angle) * distance + rng.range(-2000, 2000);
+  const z = Math.sin(angle) * distance + rng.range(-2000, 2000);
+  const y = rng.range(-1000, 1000);
+  
+  return [x, y, z];
+}
+
+function generateBarredSpiralPosition(rng: SeededRandom, index: number, total: number, radius: number): [number, number, number] {
+  const barLength = radius * 0.3;
+  const barWidth = radius * 0.1;
+  
+  // 30% chance for bar region, 70% for spiral arms
+  if (rng.next() < 0.3) {
+    // Bar region
+    const barProgress = rng.range(-1, 1);
+    const x = barProgress * barLength + rng.range(-barWidth, barWidth);
+    const z = rng.range(-barWidth, barWidth);
+    const y = rng.range(-500, 500);
+    return [x, y, z];
+  } else {
+    // Spiral arms starting from bar ends
+    return generateSpiralPosition(rng, index, total, radius);
+  }
+}
+
+function generateGlobularPosition(rng: SeededRandom, radius: number): [number, number, number] {
+  // Spherical distribution with higher density toward center
+  const distance = Math.pow(rng.next(), 0.5) * radius * 0.6;
+  const theta = rng.range(0, Math.PI * 2);
+  const phi = Math.acos(1 - 2 * rng.next());
+  
+  const x = distance * Math.sin(phi) * Math.cos(theta);
+  const y = distance * Math.sin(phi) * Math.sin(theta);
+  const z = distance * Math.cos(phi);
+  
+  return [x, y, z];
+}
+
+function generateEllipticalPosition(rng: SeededRandom, radius: number): [number, number, number] {
+  // Elliptical distribution
+  const distance = Math.pow(rng.next(), 0.7) * radius * 0.8;
+  const angle = rng.range(0, Math.PI * 2);
+  const height = rng.range(-radius * 0.2, radius * 0.2);
+  
+  const x = distance * Math.cos(angle);
+  const z = distance * Math.sin(angle) * 0.6; // Flattened
+  const y = height;
+  
+  return [x, y, z];
 }
 
 function generatePlanets(rng: SeededRandom, starType: StarSystem['starType']): Planet[] {
