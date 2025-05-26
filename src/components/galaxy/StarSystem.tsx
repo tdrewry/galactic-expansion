@@ -20,9 +20,9 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
   
   const { color, glowColor } = useMemo(() => {
     const colorMap = {
-      'main-sequence': { color: '#ffff88', glow: '#ffff44' },
-      'red-giant': { color: '#ff6666', glow: '#ff3333' },
-      'white-dwarf': { color: '#ffffff', glow: '#ccccff' },
+      'main-sequence': { color: '#ffffff', glow: '#ffff88' },
+      'red-giant': { color: '#ff8888', glow: '#ff4444' },
+      'white-dwarf': { color: '#ffffff', glow: '#aaaaff' },
       'neutron': { color: '#88ccff', glow: '#4499ff' },
       'magnetar': { color: '#ff88ff', glow: '#ff44ff' },
       'pulsar': { color: '#88ffff', glow: '#44ffff' },
@@ -32,28 +32,28 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
     return { color: colors.color, glowColor: colors.glow };
   }, [system.starType]);
 
-  // Much smaller sizes for better distinction
+  // Much smaller sizes for dense galaxy view
   const { core, innerGlow, outerGlow, spikeLength } = useMemo(() => {
     const sizeMap = {
-      'main-sequence': { core: 80, innerGlow: 120, outerGlow: 200, spikeLength: 300 },
-      'red-giant': { core: 120, innerGlow: 180, outerGlow: 280, spikeLength: 400 },
-      'white-dwarf': { core: 50, innerGlow: 80, outerGlow: 140, spikeLength: 200 },
-      'neutron': { core: 40, innerGlow: 70, outerGlow: 120, spikeLength: 180 },
-      'magnetar': { core: 60, innerGlow: 90, outerGlow: 150, spikeLength: 220 },
-      'pulsar': { core: 45, innerGlow: 75, outerGlow: 130, spikeLength: 190 },
-      'quasar': { core: 150, innerGlow: 220, outerGlow: 350, spikeLength: 500 }
+      'main-sequence': { core: 20, innerGlow: 35, outerGlow: 60, spikeLength: 80 },
+      'red-giant': { core: 30, innerGlow: 50, outerGlow: 80, spikeLength: 100 },
+      'white-dwarf': { core: 15, innerGlow: 25, outerGlow: 40, spikeLength: 50 },
+      'neutron': { core: 12, innerGlow: 20, outerGlow: 35, spikeLength: 45 },
+      'magnetar': { core: 18, innerGlow: 30, outerGlow: 50, spikeLength: 65 },
+      'pulsar': { core: 16, innerGlow: 28, outerGlow: 45, spikeLength: 60 },
+      'quasar': { core: 40, innerGlow: 65, outerGlow: 100, spikeLength: 120 }
     };
-    return sizeMap[system.starType] || { core: 80, innerGlow: 120, outerGlow: 200, spikeLength: 300 };
+    return sizeMap[system.starType] || { core: 20, innerGlow: 35, outerGlow: 60, spikeLength: 80 };
   }, [system.starType]);
 
   useFrame((state) => {
-    // Core twinkling
+    // Core bright twinkling
     if (coreRef.current) {
-      const twinkle = Math.sin(state.clock.elapsedTime * 6 + system.position[0] * 0.001) * 0.2 + 0.8;
+      const twinkle = Math.sin(state.clock.elapsedTime * 8 + system.position[0] * 0.001) * 0.3 + 0.7;
       (coreRef.current.material as MeshBasicMaterial).opacity = twinkle;
       
       if (isSelected) {
-        coreRef.current.scale.setScalar(Math.sin(state.clock.elapsedTime * 4) * 0.3 + 1);
+        coreRef.current.scale.setScalar(Math.sin(state.clock.elapsedTime * 4) * 0.4 + 1.2);
       } else {
         coreRef.current.scale.setScalar(1);
       }
@@ -61,31 +61,31 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
     
     // Inner glow pulsing
     if (innerGlowRef.current) {
-      const pulse = Math.sin(state.clock.elapsedTime * 3 + system.position[1] * 0.001) * 0.1 + 0.9;
-      (innerGlowRef.current.material as MeshBasicMaterial).opacity = 0.6 * pulse;
+      const pulse = Math.sin(state.clock.elapsedTime * 4 + system.position[1] * 0.001) * 0.2 + 0.8;
+      (innerGlowRef.current.material as MeshBasicMaterial).opacity = pulse;
       
       if (isSelected) {
-        innerGlowRef.current.scale.setScalar(Math.sin(state.clock.elapsedTime * 3) * 0.2 + 1);
+        innerGlowRef.current.scale.setScalar(Math.sin(state.clock.elapsedTime * 3) * 0.3 + 1.1);
       } else {
         innerGlowRef.current.scale.setScalar(1);
       }
     }
     
-    // Outer glow subtle animation
+    // Outer glow breathing
     if (outerGlowRef.current) {
-      const outerPulse = Math.sin(state.clock.elapsedTime * 1.5 + system.position[2] * 0.001) * 0.05 + 0.95;
-      (outerGlowRef.current.material as MeshBasicMaterial).opacity = 0.3 * outerPulse;
+      const breath = Math.sin(state.clock.elapsedTime * 2 + system.position[2] * 0.001) * 0.1 + 0.9;
+      (outerGlowRef.current.material as MeshBasicMaterial).opacity = 0.4 * breath;
     }
     
     // Rotating spikes
     if (spikesRef.current) {
-      spikesRef.current.rotation.z += 0.01;
+      spikesRef.current.rotation.z += 0.02;
     }
     
     // Selection ring animation
     if (selectionRingRef.current && isSelected) {
-      selectionRingRef.current.rotation.z += 0.03;
-      const ringPulse = Math.sin(state.clock.elapsedTime * 5) * 0.2 + 0.8;
+      selectionRingRef.current.rotation.z += 0.05;
+      const ringPulse = Math.sin(state.clock.elapsedTime * 6) * 0.3 + 0.7;
       (selectionRingRef.current.material as MeshBasicMaterial).opacity = ringPulse;
     }
   });
@@ -100,7 +100,7 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
     console.log('StarSystem pointer over:', system.id);
     event.stopPropagation();
     if (groupRef.current) {
-      groupRef.current.scale.setScalar(1.2);
+      groupRef.current.scale.setScalar(1.3);
     }
     document.body.style.cursor = 'pointer';
   };
@@ -118,91 +118,98 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
       ref={groupRef}
       position={[system.position[0], system.position[1], system.position[2]]}
     >
-      {/* Invisible collision sphere - larger for easier selection */}
+      {/* Large invisible collision sphere for easy selection */}
       <mesh
         onClick={handleClick}
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}
         visible={false}
       >
-        <sphereGeometry args={[outerGlow * 1.5, 8, 6]} />
+        <sphereGeometry args={[outerGlow * 2, 8, 6]} />
         <meshBasicMaterial transparent opacity={0} />
       </mesh>
 
-      {/* Outer glow - largest, most diffuse */}
+      {/* Outer glow - creates bloom effect */}
       <mesh ref={outerGlowRef}>
-        <sphereGeometry args={[outerGlow, 12, 8]} />
+        <sphereGeometry args={[outerGlow, 16, 12]} />
         <meshBasicMaterial 
           color={glowColor}
           transparent 
-          opacity={0.3}
+          opacity={0.4}
           blending={AdditiveBlending}
+          depthWrite={false}
         />
       </mesh>
       
-      {/* Inner glow - medium size, brighter */}
+      {/* Inner glow - brighter middle layer */}
       <mesh ref={innerGlowRef}>
-        <sphereGeometry args={[innerGlow, 10, 6]} />
+        <sphereGeometry args={[innerGlow, 12, 8]} />
         <meshBasicMaterial 
           color={color}
           transparent 
-          opacity={0.6}
+          opacity={0.8}
           blending={AdditiveBlending}
+          depthWrite={false}
         />
       </mesh>
       
-      {/* Core star - small and bright */}
+      {/* Bright core - the actual star */}
       <mesh ref={coreRef}>
         <sphereGeometry args={[core, 8, 6]} />
         <meshBasicMaterial 
           color={color} 
           transparent 
-          opacity={0.9}
+          opacity={1.0}
+          blending={AdditiveBlending}
+          depthWrite={false}
         />
       </mesh>
       
-      {/* Star spikes - cross pattern */}
+      {/* Star spikes for that classic star look */}
       <group ref={spikesRef}>
-        {/* Vertical spike */}
+        {/* Main cross spikes */}
         <mesh>
-          <planeGeometry args={[core * 0.3, spikeLength]} />
+          <planeGeometry args={[core * 0.1, spikeLength]} />
           <meshBasicMaterial 
             color={color}
             transparent
-            opacity={0.5}
+            opacity={0.8}
             blending={AdditiveBlending}
+            depthWrite={false}
           />
         </mesh>
         
-        {/* Horizontal spike */}
         <mesh rotation={[0, 0, Math.PI / 2]}>
-          <planeGeometry args={[core * 0.3, spikeLength]} />
+          <planeGeometry args={[core * 0.1, spikeLength]} />
           <meshBasicMaterial 
             color={color}
             transparent
-            opacity={0.5}
+            opacity={0.8}
             blending={AdditiveBlending}
+            depthWrite={false}
           />
         </mesh>
         
         {/* Diagonal spikes */}
         <mesh rotation={[0, 0, Math.PI / 4]}>
-          <planeGeometry args={[core * 0.2, spikeLength * 0.7]} />
+          <planeGeometry args={[core * 0.08, spikeLength * 0.6]} />
           <meshBasicMaterial 
             color={color}
             transparent
-            opacity={0.3}
+            opacity={0.6}
             blending={AdditiveBlending}
+            depthWrite={false}
           />
         </mesh>
         
         <mesh rotation={[0, 0, -Math.PI / 4]}>
-          <planeGeometry args={[core * 0.2, spikeLength * 0.7]} />
+          <planeGeometry args={[core * 0.08, spikeLength * 0.6]} />
           <meshBasicMaterial 
             color={color}
             transparent
-            opacity={0.3}
+            opacity={0.6}
             blending={AdditiveBlending}
+            depthWrite={false}
           />
         </mesh>
       </group>
@@ -210,13 +217,14 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
       {/* Selection ring */}
       {isSelected && (
         <mesh ref={selectionRingRef}>
-          <ringGeometry args={[outerGlow * 1.2, outerGlow * 1.4, 32]} />
+          <ringGeometry args={[outerGlow * 1.4, outerGlow * 1.6, 32]} />
           <meshBasicMaterial 
             color="#00ff88" 
             transparent 
-            opacity={0.8} 
+            opacity={1.0} 
             side={2}
             blending={AdditiveBlending}
+            depthWrite={false}
           />
         </mesh>
       )}
