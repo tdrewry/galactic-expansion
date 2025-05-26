@@ -17,11 +17,12 @@ export const VolumetricCloud: React.FC<VolumetricCloudProps> = ({
   position,
   size,
   color = '#888888',
-  opacity = 0.2,
-  density = 0.5,
+  opacity = 0.3,
+  density = 0.7,
   cloudType = 'dust'
 }) => {
   const materialRef = useRef<ShaderMaterial>(null);
+  const meshRef = useRef<THREE.Mesh>(null);
 
   const vertexShader = `
     varying vec3 vWorldPosition;
@@ -49,130 +50,74 @@ export const VolumetricCloud: React.FC<VolumetricCloudProps> = ({
     varying vec3 vPosition;
     varying vec2 vUv;
 
-    // Noise functions for cloud generation
-    vec3 random3(vec3 c) {
-      float j = 4096.0*sin(dot(c,vec3(17.0, 59.4, 15.0)));
-      vec3 r;
-      r.z = fract(512.0*j);
-      j *= .125;
-      r.x = fract(512.0*j);
-      j *= .125;
-      r.y = fract(512.0*j);
-      return r-0.5;
+    // Simplified noise function for better performance
+    float random(vec3 st) {
+      return fract(sin(dot(st.xyz, vec3(12.9898, 78.233, 45.164))) * 43758.5453123);
     }
 
-    float simplex3d(vec3 p) {
-      const float F3 =  0.3333333;
-      const float G3 =  0.1666667;
+    float noise(vec3 st) {
+      vec3 i = floor(st);
+      vec3 f = fract(st);
       
-      vec3 s = floor(p + dot(p, vec3(F3)));
-      vec3 x = p - s + dot(s, vec3(G3));
+      float a = random(i);
+      float b = random(i + vec3(1.0, 0.0, 0.0));
+      float c = random(i + vec3(0.0, 1.0, 0.0));
+      float d = random(i + vec3(1.0, 1.0, 0.0));
+      float e = random(i + vec3(0.0, 0.0, 1.0));
+      float f2 = random(i + vec3(1.0, 0.0, 1.0));
+      float g = random(i + vec3(0.0, 1.0, 1.0));
+      float h = random(i + vec3(1.0, 1.0, 1.0));
       
-      vec3 e = step(vec3(0.0), x - x.yzx);
-      vec3 i1 = e*(1.0 - e.zxy);
-      vec3 i2 = 1.0 - e.zxy*(1.0 - e);
+      vec3 u = f * f * (3.0 - 2.0 * f);
       
-      vec3 x1 = x - i1 + G3;
-      vec3 x2 = x - i2 + 2.0*G3;
-      vec3 x3 = x - 1.0 + 3.0*G3;
-      
-      vec4 w, d;
-      
-      w.x = dot(x, x);
-      w.y = dot(x1, x1);
-      w.z = dot(x2, x2);
-      w.w = dot(x3, x3);
-      
-      w = max(0.6 - w, 0.0);
-      
-      d.x = dot(random3(s), x);
-      d.y = dot(random3(s + i1), x1);
-      d.z = dot(random3(s + i2), x2);
-      d.w = dot(random3(s + 1.0), x3);
-      
-      w *= w;
-      w *= w;
-      d *= w;
-      
-      return dot(d, vec4(52.0));
+      return mix(mix(mix(a, b, u.x), mix(c, d, u.x), u.y),
+                 mix(mix(e, f2, u.x), mix(g, h, u.x), u.y), u.z);
     }
 
     float fbm(vec3 p) {
-      float f = 0.0;
-      float a = 0.5;
-      float freq = 1.0;
+      float value = 0.0;
+      float amplitude = 0.5;
+      float frequency = 1.0;
       
-      for(int i = 0; i < 4; i++) {
-        f += a * simplex3d(p * freq);
-        freq *= 2.0;
-        a *= 0.5;
+      for(int i = 0; i < 3; i++) {
+        value += amplitude * noise(p * frequency);
+        frequency *= 2.0;
+        amplitude *= 0.5;
       }
-      return f;
-    }
-
-    float cloudDensity(vec3 p) {
-      vec3 pos = p + time * 0.01;
-      
-      // Base cloud shape
-      float base = fbm(pos * 0.8);
-      
-      // Add detail layers
-      float detail1 = fbm(pos * 2.0) * 0.5;
-      float detail2 = fbm(pos * 4.0) * 0.25;
-      
-      // Combine layers
-      float cloud = base + detail1 + detail2;
-      
-      // Shape the cloud based on distance from center
-      float distFromCenter = length(p);
-      float falloff = 1.0 - smoothstep(0.3, 1.0, distFromCenter);
-      
-      // Different cloud types have different characteristics
-      if (cloudType < 0.5) { // dust
-        cloud = cloud * 0.7 + 0.2;
-      } else if (cloudType < 1.5) { // nebula
-        cloud = cloud * 1.2 + 0.1;
-      } else { // cosmic
-        cloud = cloud * 0.8 + 0.15;
-      }
-      
-      return max(0.0, cloud * falloff * density);
+      return value;
     }
 
     void main() {
-      vec3 rayOrigin = cameraPosition;
-      vec3 rayDir = normalize(vWorldPosition - cameraPosition);
+      // Calculate distance from center for spherical falloff
+      float distFromCenter = length(vPosition);
+      float sphereFalloff = 1.0 - smoothstep(0.3, 0.5, distFromCenter);
       
-      // Ray marching parameters
-      float stepSize = 0.1;
-      int maxSteps = 32;
+      // Add some movement
+      vec3 animatedPos = vPosition + time * 0.02;
       
-      float totalDensity = 0.0;
-      vec3 currentPos = vPosition;
+      // Generate cloud density using noise
+      float cloudNoise = fbm(animatedPos * 2.0);
       
-      // March through the volume
-      for(int i = 0; i < maxSteps; i++) {
-        float localDensity = cloudDensity(currentPos);
-        totalDensity += localDensity * stepSize;
-        
-        currentPos += rayDir * stepSize;
-        
-        // Early termination if density is high enough
-        if(totalDensity > 1.0) break;
+      // Adjust noise based on cloud type
+      if (cloudType < 0.5) { // dust
+        cloudNoise = cloudNoise * 0.8 + 0.3;
+      } else if (cloudType < 1.5) { // nebula
+        cloudNoise = cloudNoise * 1.2 + 0.2;
+      } else { // cosmic
+        cloudNoise = cloudNoise * 0.9 + 0.25;
       }
       
-      // Apply lighting based on density
-      float lighting = 1.0 - totalDensity * 0.5;
-      vec3 finalColor = color * lighting;
+      // Combine noise with falloff
+      float finalDensity = cloudNoise * sphereFalloff * density;
       
-      // Calculate final alpha
-      float alpha = min(1.0, totalDensity * opacity);
+      // Calculate alpha
+      float alpha = finalDensity * opacity;
       
-      // Add some atmospheric perspective
-      float distance = length(vWorldPosition - cameraPosition);
-      alpha *= exp(-distance * 0.00001);
+      // Ensure visibility
+      alpha = max(alpha, 0.1 * opacity);
       
-      gl_FragColor = vec4(finalColor, alpha);
+      // Output color
+      gl_FragColor = vec4(color, alpha);
     }
   `;
 
@@ -192,18 +137,22 @@ export const VolumetricCloud: React.FC<VolumetricCloudProps> = ({
     }
   });
 
+  // Add console log to verify clouds are being created
+  console.log('VolumetricCloud created at position:', position, 'size:', size, 'type:', cloudType);
+
   return (
-    <mesh position={position}>
-      <boxGeometry args={[size, size, size]} />
+    <mesh ref={meshRef} position={position}>
+      <sphereGeometry args={[size, 16, 12]} />
       <shaderMaterial
         ref={materialRef}
         vertexShader={vertexShader}
         fragmentShader={fragmentShader}
         uniforms={uniforms}
         transparent
-        blending={THREE.AdditiveBlending}
+        blending={THREE.NormalBlending}
         depthWrite={false}
-        side={THREE.BackSide}
+        depthTest={true}
+        side={THREE.DoubleSide}
       />
     </mesh>
   );
