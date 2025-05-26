@@ -50,9 +50,11 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
       meshRef.current.scale.setScalar(1);
     }
     
-    // Animate glow
-    if (glowRef.current) {
+    // Only animate glow when selected
+    if (glowRef.current && isSelected) {
       glowRef.current.scale.setScalar(Math.sin(state.clock.elapsedTime * 2) * 0.1 + 1);
+    } else if (glowRef.current) {
+      glowRef.current.scale.setScalar(1);
     }
     
     if (ringRef.current && isSelected) {
