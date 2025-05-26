@@ -44,17 +44,28 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
   }, [system.starType]);
 
   useFrame((state) => {
-    if (meshRef.current && isSelected) {
-      meshRef.current.scale.setScalar(Math.sin(state.clock.elapsedTime * 3) * 0.2 + 1);
-    } else if (meshRef.current) {
-      meshRef.current.scale.setScalar(1);
+    // Subtle twinkling effect for all stars
+    if (meshRef.current) {
+      const twinkle = Math.sin(state.clock.elapsedTime * 4 + system.position[0] * 0.001) * 0.1 + 0.9;
+      meshRef.current.material.opacity = twinkle;
+      
+      if (isSelected) {
+        meshRef.current.scale.setScalar(Math.sin(state.clock.elapsedTime * 3) * 0.2 + 1);
+      } else {
+        meshRef.current.scale.setScalar(1);
+      }
     }
     
-    // Only animate glow when selected
-    if (glowRef.current && isSelected) {
-      glowRef.current.scale.setScalar(Math.sin(state.clock.elapsedTime * 2) * 0.1 + 1);
-    } else if (glowRef.current) {
-      glowRef.current.scale.setScalar(1);
+    // Glow effect with subtle pulsing
+    if (glowRef.current) {
+      const glowPulse = Math.sin(state.clock.elapsedTime * 2 + system.position[1] * 0.001) * 0.15 + 0.85;
+      glowRef.current.material.opacity = (system.explored ? 0.4 : 0.3) * glowPulse;
+      
+      if (isSelected) {
+        glowRef.current.scale.setScalar(Math.sin(state.clock.elapsedTime * 2) * 0.1 + 1);
+      } else {
+        glowRef.current.scale.setScalar(1);
+      }
     }
     
     if (ringRef.current && isSelected) {
@@ -93,33 +104,61 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
 
   return (
     <group position={[system.position[0], system.position[1], system.position[2]]}>
-      {/* Outer glow effect */}
+      {/* Outer glow effect - larger, more diffuse */}
       <mesh
         ref={glowRef}
         onClick={handleClick}
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}
       >
-        <sphereGeometry args={[glow, 16, 12]} />
+        <sphereGeometry args={[glow, 8, 6]} />
         <meshBasicMaterial 
           color={glowColor}
           transparent 
-          opacity={system.explored ? 0.3 : 0.2}
+          opacity={system.explored ? 0.4 : 0.3}
         />
       </mesh>
       
-      {/* Core star */}
+      {/* Core star - bright and twinkling */}
       <mesh
         ref={meshRef}
         onClick={handleClick}
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}
       >
-        <sphereGeometry args={[core, 16, 12]} />
+        <sphereGeometry args={[core, 8, 6]} />
         <meshBasicMaterial 
           color={color} 
           transparent 
           opacity={system.explored ? 1 : 0.9}
+        />
+      </mesh>
+      
+      {/* Star spikes effect */}
+      <mesh
+        onClick={handleClick}
+        onPointerOver={handlePointerOver}
+        onPointerOut={handlePointerOut}
+      >
+        <coneGeometry args={[core * 0.1, core * 4, 4]} />
+        <meshBasicMaterial 
+          color={color}
+          transparent
+          opacity={0.6}
+        />
+      </mesh>
+      
+      <mesh
+        onClick={handleClick}
+        onPointerOver={handlePointerOver}
+        onPointerOut={handlePointerOut}
+        rotation={[0, 0, Math.PI / 2]}
+      >
+        <coneGeometry args={[core * 0.1, core * 4, 4]} />
+        <meshBasicMaterial 
+          color={color}
+          transparent
+          opacity={0.6}
         />
       </mesh>
       
