@@ -1,8 +1,9 @@
 
 import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Mesh, AdditiveBlending, Group } from 'three';
+import { Mesh, Group } from 'three';
 import { Galaxy } from '../../utils/galaxyGenerator';
+import { NebulaMaterial } from './NebulaMaterial';
 
 interface InterstellarMaterialProps {
   galaxy: Galaxy;
@@ -19,13 +20,13 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({ gala
     const cosmicDust = [];
     
     // Create spiral dust lanes
-    for (let i = 0; i < 8; i++) {
-      const angle = (i / 8) * Math.PI * 2;
+    for (let i = 0; i < 6; i++) {
+      const angle = (i / 6) * Math.PI * 2;
       const armLength = 45000;
       
       // Create dust lane along spiral arm
-      for (let j = 0; j < 50; j++) {
-        const t = j / 50;
+      for (let j = 0; j < 30; j++) {
+        const t = j / 30;
         const spiralAngle = angle + t * Math.PI * 1.5;
         const distance = t * armLength;
         
@@ -33,18 +34,19 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({ gala
           id: `dust-lane-${i}-${j}`,
           position: [
             Math.cos(spiralAngle) * distance,
-            (Math.random() - 0.5) * 2000,
+            (Math.random() - 0.5) * 1500,
             Math.sin(spiralAngle) * distance
           ] as [number, number, number],
-          size: 800 + Math.random() * 400,
-          opacity: 0.15 + Math.random() * 0.1,
+          size: 2000 + Math.random() * 1500,
+          rotation: [Math.random() * Math.PI, Math.random() * Math.PI, spiralAngle],
+          scale: 2.0 + Math.random() * 1.5,
           color: '#8B4513'
         });
       }
     }
     
     // Create star-forming regions (bright nebular clouds)
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 15; i++) {
       const angle = Math.random() * Math.PI * 2;
       const distance = 15000 + Math.random() * 25000;
       
@@ -52,17 +54,18 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({ gala
         id: `star-forming-${i}`,
         position: [
           Math.cos(angle) * distance,
-          (Math.random() - 0.5) * 3000,
+          (Math.random() - 0.5) * 2500,
           Math.sin(angle) * distance
         ] as [number, number, number],
-        size: 1200 + Math.random() * 800,
-        opacity: 0.3 + Math.random() * 0.2,
-        color: ['#FF69B4', '#00BFFF', '#FFD700', '#FF4500'][Math.floor(Math.random() * 4)]
+        size: 3000 + Math.random() * 2000,
+        rotation: [Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI],
+        scale: 1.5 + Math.random() * 1.0,
+        color: ['#FF69B4', '#00BFFF', '#FFD700', '#FF4500', '#9400D3'][Math.floor(Math.random() * 5)]
       });
     }
     
     // Create general cosmic dust
-    for (let i = 0; i < 200; i++) {
+    for (let i = 0; i < 100; i++) {
       const angle = Math.random() * Math.PI * 2;
       const distance = Math.random() * 50000;
       
@@ -70,11 +73,12 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({ gala
         id: `cosmic-dust-${i}`,
         position: [
           Math.cos(angle) * distance,
-          (Math.random() - 0.5) * 5000,
+          (Math.random() - 0.5) * 4000,
           Math.sin(angle) * distance
         ] as [number, number, number],
-        size: 300 + Math.random() * 500,
-        opacity: 0.05 + Math.random() * 0.1,
+        size: 1500 + Math.random() * 1000,
+        rotation: [Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI],
+        scale: 1.0 + Math.random() * 0.8,
         color: '#696969'
       });
     }
@@ -88,15 +92,20 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({ gala
       groupRef.current.rotation.y += 0.0001;
     }
     
-    // Animate dust clouds with subtle pulsing
+    // Animate dust clouds with subtle movement
     dustCloudsRef.current.forEach((mesh, index) => {
       if (mesh) {
         const time = state.clock.elapsedTime;
-        const pulse = Math.sin(time * 0.5 + index * 0.1) * 0.1 + 0.9;
-        mesh.scale.setScalar(pulse);
         
         // Subtle rotation
-        mesh.rotation.z += 0.0002;
+        mesh.rotation.z += 0.0001;
+        mesh.rotation.x += 0.00005;
+        
+        // Very gentle drift
+        const driftX = Math.sin(time * 0.1 + index * 0.1) * 10;
+        const driftY = Math.cos(time * 0.15 + index * 0.2) * 5;
+        mesh.position.x += driftX * 0.001;
+        mesh.position.y += driftY * 0.001;
       }
     });
   });
@@ -108,17 +117,16 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({ gala
         <mesh 
           key={dust.id}
           position={dust.position}
+          rotation={dust.rotation}
           ref={el => {
             if (el) dustCloudsRef.current[index] = el;
           }}
         >
-          <sphereGeometry args={[dust.size, 12, 8]} />
-          <meshBasicMaterial 
+          <planeGeometry args={[dust.size, dust.size]} />
+          <NebulaMaterial 
             color={dust.color}
-            transparent 
-            opacity={dust.opacity}
-            blending={AdditiveBlending}
-            depthWrite={false}
+            opacity={0.15}
+            scale={dust.scale}
           />
         </mesh>
       ))}
@@ -128,17 +136,16 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({ gala
         <mesh 
           key={region.id}
           position={region.position}
+          rotation={region.rotation}
           ref={el => {
             if (el) dustCloudsRef.current[dustLanes.length + index] = el;
           }}
         >
-          <sphereGeometry args={[region.size, 16, 12]} />
-          <meshBasicMaterial 
+          <planeGeometry args={[region.size, region.size]} />
+          <NebulaMaterial 
             color={region.color}
-            transparent 
-            opacity={region.opacity}
-            blending={AdditiveBlending}
-            depthWrite={false}
+            opacity={0.4}
+            scale={region.scale}
           />
         </mesh>
       ))}
@@ -148,17 +155,16 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({ gala
         <mesh 
           key={dust.id}
           position={dust.position}
+          rotation={dust.rotation}
           ref={el => {
             if (el) dustCloudsRef.current[dustLanes.length + starFormingRegions.length + index] = el;
           }}
         >
-          <sphereGeometry args={[dust.size, 8, 6]} />
-          <meshBasicMaterial 
+          <planeGeometry args={[dust.size, dust.size]} />
+          <NebulaMaterial 
             color={dust.color}
-            transparent 
-            opacity={dust.opacity}
-            blending={AdditiveBlending}
-            depthWrite={false}
+            opacity={0.08}
+            scale={dust.scale}
           />
         </mesh>
       ))}
