@@ -1,7 +1,7 @@
 
 import React, { useRef, useMemo } from 'react';
 import { useFrame, ThreeEvent } from '@react-three/fiber';
-import { Mesh, MeshBasicMaterial } from 'three';
+import { Mesh, MeshBasicMaterial, AdditiveBlending, Group } from 'three';
 import { StarSystem as StarSystemType } from '../../utils/galaxyGenerator';
 
 interface StarSystemProps {
@@ -11,9 +11,12 @@ interface StarSystemProps {
 }
 
 export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSelect }) => {
-  const meshRef = useRef<Mesh>(null);
-  const glowRef = useRef<Mesh>(null);
-  const ringRef = useRef<Mesh>(null);
+  const groupRef = useRef<Group>(null);
+  const coreRef = useRef<Mesh>(null);
+  const innerGlowRef = useRef<Mesh>(null);
+  const outerGlowRef = useRef<Mesh>(null);
+  const spikesRef = useRef<Group>(null);
+  const selectionRingRef = useRef<Mesh>(null);
   
   const { color, glowColor } = useMemo(() => {
     const colorMap = {
@@ -29,47 +32,61 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
     return { color: colors.color, glowColor: colors.glow };
   }, [system.starType]);
 
-  // Adjusted star sizes to be more realistic
-  const { core, glow } = useMemo(() => {
+  // Much smaller sizes for better distinction
+  const { core, innerGlow, outerGlow, spikeLength } = useMemo(() => {
     const sizeMap = {
-      'main-sequence': { core: 400, glow: 800 },
-      'red-giant': { core: 600, glow: 1200 },
-      'white-dwarf': { core: 200, glow: 400 },
-      'neutron': { core: 150, glow: 300 },
-      'magnetar': { core: 180, glow: 360 },
-      'pulsar': { core: 150, glow: 300 },
-      'quasar': { core: 800, glow: 1600 }
+      'main-sequence': { core: 80, innerGlow: 120, outerGlow: 200, spikeLength: 300 },
+      'red-giant': { core: 120, innerGlow: 180, outerGlow: 280, spikeLength: 400 },
+      'white-dwarf': { core: 50, innerGlow: 80, outerGlow: 140, spikeLength: 200 },
+      'neutron': { core: 40, innerGlow: 70, outerGlow: 120, spikeLength: 180 },
+      'magnetar': { core: 60, innerGlow: 90, outerGlow: 150, spikeLength: 220 },
+      'pulsar': { core: 45, innerGlow: 75, outerGlow: 130, spikeLength: 190 },
+      'quasar': { core: 150, innerGlow: 220, outerGlow: 350, spikeLength: 500 }
     };
-    return sizeMap[system.starType] || { core: 400, glow: 800 };
+    return sizeMap[system.starType] || { core: 80, innerGlow: 120, outerGlow: 200, spikeLength: 300 };
   }, [system.starType]);
 
   useFrame((state) => {
-    // Subtle twinkling effect for all stars
-    if (meshRef.current) {
-      const twinkle = Math.sin(state.clock.elapsedTime * 4 + system.position[0] * 0.001) * 0.1 + 0.9;
-      (meshRef.current.material as MeshBasicMaterial).opacity = twinkle;
+    // Core twinkling
+    if (coreRef.current) {
+      const twinkle = Math.sin(state.clock.elapsedTime * 6 + system.position[0] * 0.001) * 0.2 + 0.8;
+      (coreRef.current.material as MeshBasicMaterial).opacity = twinkle;
       
       if (isSelected) {
-        meshRef.current.scale.setScalar(Math.sin(state.clock.elapsedTime * 3) * 0.2 + 1);
+        coreRef.current.scale.setScalar(Math.sin(state.clock.elapsedTime * 4) * 0.3 + 1);
       } else {
-        meshRef.current.scale.setScalar(1);
+        coreRef.current.scale.setScalar(1);
       }
     }
     
-    // Glow effect with subtle pulsing
-    if (glowRef.current) {
-      const glowPulse = Math.sin(state.clock.elapsedTime * 2 + system.position[1] * 0.001) * 0.15 + 0.85;
-      (glowRef.current.material as MeshBasicMaterial).opacity = (system.explored ? 0.4 : 0.3) * glowPulse;
+    // Inner glow pulsing
+    if (innerGlowRef.current) {
+      const pulse = Math.sin(state.clock.elapsedTime * 3 + system.position[1] * 0.001) * 0.1 + 0.9;
+      (innerGlowRef.current.material as MeshBasicMaterial).opacity = 0.6 * pulse;
       
       if (isSelected) {
-        glowRef.current.scale.setScalar(Math.sin(state.clock.elapsedTime * 2) * 0.1 + 1);
+        innerGlowRef.current.scale.setScalar(Math.sin(state.clock.elapsedTime * 3) * 0.2 + 1);
       } else {
-        glowRef.current.scale.setScalar(1);
+        innerGlowRef.current.scale.setScalar(1);
       }
     }
     
-    if (ringRef.current && isSelected) {
-      ringRef.current.rotation.z += 0.02;
+    // Outer glow subtle animation
+    if (outerGlowRef.current) {
+      const outerPulse = Math.sin(state.clock.elapsedTime * 1.5 + system.position[2] * 0.001) * 0.05 + 0.95;
+      (outerGlowRef.current.material as MeshBasicMaterial).opacity = 0.3 * outerPulse;
+    }
+    
+    // Rotating spikes
+    if (spikesRef.current) {
+      spikesRef.current.rotation.z += 0.01;
+    }
+    
+    // Selection ring animation
+    if (selectionRingRef.current && isSelected) {
+      selectionRingRef.current.rotation.z += 0.03;
+      const ringPulse = Math.sin(state.clock.elapsedTime * 5) * 0.2 + 0.8;
+      (selectionRingRef.current.material as MeshBasicMaterial).opacity = ringPulse;
     }
   });
 
@@ -82,91 +99,125 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
   const handlePointerOver = (event: ThreeEvent<PointerEvent>) => {
     console.log('StarSystem pointer over:', system.id);
     event.stopPropagation();
-    if (meshRef.current) {
-      meshRef.current.scale.setScalar(1.3);
-    }
-    if (glowRef.current) {
-      glowRef.current.scale.setScalar(1.5);
+    if (groupRef.current) {
+      groupRef.current.scale.setScalar(1.2);
     }
     document.body.style.cursor = 'pointer';
   };
 
   const handlePointerOut = (event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
-    if (meshRef.current && !isSelected) {
-      meshRef.current.scale.setScalar(1);
-    }
-    if (glowRef.current && !isSelected) {
-      glowRef.current.scale.setScalar(1);
+    if (groupRef.current && !isSelected) {
+      groupRef.current.scale.setScalar(1);
     }
     document.body.style.cursor = 'default';
   };
 
   return (
-    <group position={[system.position[0], system.position[1], system.position[2]]}>
-      {/* Outer glow effect - larger, more diffuse */}
+    <group 
+      ref={groupRef}
+      position={[system.position[0], system.position[1], system.position[2]]}
+    >
+      {/* Invisible collision sphere - larger for easier selection */}
       <mesh
-        ref={glowRef}
         onClick={handleClick}
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}
+        visible={false}
       >
-        <sphereGeometry args={[glow, 8, 6]} />
+        <sphereGeometry args={[outerGlow * 1.5, 8, 6]} />
+        <meshBasicMaterial transparent opacity={0} />
+      </mesh>
+
+      {/* Outer glow - largest, most diffuse */}
+      <mesh ref={outerGlowRef}>
+        <sphereGeometry args={[outerGlow, 12, 8]} />
         <meshBasicMaterial 
           color={glowColor}
           transparent 
-          opacity={system.explored ? 0.4 : 0.3}
+          opacity={0.3}
+          blending={AdditiveBlending}
         />
       </mesh>
       
-      {/* Core star - bright and twinkling */}
-      <mesh
-        ref={meshRef}
-        onClick={handleClick}
-        onPointerOver={handlePointerOver}
-        onPointerOut={handlePointerOut}
-      >
+      {/* Inner glow - medium size, brighter */}
+      <mesh ref={innerGlowRef}>
+        <sphereGeometry args={[innerGlow, 10, 6]} />
+        <meshBasicMaterial 
+          color={color}
+          transparent 
+          opacity={0.6}
+          blending={AdditiveBlending}
+        />
+      </mesh>
+      
+      {/* Core star - small and bright */}
+      <mesh ref={coreRef}>
         <sphereGeometry args={[core, 8, 6]} />
         <meshBasicMaterial 
           color={color} 
           transparent 
-          opacity={system.explored ? 1 : 0.9}
+          opacity={0.9}
         />
       </mesh>
       
-      {/* Star spikes effect */}
-      <mesh
-        onClick={handleClick}
-        onPointerOver={handlePointerOver}
-        onPointerOut={handlePointerOut}
-      >
-        <coneGeometry args={[core * 0.1, core * 4, 4]} />
-        <meshBasicMaterial 
-          color={color}
-          transparent
-          opacity={0.6}
-        />
-      </mesh>
-      
-      <mesh
-        onClick={handleClick}
-        onPointerOver={handlePointerOver}
-        onPointerOut={handlePointerOut}
-        rotation={[0, 0, Math.PI / 2]}
-      >
-        <coneGeometry args={[core * 0.1, core * 4, 4]} />
-        <meshBasicMaterial 
-          color={color}
-          transparent
-          opacity={0.6}
-        />
-      </mesh>
+      {/* Star spikes - cross pattern */}
+      <group ref={spikesRef}>
+        {/* Vertical spike */}
+        <mesh>
+          <planeGeometry args={[core * 0.3, spikeLength]} />
+          <meshBasicMaterial 
+            color={color}
+            transparent
+            opacity={0.5}
+            blending={AdditiveBlending}
+          />
+        </mesh>
+        
+        {/* Horizontal spike */}
+        <mesh rotation={[0, 0, Math.PI / 2]}>
+          <planeGeometry args={[core * 0.3, spikeLength]} />
+          <meshBasicMaterial 
+            color={color}
+            transparent
+            opacity={0.5}
+            blending={AdditiveBlending}
+          />
+        </mesh>
+        
+        {/* Diagonal spikes */}
+        <mesh rotation={[0, 0, Math.PI / 4]}>
+          <planeGeometry args={[core * 0.2, spikeLength * 0.7]} />
+          <meshBasicMaterial 
+            color={color}
+            transparent
+            opacity={0.3}
+            blending={AdditiveBlending}
+          />
+        </mesh>
+        
+        <mesh rotation={[0, 0, -Math.PI / 4]}>
+          <planeGeometry args={[core * 0.2, spikeLength * 0.7]} />
+          <meshBasicMaterial 
+            color={color}
+            transparent
+            opacity={0.3}
+            blending={AdditiveBlending}
+          />
+        </mesh>
+      </group>
       
       {/* Selection ring */}
       {isSelected && (
-        <mesh ref={ringRef}>
-          <ringGeometry args={[glow * 1.8, glow * 2.2, 32]} />
-          <meshBasicMaterial color="#00ff88" transparent opacity={0.8} side={2} />
+        <mesh ref={selectionRingRef}>
+          <ringGeometry args={[outerGlow * 1.2, outerGlow * 1.4, 32]} />
+          <meshBasicMaterial 
+            color="#00ff88" 
+            transparent 
+            opacity={0.8} 
+            side={2}
+            blending={AdditiveBlending}
+          />
         </mesh>
       )}
     </group>
