@@ -50,39 +50,26 @@ export const VolumetricCloud: React.FC<VolumetricCloudProps> = ({
     varying vec3 vPosition;
     varying vec2 vUv;
 
-    // Simple hash function for noise
-    float hash(vec3 p) {
-      p = fract(p * 0.3183099 + 0.1);
-      p *= 17.0;
-      return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+    // Very simple noise function for maximum compatibility
+    float noise(vec3 p) {
+      return fract(sin(dot(p, vec3(12.9898, 78.233, 45.164))) * 43758.5453);
     }
 
-    // Simple 3D noise
-    float noise(vec3 x) {
-      vec3 i = floor(x);
-      vec3 f = fract(x);
-      f = f * f * (3.0 - 2.0 * f);
-      
-      return mix(mix(mix(hash(i + vec3(0.0, 0.0, 0.0)), 
-                         hash(i + vec3(1.0, 0.0, 0.0)), f.x),
-                     mix(hash(i + vec3(0.0, 1.0, 0.0)), 
-                         hash(i + vec3(1.0, 1.0, 0.0)), f.x), f.y),
-                 mix(mix(hash(i + vec3(0.0, 0.0, 1.0)), 
-                         hash(i + vec3(1.0, 0.0, 1.0)), f.x),
-                     mix(hash(i + vec3(0.0, 1.0, 1.0)), 
-                         hash(i + vec3(1.0, 1.0, 1.0)), f.x), f.y), f.z);
-    }
-
-    // Fractal noise
+    // Simple fractal brownian motion
     float fbm(vec3 p) {
       float value = 0.0;
       float amplitude = 0.5;
       
-      for(int i = 0; i < 4; i++) {
-        value += amplitude * noise(p);
-        p *= 2.0;
-        amplitude *= 0.5;
-      }
+      value += amplitude * noise(p);
+      p *= 2.0;
+      amplitude *= 0.5;
+      
+      value += amplitude * noise(p);
+      p *= 2.0;
+      amplitude *= 0.5;
+      
+      value += amplitude * noise(p);
+      
       return value;
     }
 
@@ -113,7 +100,7 @@ export const VolumetricCloud: React.FC<VolumetricCloudProps> = ({
       float finalDensity = cloudNoise * sphereFalloff * density;
       
       // Calculate alpha with minimum visibility
-      float alpha = max(finalDensity * opacity, 0.05);
+      float alpha = max(finalDensity * opacity, 0.1);
       
       gl_FragColor = vec4(color, alpha);
     }
@@ -139,7 +126,7 @@ export const VolumetricCloud: React.FC<VolumetricCloudProps> = ({
 
   return (
     <mesh ref={meshRef} position={position}>
-      <sphereGeometry args={[size, 24, 16]} />
+      <sphereGeometry args={[size, 16, 12]} />
       <shaderMaterial
         ref={materialRef}
         vertexShader={vertexShader}
