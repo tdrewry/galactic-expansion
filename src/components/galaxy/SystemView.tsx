@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useCallback, useMemo } from 'react';
 import { StarSystem, Planet, Moon } from '../../utils/galaxyGenerator';
 
@@ -26,14 +25,14 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, selectedStar = '
           starType: system.binaryCompanion.starType,
           temperature: system.binaryCompanion.temperature,
           mass: system.binaryCompanion.mass,
-          planets: system.binaryCompanion.planets || []
+          planets: system.planets // Binary companions share planets with primary for now
         } : null;
       case 'trinary':
         return system.trinaryCompanion ? {
           starType: system.trinaryCompanion.starType,
           temperature: system.trinaryCompanion.temperature,
           mass: system.trinaryCompanion.mass,
-          planets: system.trinaryCompanion.planets || []
+          planets: system.planets // Trinary companions share planets with primary for now
         } : null;
       default:
         return {

@@ -25,12 +25,16 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
   binaryFrequency = 0.15,
   trinaryFrequency = 0.03,
   onSystemSelect,
-  selectedSystem = null,
-  selectedStar = 'primary',
+  selectedSystem: propSelectedSystem = null,
+  selectedStar: propSelectedStar = 'primary',
   onStarSelect
 }) => {
   const [selectedSystem, setSelectedSystem] = useState<StarSystem | null>(null);
   const [selectedStar, setSelectedStar] = useState<'primary' | 'binary' | 'trinary'>('primary');
+  
+  // Use props if provided, otherwise use internal state
+  const currentSelectedSystem = propSelectedSystem || selectedSystem;
+  const currentSelectedStar = propSelectedStar || selectedStar;
   
   const galaxy = useMemo(() => {
     console.log('Generating galaxy with seed:', seed, 'systems:', numSystems, 'nebulae:', numNebulae, 'binary:', binaryFrequency, 'trinary:', trinaryFrequency);
@@ -41,13 +45,17 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
   
   const handleSystemSelect = useCallback((system: StarSystem | null) => {
     console.log('Selected system:', system?.id || 'none');
-    if (system) {
-      onSystemSelect?.(system);
+    setSelectedSystem(system);
+    if (system && onSystemSelect) {
+      onSystemSelect(system);
     }
   }, [onSystemSelect]);
 
   const handleStarSelect = useCallback((starType: 'primary' | 'binary' | 'trinary') => {
-    onStarSelect?.(starType);
+    setSelectedStar(starType);
+    if (onStarSelect) {
+      onStarSelect(starType);
+    }
   }, [onStarSelect]);
 
   return (
@@ -67,16 +75,16 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
       >
         <GalaxyScene 
           galaxy={galaxy}
-          selectedSystem={selectedSystem}
+          selectedSystem={currentSelectedSystem}
           onSystemSelect={handleSystemSelect}
         />
       </Canvas>
       
-      {selectedSystem && (
+      {currentSelectedSystem && (
         <SystemInfoPanel 
-          system={selectedSystem} 
+          system={currentSelectedSystem} 
           onStarSelect={handleStarSelect}
-          selectedStar={selectedStar}
+          selectedStar={currentSelectedStar}
         />
       )}
       <GalaxyInfo galaxy={galaxy} />
