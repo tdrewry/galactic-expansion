@@ -132,42 +132,12 @@ const Index = () => {
 
                   {/* Scrollable content area */}
                   <div className="flex-1 overflow-y-auto">
-                    <div className="p-4 space-y-4">
-                      {/* System View - This should show the orbital diagram */}
+                    <div className="p-4">
+                      {/* System View - This shows the orbital diagram with celestial body details */}
                       <SystemView 
                         system={selectedSystem} 
                         onBodySelect={handleBodySelect}
                       />
-
-                      {/* Detailed Planet/Moon Info */}
-                      {selectedBody && (
-                        <Card className="bg-gray-800 border-gray-600">
-                          <CardHeader>
-                            <CardTitle className="text-white text-lg">{selectedBody.name}</CardTitle>
-                          </CardHeader>
-                          <CardContent className="text-gray-300 space-y-2">
-                            <div><strong>Type:</strong> {selectedBody.type}</div>
-                            <div><strong>Radius:</strong> {selectedBody.radius.toFixed(1)} km</div>
-                            {'distanceFromStar' in selectedBody && (
-                              <div><strong>Distance from Star:</strong> {selectedBody.distanceFromStar.toFixed(2)} AU</div>
-                            )}
-                            {'inhabited' in selectedBody && selectedBody.inhabited && (
-                              <div className="text-green-400 font-medium">Inhabited World</div>
-                            )}
-                            {'civilization' in selectedBody && selectedBody.civilization && (
-                              <div>
-                                <strong>Civilization:</strong> {selectedBody.civilization.name}
-                                <div className="text-sm text-gray-400">Type: {selectedBody.civilization.type}</div>
-                              </div>
-                            )}
-                            {'moons' in selectedBody && selectedBody.moons && selectedBody.moons.length > 0 && (
-                              <div>
-                                <strong>Moons:</strong> {selectedBody.moons.length}
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
-                      )}
                     </div>
                   </div>
                 </div>
