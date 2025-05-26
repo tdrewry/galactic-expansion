@@ -65,7 +65,7 @@ export const SystemInfoPanel: React.FC<SystemInfoPanelProps> = ({
           <div className="flex flex-wrap gap-1">
             <Button
               size="sm"
-              variant={selectedStar === 'primary' ? 'default' : 'outline'}
+              variant={selectedStar === 'primary' ? 'default' : 'secondary'}
               onClick={() => {
                 console.log('Primary star button clicked');
                 onStarSelect?.('primary');
@@ -77,7 +77,7 @@ export const SystemInfoPanel: React.FC<SystemInfoPanelProps> = ({
             {system.binaryCompanion && (
               <Button
                 size="sm"
-                variant={selectedStar === 'binary' ? 'default' : 'outline'}
+                variant={selectedStar === 'binary' ? 'default' : 'secondary'}
                 onClick={() => {
                   console.log('Binary star button clicked');
                   onStarSelect?.('binary');
@@ -90,7 +90,7 @@ export const SystemInfoPanel: React.FC<SystemInfoPanelProps> = ({
             {system.trinaryCompanion && (
               <Button
                 size="sm"
-                variant={selectedStar === 'trinary' ? 'default' : 'outline'}
+                variant={selectedStar === 'trinary' ? 'default' : 'secondary'}
                 onClick={() => {
                   console.log('Trinary star button clicked');
                   onStarSelect?.('trinary');
