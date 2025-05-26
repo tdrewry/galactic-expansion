@@ -6,6 +6,7 @@ import { SystemView } from '../components/galaxy/SystemView';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 
 const Index = () => {
   const [galaxySeed, setGalaxySeed] = useState(12345);
@@ -31,19 +32,13 @@ const Index = () => {
   const handleSystemSelect = (system: StarSystem) => {
     console.log('Index: System selected:', system.id);
     setSelectedSystem(system);
-    setSelectedBody(null); // Reset body selection when system changes
+    setSelectedBody(null);
   };
 
   const handleBodySelect = (body: Planet | Moon | null) => {
     console.log('Index: Body selected:', body?.name || 'none');
     setSelectedBody(body);
   };
-
-  // Log when we're about to render the panel
-  if (selectedSystem) {
-    console.log('Rendering panel for system:', selectedSystem.id);
-    console.log('About to render SystemView component');
-  }
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
@@ -70,97 +65,106 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Main Content */}
-      <div className="flex-1 flex">
-        {/* Galaxy Map */}
-        <div className="flex-1">
-          <GalaxyMap 
-            seed={galaxySeed} 
-            onSystemSelect={handleSystemSelect}
-          />
-        </div>
-
-        {/* System Details Panel */}
-        {selectedSystem && (
-          <div className="w-80 bg-gray-900 border-l border-gray-700 p-4 overflow-y-auto space-y-4">
-            {/* System Overview */}
-            <Card className="bg-gray-800 border-gray-600">
-              <CardHeader>
-                <CardTitle className="text-white">{selectedSystem.id}</CardTitle>
-              </CardHeader>
-              <CardContent className="text-gray-300 space-y-3">
-                <div>
-                  <strong>Star Classification:</strong> {selectedSystem.starType}
-                </div>
-                <div>
-                  <strong>Temperature:</strong> {Math.round(selectedSystem.temperature).toLocaleString()}K
-                </div>
-                <div>
-                  <strong>Mass:</strong> {selectedSystem.mass.toFixed(2)} solar masses
-                </div>
-                <div>
-                  <strong>Planets:</strong> {selectedSystem.planets.length}
-                </div>
-                <div>
-                  <strong>Status:</strong> {selectedSystem.explored ? 'Explored' : 'Unexplored'}
-                </div>
-                
-                {selectedSystem.specialFeatures.length > 0 && (
-                  <div>
-                    <strong>Special Features:</strong>
-                    <ul className="list-disc list-inside mt-1">
-                      {selectedSystem.specialFeatures.map((feature, index) => (
-                        <li key={index} className="capitalize">{feature.replace('-', ' ')}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                <div className="pt-4 border-t border-gray-600">
-                  <Button className="w-full" disabled={selectedSystem.explored}>
-                    {selectedSystem.explored ? 'Already Explored' : 'Begin Exploration'}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* System View - This should show the orbital diagram */}
-            <SystemView 
-              system={selectedSystem} 
-              onBodySelect={handleBodySelect}
+      {/* Main Content with Resizable Layout */}
+      <div className="flex-1">
+        <ResizablePanelGroup direction="horizontal" className="h-full">
+          {/* Galaxy Map Panel */}
+          <ResizablePanel defaultSize={70} minSize={30}>
+            <GalaxyMap 
+              seed={galaxySeed} 
+              onSystemSelect={handleSystemSelect}
             />
+          </ResizablePanel>
 
-            {/* Detailed Planet/Moon Info */}
-            {selectedBody && (
-              <Card className="bg-gray-800 border-gray-600">
-                <CardHeader>
-                  <CardTitle className="text-white text-lg">{selectedBody.name}</CardTitle>
-                </CardHeader>
-                <CardContent className="text-gray-300 space-y-2">
-                  <div><strong>Type:</strong> {selectedBody.type}</div>
-                  <div><strong>Radius:</strong> {selectedBody.radius.toFixed(1)} km</div>
-                  {'distanceFromStar' in selectedBody && (
-                    <div><strong>Distance from Star:</strong> {selectedBody.distanceFromStar.toFixed(2)} AU</div>
+          {/* Resizable Handle */}
+          {selectedSystem && (
+            <>
+              <ResizableHandle withHandle />
+              
+              {/* System Details Panel */}
+              <ResizablePanel defaultSize={30} minSize={20} maxSize={60}>
+                <div className="h-full bg-gray-900 border-l border-gray-700 p-4 overflow-y-auto space-y-4">
+                  {/* System Overview */}
+                  <Card className="bg-gray-800 border-gray-600">
+                    <CardHeader>
+                      <CardTitle className="text-white">{selectedSystem.id}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-gray-300 space-y-3">
+                      <div>
+                        <strong>Star Classification:</strong> {selectedSystem.starType}
+                      </div>
+                      <div>
+                        <strong>Temperature:</strong> {Math.round(selectedSystem.temperature).toLocaleString()}K
+                      </div>
+                      <div>
+                        <strong>Mass:</strong> {selectedSystem.mass.toFixed(2)} solar masses
+                      </div>
+                      <div>
+                        <strong>Planets:</strong> {selectedSystem.planets.length}
+                      </div>
+                      <div>
+                        <strong>Status:</strong> {selectedSystem.explored ? 'Explored' : 'Unexplored'}
+                      </div>
+                      
+                      {selectedSystem.specialFeatures.length > 0 && (
+                        <div>
+                          <strong>Special Features:</strong>
+                          <ul className="list-disc list-inside mt-1">
+                            {selectedSystem.specialFeatures.map((feature, index) => (
+                              <li key={index} className="capitalize">{feature.replace('-', ' ')}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      <div className="pt-4 border-t border-gray-600">
+                        <Button className="w-full" disabled={selectedSystem.explored}>
+                          {selectedSystem.explored ? 'Already Explored' : 'Begin Exploration'}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* System View - This should show the orbital diagram */}
+                  <SystemView 
+                    system={selectedSystem} 
+                    onBodySelect={handleBodySelect}
+                  />
+
+                  {/* Detailed Planet/Moon Info */}
+                  {selectedBody && (
+                    <Card className="bg-gray-800 border-gray-600">
+                      <CardHeader>
+                        <CardTitle className="text-white text-lg">{selectedBody.name}</CardTitle>
+                      </CardHeader>
+                      <CardContent className="text-gray-300 space-y-2">
+                        <div><strong>Type:</strong> {selectedBody.type}</div>
+                        <div><strong>Radius:</strong> {selectedBody.radius.toFixed(1)} km</div>
+                        {'distanceFromStar' in selectedBody && (
+                          <div><strong>Distance from Star:</strong> {selectedBody.distanceFromStar.toFixed(2)} AU</div>
+                        )}
+                        {'inhabited' in selectedBody && selectedBody.inhabited && (
+                          <div className="text-green-400 font-medium">Inhabited World</div>
+                        )}
+                        {'civilization' in selectedBody && selectedBody.civilization && (
+                          <div>
+                            <strong>Civilization:</strong> {selectedBody.civilization.name}
+                            <div className="text-sm text-gray-400">Type: {selectedBody.civilization.type}</div>
+                          </div>
+                        )}
+                        {'moons' in selectedBody && selectedBody.moons && selectedBody.moons.length > 0 && (
+                          <div>
+                            <strong>Moons:</strong> {selectedBody.moons.length}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
                   )}
-                  {'inhabited' in selectedBody && selectedBody.inhabited && (
-                    <div className="text-green-400 font-medium">Inhabited World</div>
-                  )}
-                  {'civilization' in selectedBody && selectedBody.civilization && (
-                    <div>
-                      <strong>Civilization:</strong> {selectedBody.civilization.name}
-                      <div className="text-sm text-gray-400">Type: {selectedBody.civilization.type}</div>
-                    </div>
-                  )}
-                  {'moons' in selectedBody && selectedBody.moons && selectedBody.moons.length > 0 && (
-                    <div>
-                      <strong>Moons:</strong> {selectedBody.moons.length}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        )}
+                </div>
+              </ResizablePanel>
+            </>
+          )}
+        </ResizablePanelGroup>
       </div>
 
       <footer className="bg-gray-900 p-2 border-t border-gray-700 text-center text-sm text-gray-400">
