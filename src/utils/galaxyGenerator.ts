@@ -93,8 +93,9 @@ export function generateGalaxy(seed: number): Galaxy {
   const starSystems: StarSystem[] = [];
   const nebulae: Nebula[] = [];
   
-  // Choose galaxy type
-  const galaxyType = rng.choice(['spiral', 'barred-spiral', 'globular', 'elliptical']);
+  // Choose galaxy type with proper typing
+  const galaxyTypes: Galaxy['galaxyType'][] = ['spiral', 'barred-spiral', 'globular', 'elliptical'];
+  const galaxyType = rng.choice(galaxyTypes);
 
   // Generate star systems based on galaxy type
   const numSystems = 1000;

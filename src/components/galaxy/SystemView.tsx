@@ -291,6 +291,18 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, onBodySelect }) 
             {'civilization' in selectedBody && selectedBody.civilization && (
               <p><span className="text-gray-400">Civilization:</span> {selectedBody.civilization.name} ({selectedBody.civilization.type})</p>
             )}
+            {'moons' in selectedBody && selectedBody.moons && selectedBody.moons.length > 0 && (
+              <div>
+                <p><span className="text-gray-400">Moons:</span> {selectedBody.moons.length}</p>
+                <div className="ml-4 mt-1 space-y-1">
+                  {selectedBody.moons.map((moon, index) => (
+                    <p key={moon.id} className="text-xs text-gray-400">
+                      • {moon.name} ({moon.type}, {moon.radius.toFixed(1)}km)
+                    </p>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
