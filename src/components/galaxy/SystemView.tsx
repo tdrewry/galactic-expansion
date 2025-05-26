@@ -15,7 +15,7 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, selectedStar = '
   const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
 
-  console.log('SystemView rendering with system:', system.id, 'planets:', system.planets.length, 'selectedStar:', selectedStar);
+  console.log('SystemView rendering with system:', system.id, 'selectedStar:', selectedStar);
 
   // Get the current star's data and planets
   const getCurrentStarData = () => {
@@ -25,14 +25,14 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, selectedStar = '
           starType: system.binaryCompanion.starType,
           temperature: system.binaryCompanion.temperature,
           mass: system.binaryCompanion.mass,
-          planets: system.planets // Binary companions share planets with primary for now
+          planets: system.binaryCompanion.planets
         } : null;
       case 'trinary':
         return system.trinaryCompanion ? {
           starType: system.trinaryCompanion.starType,
           temperature: system.trinaryCompanion.temperature,
           mass: system.trinaryCompanion.mass,
-          planets: system.planets // Trinary companions share planets with primary for now
+          planets: system.trinaryCompanion.planets
         } : null;
       default:
         return {
@@ -46,6 +46,8 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, selectedStar = '
 
   const currentStarData = getCurrentStarData();
   const planetsToShow = currentStarData?.planets || [];
+
+  console.log('Current star data:', currentStarData, 'Planets to show:', planetsToShow.length);
 
   const handleBodyClick = (body: Planet | Moon | null) => {
     if (body) {

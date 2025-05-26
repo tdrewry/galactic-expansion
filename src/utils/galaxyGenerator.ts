@@ -11,11 +11,13 @@ export interface StarSystem {
     starType: 'main-sequence' | 'red-giant' | 'white-dwarf' | 'neutron' | 'magnetar' | 'pulsar' | 'quasar';
     temperature: number;
     mass: number;
+    planets: Planet[];
   };
   trinaryCompanion?: {
     starType: 'main-sequence' | 'red-giant' | 'white-dwarf' | 'neutron' | 'magnetar' | 'pulsar' | 'quasar';
     temperature: number;
     mass: number;
+    planets: Planet[];
   };
 }
 
@@ -132,7 +134,7 @@ export function generateGalaxy(
     }
     
     const starType = rng.choice(starTypes);
-    const planets = generatePlanets(rng, starType);
+    const planets = generatePlanets(rng, starType, `${i}-primary`);
     
     // Generate binary/trinary companions using configurable frequencies
     let binaryCompanion: StarSystem['binaryCompanion'] = undefined;
@@ -140,18 +142,22 @@ export function generateGalaxy(
     
     if (rng.next() < binaryFrequency) { // Configurable binary frequency
       const companionType = rng.choice(starTypes);
+      const binaryPlanets = generatePlanets(rng, companionType, `${i}-binary`);
       binaryCompanion = {
         starType: companionType,
         temperature: getStarTemperature(companionType, rng),
-        mass: getStarMass(companionType, rng)
+        mass: getStarMass(companionType, rng),
+        planets: binaryPlanets
       };
       
       if (rng.next() < (trinaryFrequency / binaryFrequency)) { // Adjusted trinary calculation
         const trinaryType = rng.choice(starTypes);
+        const trinaryPlanets = generatePlanets(rng, trinaryType, `${i}-trinary`);
         trinaryCompanion = {
           starType: trinaryType,
           temperature: getStarTemperature(trinaryType, rng),
-          mass: getStarMass(trinaryType, rng)
+          mass: getStarMass(trinaryType, rng),
+          planets: trinaryPlanets
         };
       }
     }
@@ -256,7 +262,7 @@ function generateEllipticalPosition(rng: SeededRandom, radius: number): [number,
   return [x, y, z];
 }
 
-function generatePlanets(rng: SeededRandom, starType: StarSystem['starType']): Planet[] {
+function generatePlanets(rng: SeededRandom, starType: StarSystem['starType'], starId: string): Planet[] {
   const numPlanets = Math.floor(rng.range(0, 12));
   const planets: Planet[] = [];
   
@@ -265,10 +271,10 @@ function generatePlanets(rng: SeededRandom, starType: StarSystem['starType']): P
     const angle = rng.next() * Math.PI * 2;
     const distanceFromStar = (i + 1) * rng.range(0.5, 3.0);
     
-    const moons = generateMoons(rng);
+    const moons = generateMoons(rng, `${starId}-planet-${i}`);
     
     planets.push({
-      id: `planet-${i}`,
+      id: `${starId}-planet-${i}`,
       name: generatePlanetName(rng),
       type: rng.choice(['terrestrial', 'gas-giant', 'ice-giant', 'asteroid-belt', 'dwarf-planet']),
       position: [
@@ -289,13 +295,13 @@ function generatePlanets(rng: SeededRandom, starType: StarSystem['starType']): P
   return planets;
 }
 
-function generateMoons(rng: SeededRandom): Moon[] {
+function generateMoons(rng: SeededRandom, planetId: string): Moon[] {
   const numMoons = Math.floor(rng.range(0, 5));
   const moons: Moon[] = [];
   
   for (let i = 0; i < numMoons; i++) {
     moons.push({
-      id: `moon-${i}`,
+      id: `${planetId}-moon-${i}`,
       name: generateMoonName(rng),
       type: rng.choice(['rocky', 'ice', 'metallic']),
       radius: rng.range(0.1, 2.0),
