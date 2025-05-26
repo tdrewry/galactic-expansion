@@ -25,15 +25,12 @@ export const VolumetricCloud: React.FC<VolumetricCloudProps> = ({
   const meshRef = useRef<THREE.Mesh>(null);
 
   const vertexShader = `
-    varying vec3 vWorldPosition;
     varying vec3 vPosition;
     varying vec2 vUv;
     
     void main() {
       vUv = uv;
       vPosition = position;
-      vec4 worldPos = modelMatrix * vec4(position, 1.0);
-      vWorldPosition = worldPos.xyz;
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     }
   `;
@@ -43,64 +40,36 @@ export const VolumetricCloud: React.FC<VolumetricCloudProps> = ({
     uniform vec3 color;
     uniform float opacity;
     uniform float density;
-    uniform vec3 cameraPosition;
-    uniform float cloudType;
     
-    varying vec3 vWorldPosition;
     varying vec3 vPosition;
     varying vec2 vUv;
 
-    // Very simple noise function for maximum compatibility
+    // Very simple noise function
     float noise(vec3 p) {
       return fract(sin(dot(p, vec3(12.9898, 78.233, 45.164))) * 43758.5453);
-    }
-
-    // Simple fractal brownian motion
-    float fbm(vec3 p) {
-      float value = 0.0;
-      float amplitude = 0.5;
-      
-      value += amplitude * noise(p);
-      p *= 2.0;
-      amplitude *= 0.5;
-      
-      value += amplitude * noise(p);
-      p *= 2.0;
-      amplitude *= 0.5;
-      
-      value += amplitude * noise(p);
-      
-      return value;
     }
 
     void main() {
       // Distance from center for spherical falloff
       float distFromCenter = length(vPosition);
-      float sphereFalloff = 1.0 - smoothstep(0.2, 0.5, distFromCenter);
+      float sphereFalloff = 1.0 - smoothstep(0.0, 0.5, distFromCenter);
       
       // Animated position
       vec3 animatedPos = vPosition + time * 0.01;
       
-      // Generate cloud density
-      float cloudNoise = fbm(animatedPos * 3.0);
-      
-      // Adjust based on cloud type
-      if (cloudType < 0.5) { 
-        // dust
-        cloudNoise = cloudNoise * 0.7 + 0.4;
-      } else if (cloudType < 1.5) { 
-        // nebula
-        cloudNoise = cloudNoise * 1.1 + 0.3;
-      } else { 
-        // cosmic
-        cloudNoise = cloudNoise * 0.8 + 0.35;
-      }
+      // Generate simple cloud density
+      float cloudNoise = noise(animatedPos * 2.0) * 0.5 + 
+                        noise(animatedPos * 4.0) * 0.25 + 
+                        noise(animatedPos * 8.0) * 0.125;
       
       // Combine noise with falloff
       float finalDensity = cloudNoise * sphereFalloff * density;
       
-      // Calculate alpha with minimum visibility
-      float alpha = max(finalDensity * opacity, 0.1);
+      // Calculate alpha
+      float alpha = finalDensity * opacity;
+      
+      // Ensure some minimum visibility
+      alpha = max(alpha, 0.02);
       
       gl_FragColor = vec4(color, alpha);
     }
@@ -110,15 +79,12 @@ export const VolumetricCloud: React.FC<VolumetricCloudProps> = ({
     time: { value: 0.0 },
     color: { value: new THREE.Color(color) },
     opacity: { value: opacity },
-    density: { value: density },
-    cameraPosition: { value: new THREE.Vector3() },
-    cloudType: { value: cloudType === 'dust' ? 0.0 : cloudType === 'nebula' ? 1.0 : 2.0 }
-  }), [color, opacity, density, cloudType]);
+    density: { value: density }
+  }), [color, opacity, density]);
 
   useFrame((state) => {
     if (materialRef.current) {
       materialRef.current.uniforms.time.value = state.clock.elapsedTime;
-      materialRef.current.uniforms.cameraPosition.value.copy(state.camera.position);
     }
   });
 
@@ -126,7 +92,7 @@ export const VolumetricCloud: React.FC<VolumetricCloudProps> = ({
 
   return (
     <mesh ref={meshRef} position={position}>
-      <sphereGeometry args={[size, 16, 12]} />
+      <sphereGeometry args={[size, 12, 8]} />
       <shaderMaterial
         ref={materialRef}
         vertexShader={vertexShader}
@@ -135,7 +101,6 @@ export const VolumetricCloud: React.FC<VolumetricCloudProps> = ({
         transparent
         blending={THREE.AdditiveBlending}
         depthWrite={false}
-        depthTest={true}
         side={THREE.DoubleSide}
       />
     </mesh>
