@@ -1,7 +1,7 @@
 
 import React, { useRef, useMemo } from 'react';
 import { useFrame, ThreeEvent } from '@react-three/fiber';
-import { Mesh } from 'three';
+import { Mesh, MeshBasicMaterial } from 'three';
 import { StarSystem as StarSystemType } from '../../utils/galaxyGenerator';
 
 interface StarSystemProps {
@@ -47,7 +47,7 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
     // Subtle twinkling effect for all stars
     if (meshRef.current) {
       const twinkle = Math.sin(state.clock.elapsedTime * 4 + system.position[0] * 0.001) * 0.1 + 0.9;
-      meshRef.current.material.opacity = twinkle;
+      (meshRef.current.material as MeshBasicMaterial).opacity = twinkle;
       
       if (isSelected) {
         meshRef.current.scale.setScalar(Math.sin(state.clock.elapsedTime * 3) * 0.2 + 1);
@@ -59,7 +59,7 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
     // Glow effect with subtle pulsing
     if (glowRef.current) {
       const glowPulse = Math.sin(state.clock.elapsedTime * 2 + system.position[1] * 0.001) * 0.15 + 0.85;
-      glowRef.current.material.opacity = (system.explored ? 0.4 : 0.3) * glowPulse;
+      (glowRef.current.material as MeshBasicMaterial).opacity = (system.explored ? 0.4 : 0.3) * glowPulse;
       
       if (isSelected) {
         glowRef.current.scale.setScalar(Math.sin(state.clock.elapsedTime * 2) * 0.1 + 1);
