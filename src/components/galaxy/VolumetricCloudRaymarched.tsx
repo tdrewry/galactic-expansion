@@ -43,7 +43,6 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
     uniform vec3 color;
     uniform float opacity;
     uniform float density;
-    uniform vec3 cameraPosition;
     uniform float cloudType;
     uniform float size;
     
@@ -122,9 +121,9 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
     }
 
     void main() {
-      // Raymarching setup
-      vec3 rayDir = normalize(vWorldPosition - cameraPosition);
+      // Use local position for raymarching instead of camera position
       vec3 rayStart = vLocalPosition;
+      vec3 rayDir = normalize(vLocalPosition);
       
       // Raymarching parameters
       float stepSize = 0.1;
@@ -170,7 +169,6 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
     color: { value: new THREE.Color(color) },
     opacity: { value: opacity },
     density: { value: density },
-    cameraPosition: { value: new THREE.Vector3() },
     size: { value: size },
     cloudType: { value: cloudType === 'dust' ? 0.0 : cloudType === 'nebula' ? 1.0 : 2.0 }
   }), [color, opacity, density, size, cloudType]);
@@ -178,7 +176,6 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
   useFrame((state) => {
     if (materialRef.current) {
       materialRef.current.uniforms.time.value = state.clock.elapsedTime;
-      materialRef.current.uniforms.cameraPosition.value.copy(state.camera.position);
     }
   });
 
