@@ -3,7 +3,7 @@ import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Group } from 'three';
 import { Galaxy } from '../../utils/galaxyGenerator';
-import { VolumetricCloud } from './VolumetricCloud';
+import { VolumetricCloudRaymarched } from './VolumetricCloudRaymarched';
 
 interface InterstellarMaterialProps {
   galaxy: Galaxy;
@@ -198,7 +198,7 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({ gala
     <group ref={groupRef}>
       {/* Dust Lanes (only for spiral galaxies) */}
       {dustLanes.map((dust) => (
-        <VolumetricCloud
+        <VolumetricCloudRaymarched
           key={dust.id}
           position={dust.position}
           size={dust.size}
@@ -211,7 +211,7 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({ gala
       
       {/* Star-forming Regions */}
       {starFormingRegions.map((region) => (
-        <VolumetricCloud
+        <VolumetricCloudRaymarched
           key={region.id}
           position={region.position}
           size={region.size}
@@ -224,7 +224,7 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({ gala
       
       {/* Cosmic Dust */}
       {cosmicDust.map((dust) => (
-        <VolumetricCloud
+        <VolumetricCloudRaymarched
           key={dust.id}
           position={dust.position}
           size={dust.size}
