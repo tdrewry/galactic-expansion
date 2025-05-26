@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { generateGalaxy, Galaxy, StarSystem } from '../utils/galaxyGenerator';
@@ -10,6 +9,8 @@ interface GalaxyMapProps {
   seed?: number;
   numSystems?: number;
   numNebulae?: number;
+  binaryFrequency?: number;
+  trinaryFrequency?: number;
   onSystemSelect?: (system: StarSystem) => void;
 }
 
@@ -17,16 +18,18 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
   seed = 12345,
   numSystems = 1000,
   numNebulae = 50,
+  binaryFrequency = 0.15,
+  trinaryFrequency = 0.03,
   onSystemSelect 
 }) => {
   const [selectedSystem, setSelectedSystem] = useState<StarSystem | null>(null);
   
   const galaxy = useMemo(() => {
-    console.log('Generating galaxy with seed:', seed, 'systems:', numSystems, 'nebulae:', numNebulae);
-    const newGalaxy = generateGalaxy(seed, numSystems, numNebulae);
+    console.log('Generating galaxy with seed:', seed, 'systems:', numSystems, 'nebulae:', numNebulae, 'binary:', binaryFrequency, 'trinary:', trinaryFrequency);
+    const newGalaxy = generateGalaxy(seed, numSystems, numNebulae, binaryFrequency, trinaryFrequency);
     console.log('Generated galaxy with', newGalaxy.starSystems.length, 'systems');
     return newGalaxy;
-  }, [seed, numSystems, numNebulae]);
+  }, [seed, numSystems, numNebulae, binaryFrequency, trinaryFrequency]);
   
   const handleSystemSelect = useCallback((system: StarSystem | null) => {
     console.log('Selected system:', system?.id || 'none');

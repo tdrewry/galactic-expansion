@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import { GalaxyMap } from '../components/GalaxyMap';
 import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
 import { SystemView } from '../components/galaxy/SystemView';
+import { GalaxySettings } from '../components/galaxy/GalaxySettings';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +14,8 @@ const Index = () => {
   const [inputSeed, setInputSeed] = useState('12345');
   const [numSystems, setNumSystems] = useState(1000);
   const [numNebulae, setNumNebulae] = useState(50);
+  const [binaryFrequency, setBinaryFrequency] = useState(0.15);
+  const [trinaryFrequency, setTriinaryFrequency] = useState(0.03);
   const [selectedSystem, setSelectedSystem] = useState<StarSystem | null>(null);
   const [selectedBody, setSelectedBody] = useState<Planet | Moon | null>(null);
 
@@ -28,6 +30,22 @@ const Index = () => {
     const randomSeed = Math.floor(Math.random() * 999999) + 1;
     setInputSeed(randomSeed.toString());
     setGalaxySeed(randomSeed);
+    setSelectedSystem(null);
+    setSelectedBody(null);
+  };
+
+  const handleSettingsChange = (settings: {
+    numSystems: number;
+    numNebulae: number;
+    binaryFrequency: number;
+    trinaryFrequency: number;
+  }) => {
+    setNumSystems(settings.numSystems);
+    setNumNebulae(settings.numNebulae);
+    setBinaryFrequency(settings.binaryFrequency);
+    setTriinaryFrequency(settings.trinaryFrequency);
+    
+    // Auto-regenerate galaxy with new settings
     setSelectedSystem(null);
     setSelectedBody(null);
   };
@@ -51,30 +69,6 @@ const Index = () => {
           <h1 className="text-2xl font-bold">Stardust Voyager Fleet</h1>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-2">
-                <Label htmlFor="systems" className="text-sm text-gray-300">Systems:</Label>
-                <Input
-                  id="systems"
-                  type="number"
-                  value={numSystems}
-                  onChange={(e) => setNumSystems(parseInt(e.target.value) || 1000)}
-                  className="w-20 bg-gray-800 border-gray-600 text-white"
-                  min="100"
-                  max="5000"
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <Label htmlFor="nebulae" className="text-sm text-gray-300">Nebulae:</Label>
-                <Input
-                  id="nebulae"
-                  type="number"
-                  value={numNebulae}
-                  onChange={(e) => setNumNebulae(parseInt(e.target.value) || 50)}
-                  className="w-16 bg-gray-800 border-gray-600 text-white"
-                  min="10"
-                  max="200"
-                />
-              </div>
               <Input
                 type="number"
                 value={inputSeed}
@@ -88,6 +82,13 @@ const Index = () => {
               <Button onClick={generateRandomSeed} variant="secondary" size="sm">
                 Random
               </Button>
+              <GalaxySettings
+                numSystems={numSystems}
+                numNebulae={numNebulae}
+                binaryFrequency={binaryFrequency}
+                trinaryFrequency={trinaryFrequency}
+                onSettingsChange={handleSettingsChange}
+              />
             </div>
           </div>
         </div>
@@ -103,6 +104,8 @@ const Index = () => {
                 seed={galaxySeed} 
                 numSystems={numSystems}
                 numNebulae={numNebulae}
+                binaryFrequency={binaryFrequency}
+                trinaryFrequency={trinaryFrequency}
                 onSystemSelect={handleSystemSelect}
               />
             </div>
@@ -177,7 +180,7 @@ const Index = () => {
       </div>
 
       <footer className="bg-gray-900 p-2 border-t border-gray-700 text-center text-sm text-gray-400 flex-shrink-0">
-        <p>Procedurally Generated Galaxy | Seed: {galaxySeed} | Systems: {numSystems} | Nebulae: {numNebulae} | Click and drag to navigate, scroll to zoom</p>
+        <p>Procedurally Generated Galaxy | Seed: {galaxySeed} | Systems: {numSystems} | Nebulae: {numNebulae} | Binary: {Math.round(binaryFrequency * 100)}% | Trinary: {Math.round(trinaryFrequency * 100)}% | Click and drag to navigate, scroll to zoom</p>
       </footer>
     </div>
   );

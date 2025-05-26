@@ -87,7 +87,13 @@ class SeededRandom {
   }
 }
 
-export function generateGalaxy(seed: number, numSystems: number = 1000, numNebulae: number = 50): Galaxy {
+export function generateGalaxy(
+  seed: number, 
+  numSystems: number = 1000, 
+  numNebulae: number = 50,
+  binaryFrequency: number = 0.15,
+  trinaryFrequency: number = 0.03
+): Galaxy {
   const rng = new SeededRandom(seed);
   const galaxyRadius = 50000; // Light years
   const starSystems: StarSystem[] = [];
@@ -128,11 +134,11 @@ export function generateGalaxy(seed: number, numSystems: number = 1000, numNebul
     const starType = rng.choice(starTypes);
     const planets = generatePlanets(rng, starType);
     
-    // Generate binary/trinary companions (15% chance for binary, 3% for trinary)
+    // Generate binary/trinary companions using configurable frequencies
     let binaryCompanion: StarSystem['binaryCompanion'] = undefined;
     let trinaryCompanion: StarSystem['trinaryCompanion'] = undefined;
     
-    if (rng.next() < 0.15) { // 15% chance for binary
+    if (rng.next() < binaryFrequency) { // Configurable binary frequency
       const companionType = rng.choice(starTypes);
       binaryCompanion = {
         starType: companionType,
@@ -140,7 +146,7 @@ export function generateGalaxy(seed: number, numSystems: number = 1000, numNebul
         mass: getStarMass(companionType, rng)
       };
       
-      if (rng.next() < 0.2) { // 20% of binary systems have a third star
+      if (rng.next() < (trinaryFrequency / binaryFrequency)) { // Adjusted trinary calculation
         const trinaryType = rng.choice(starTypes);
         trinaryCompanion = {
           starType: trinaryType,
