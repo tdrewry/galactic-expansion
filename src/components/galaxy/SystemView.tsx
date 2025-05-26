@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 import { StarSystem, Planet, Moon } from '../../utils/galaxyGenerator';
 
 interface SystemViewProps {
@@ -17,8 +17,10 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, onBodySelect }) 
 
   console.log('SystemView rendering with system:', system.id, 'planets:', system.planets.length);
 
-  const handleBodyClick = (body: Planet | Moon) => {
-    console.log('Selected celestial body:', body.name);
+  const handleBodyClick = (body: Planet | Moon | null) => {
+    if (body) {
+      console.log('Selected celestial body:', body.name);
+    }
     setSelectedBody(body);
     onBodySelect(body);
   };
@@ -51,6 +53,7 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, onBodySelect }) 
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     const zoomFactor = 0.1;
     const newZoom = Math.max(0.5, Math.min(3, zoom - e.deltaY * 0.001));
     setZoom(newZoom);
@@ -85,29 +88,31 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, onBodySelect }) 
     return colors[type] || '#888888';
   };
 
-  // Sort planets by distance from star
-  const sortedPlanets = [...system.planets].sort((a, b) => a.distanceFromStar - b.distanceFromStar);
+  // Memoize planet positions to prevent recalculation on every render
+  const planetPositions = useMemo(() => {
+    const sortedPlanets = [...system.planets].sort((a, b) => a.distanceFromStar - b.distanceFromStar);
+    const centerX = 200;
+    const centerY = 200;
+    const baseRadius = 60;
+    const radiusIncrement = 35;
 
-  // Calculate orbital positions for Elite Dangerous style layout
-  const centerX = 200;
-  const centerY = 200;
-  const baseRadius = 60;
-  const radiusIncrement = 35;
-
-  const planetPositions = sortedPlanets.map((planet, index) => {
-    const orbitRadius = baseRadius + (index * radiusIncrement);
-    const angle = (index * 45) + (Math.random() * 90 - 45); // Vary angle slightly
-    const x = centerX + Math.cos(angle * Math.PI / 180) * orbitRadius;
-    const y = centerY + Math.sin(angle * Math.PI / 180) * orbitRadius;
-    
-    return {
-      planet,
-      x,
-      y,
-      orbitRadius,
-      angle
-    };
-  });
+    return sortedPlanets.map((planet, index) => {
+      const orbitRadius = baseRadius + (index * radiusIncrement);
+      // Use a deterministic angle based on planet ID to prevent position changes
+      const seedValue = planet.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const angle = (index * 45) + (seedValue % 90 - 45);
+      const x = centerX + Math.cos(angle * Math.PI / 180) * orbitRadius;
+      const y = centerY + Math.sin(angle * Math.PI / 180) * orbitRadius;
+      
+      return {
+        planet,
+        x,
+        y,
+        orbitRadius,
+        angle
+      };
+    });
+  }, [system.planets, system.id]);
 
   const transformStyle = {
     transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
@@ -143,8 +148,8 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, onBodySelect }) 
             {planetPositions.map((pos, index) => (
               <circle
                 key={`orbit-${index}`}
-                cx={centerX}
-                cy={centerY}
+                cx={200}
+                cy={200}
                 r={pos.orbitRadius}
                 fill="none"
                 stroke="rgba(100, 116, 139, 0.3)"
@@ -157,8 +162,8 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, onBodySelect }) 
             {planetPositions.map((pos, index) => (
               <line
                 key={`line-${index}`}
-                x1={centerX}
-                y1={centerY}
+                x1={200}
+                y1={200}
                 x2={pos.x}
                 y2={pos.y}
                 stroke="rgba(100, 116, 139, 0.2)"
@@ -171,8 +176,8 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, onBodySelect }) 
           <div 
             className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer hover:scale-110 transition-transform"
             style={{ 
-              left: centerX, 
-              top: centerY,
+              left: 200, 
+              top: 200,
               backgroundColor: getStarColor(system.starType),
               width: '24px',
               height: '24px',
