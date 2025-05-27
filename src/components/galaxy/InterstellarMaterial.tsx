@@ -36,7 +36,6 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
   return (
     <group ref={groupRef}>
       {/* All dust rendering disabled for performance testing */}
-      {showCosmicDust && console.log('Cosmic dust rendering is disabled for testing')}
     </group>
   );
 };
