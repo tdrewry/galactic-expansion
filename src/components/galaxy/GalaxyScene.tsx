@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
@@ -82,10 +83,15 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
         fade 
       />
       
-      {/* Galactic Center */}
+      {/* Galactic Center - only show the rim */}
       <mesh position={[0, 0, 0]} onClick={handleBackgroundClick}>
-        <sphereGeometry args={[800, 32, 24]} />
-        <meshBasicMaterial color="#ffaa00" transparent opacity={0.6} />
+        <ringGeometry args={[750, 800, 32]} />
+        <meshBasicMaterial 
+          color="#ffaa00" 
+          transparent 
+          opacity={0.8} 
+          side={THREE.DoubleSide}
+        />
       </mesh>
       
       {/* Interstellar Material - renders behind stars */}
