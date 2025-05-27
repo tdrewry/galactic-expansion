@@ -72,7 +72,7 @@ export const NebulaMaterial: React.FC<NebulaMaterialProps> = ({
       vec2 st = vUv * scale;
       
       // Add time-based movement
-      st += time * 0.02;
+      st += 0.02; // Static time value for performance testing
       
       // Create cloud-like patterns
       float n1 = fbm(st * 3.0);
@@ -104,11 +104,8 @@ export const NebulaMaterial: React.FC<NebulaMaterialProps> = ({
     scale: { value: scale }
   }), [color, opacity, scale]);
 
-  useFrame((state) => {
-    if (materialRef.current) {
-      materialRef.current.uniforms.time.value = state.clock.elapsedTime;
-    }
-  });
+  // DISABLED SHADER TIME UPDATES FOR PERFORMANCE TESTING
+  console.log('NebulaMaterial shader time updates disabled for performance testing');
 
   return (
     <shaderMaterial

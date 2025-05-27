@@ -60,15 +60,8 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
     }
   }, [selectedSystem, camera]);
 
-  useFrame(() => {
-    if (isMoving.current && controlsRef.current) {
-      controlsRef.current.update();
-      // Stop moving after a short time
-      setTimeout(() => {
-        isMoving.current = false;
-      }, 1000);
-    }
-  });
+  // DISABLED CAMERA ANIMATION FOR PERFORMANCE TESTING
+  console.log('GalaxyScene camera animations disabled for performance testing');
 
   const handleBackgroundClick = (event: any) => {
     console.log('Background clicked - deselecting system');
