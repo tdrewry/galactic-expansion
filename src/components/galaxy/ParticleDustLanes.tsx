@@ -59,7 +59,7 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
       };
     }
     
-    // Use the same seeded random and parameters as the galaxy generator
+    // Use the same seeded random as the galaxy generator
     let seedValue = galaxy.seed;
     const seededRandom = () => {
       seedValue = (seedValue * 9301 + 49297) % 233280;
@@ -68,60 +68,56 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
     
     console.log(`Generating barred galaxy particles for galaxy ${galaxy.seed}`);
     
-    // Match the galaxy generator's bar parameters exactly
+    // Use the EXACT same bar parameters as the star generation
     const galaxyRadius = 50000;
-    const barLength = galaxy.barLength || (12000 + seededRandom() * 8000);
-    const barWidth = galaxy.barWidth || (2000 + seededRandom() * 1500);
-    const barAngle = galaxy.barAngle || (seededRandom() * Math.PI * 0.25);
+    const barLength = galaxyRadius * 0.3; // Same as generateBarredSpiralPosition
+    const barWidth = galaxyRadius * 0.1;   // Same as generateBarredSpiralPosition
     
-    // Galaxy age affects spiral characteristics
-    const galaxyAge = seededRandom();
-    const spiralTightness = 1.2 + galaxyAge * 0.8;
-    
-    console.log(`Aligned dust lanes - Bar length: ${barLength}, Bar width: ${barWidth}, Bar angle: ${(barAngle * 180 / Math.PI).toFixed(1)}°`);
+    console.log(`Aligned dust lanes - Bar length: ${barLength}, Bar width: ${barWidth}, Bar angle: 0°`);
     
     for (let i = 0; i < numParticles; i++) {
       const i3 = i * 3;
       
-      // 30% of particles form the central bar, 70% form the spiral arms
+      // 30% of particles form the central bar (same as star generation), 70% form the spiral arms
       const isBarParticle = seededRandom() < 0.3;
       
       let x, z, y;
       let armDistanceRatio = 0;
       
       if (isBarParticle) {
-        // Central bar particles - align exactly with star bar
-        const barPosition = (seededRandom() - 0.5) * barLength;
+        // Central bar particles - use EXACT same logic as generateBarredSpiralPosition
+        const barProgress = seededRandom() * 2 - 1; // -1 to 1
         const barOffset = (seededRandom() - 0.5) * barWidth;
         
-        // Rotate the bar by the same angle as the stars
-        x = barPosition * Math.cos(barAngle) - barOffset * Math.sin(barAngle);
-        z = barPosition * Math.sin(barAngle) + barOffset * Math.cos(barAngle);
-        y = (seededRandom() - 0.5) * 400; // Match star disk thickness
+        // No rotation - align with star bar exactly
+        x = barProgress * barLength;
+        z = barOffset;
+        y = (seededRandom() - 0.5) * 1000; // Match star disk thickness (was 500 in stars)
         
         armDistanceRatio = 0;
         
       } else {
-        // Spiral arm particles
+        // Spiral arm particles starting from bar ends
         const armIndex = Math.floor(seededRandom() * 2);
         
         // Enhanced density falloff for much thinner ends
-        armDistanceRatio = Math.pow(seededRandom(), 2.5); // Even more dramatic thinning
+        armDistanceRatio = Math.pow(seededRandom(), 2.5);
         const armDistance = armDistanceRatio * galaxyRadius * 0.8;
         
-        // Starting point: end of the bar (aligned with star distribution)
+        // Starting point: end of the bar (no rotation)
         const barEndSign = armIndex === 0 ? 1 : -1;
-        const barEndX = (barLength / 2) * barEndSign * Math.cos(barAngle);
-        const barEndZ = (barLength / 2) * barEndSign * Math.sin(barAngle);
+        const barEndX = (barLength / 2) * barEndSign;
+        const barEndZ = 0;
         
-        // Spiral angle calculation
-        const baseAngle = barAngle + (armIndex === 0 ? 0 : Math.PI);
+        // Spiral angle calculation (starting from horizontal bar)
+        const baseAngle = armIndex === 0 ? 0 : Math.PI;
+        const spiralTightness = 1.2 + seededRandom() * 0.8;
         const spiralCurve = armDistanceRatio * Math.PI * spiralTightness;
         const finalAngle = baseAngle + spiralCurve;
         
         // Much wider arms at the ends for dramatic effect
         const baseArmWidth = 1500 + seededRandom() * 1000;
-        const widthMultiplier = 1.0 + armDistanceRatio * 4.0; // Arms get 5x wider at ends
+        const widthMultiplier = 1.0 + armDistanceRatio * 4.0;
         const armWidth = baseArmWidth * widthMultiplier;
         const widthOffset = (seededRandom() - 0.5) * armWidth;
         const widthAngle = finalAngle + Math.PI / 2;
@@ -142,15 +138,15 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
         dustColor.setHSL(
           0.06 + seededRandom() * 0.08, // Hue: orange to red
           0.8 + seededRandom() * 0.2,   // Higher saturation
-          0.4 + seededRandom() * 0.4    // Much brighter (was 0.25 + 0.35)
+          0.4 + seededRandom() * 0.4    // Much brighter
         );
       } else {
         // Arm particles - brighter, cooler colors
-        const brightnessReduction = armDistanceRatio * 0.2; // Less reduction
+        const brightnessReduction = armDistanceRatio * 0.2;
         dustColor.setHSL(
           0.15 + seededRandom() * 0.1,  // Hue: yellow to cyan
           0.6 + seededRandom() * 0.3,   // Higher saturation
-          (0.35 + seededRandom() * 0.45) * (1.0 - brightnessReduction) // Much brighter base
+          (0.35 + seededRandom() * 0.45) * (1.0 - brightnessReduction)
         );
       }
       
@@ -172,9 +168,6 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
       sizes: sizesArray
     };
   }, [numParticles, particleSize, galaxy.seed, galaxy.galaxyType, isBarredGalaxy, blurTexture]);
-  
-  // Remove rotation animation - dust lanes should be static and aligned with stars
-  // useFrame hook removed entirely
 
   // Only render if this is a barred galaxy
   if (!isBarredGalaxy) {
@@ -209,7 +202,7 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
         sizeAttenuation={true}
         vertexColors={true}
         transparent={true}
-        opacity={opacity * 1.2} // Increased opacity for brighter effect (was 0.7)
+        opacity={opacity * 1.2}
         depthWrite={false}
         blending={THREE.AdditiveBlending}
         alphaTest={0.001}
