@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
+import { Slider } from '@/components/ui/slider';
 import { Settings } from 'lucide-react';
 
 interface GalaxySettingsProps {
@@ -34,6 +34,15 @@ interface GalaxySettingsProps {
     dustLaneParticles?: number;
     starFormingParticles?: number;
     cosmicDustParticles?: number;
+    dustLaneOpacity?: number;
+    starFormingOpacity?: number;
+    cosmicDustOpacity?: number;
+    dustLaneColorIntensity?: number;
+    starFormingColorIntensity?: number;
+    cosmicDustColorIntensity?: number;
+    dustLaneBloom?: number;
+    starFormingBloom?: number;
+    cosmicDustBloom?: number;
   }) => void;
 }
 
@@ -63,7 +72,16 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
     appTitle,
     dustLaneParticles: 15000,
     starFormingParticles: 12000,
-    cosmicDustParticles: 10000
+    cosmicDustParticles: 10000,
+    dustLaneOpacity: 0.4,
+    starFormingOpacity: 0.3,
+    cosmicDustOpacity: 0.4,
+    dustLaneColorIntensity: 1.0,
+    starFormingColorIntensity: 1.2,
+    cosmicDustColorIntensity: 0.8,
+    dustLaneBloom: 1.0,
+    starFormingBloom: 1.5,
+    cosmicDustBloom: 0.8
   });
 
   const handleApply = () => {
@@ -84,7 +102,16 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
       appTitle: 'Stardust Voyager',
       dustLaneParticles: 15000,
       starFormingParticles: 12000,
-      cosmicDustParticles: 10000
+      cosmicDustParticles: 10000,
+      dustLaneOpacity: 0.4,
+      starFormingOpacity: 0.3,
+      cosmicDustOpacity: 0.4,
+      dustLaneColorIntensity: 1.0,
+      starFormingColorIntensity: 1.2,
+      cosmicDustColorIntensity: 0.8,
+      dustLaneBloom: 1.0,
+      starFormingBloom: 1.5,
+      cosmicDustBloom: 0.8
     };
     setLocalSettings(defaultSettings);
     onSettingsChange(defaultSettings);
@@ -221,56 +248,203 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
               <CardHeader>
                 <CardTitle className="text-sm">Particle System Detail</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="dust-lane-particles">Dust Lane Particles</Label>
-                  <Input
-                    id="dust-lane-particles"
-                    type="number"
-                    value={localSettings.dustLaneParticles}
-                    onChange={(e) => setLocalSettings(prev => ({
-                      ...prev,
-                      dustLaneParticles: parseInt(e.target.value) || 15000
-                    }))}
-                    min="1000"
-                    max="50000"
-                    step="1000"
-                  />
-                  <span className="text-xs text-gray-400">For spiral galaxy dust lanes</span>
+              <CardContent className="space-y-6">
+                {/* Dust Lane Particles */}
+                <div className="space-y-4 p-4 border rounded-lg">
+                  <h4 className="font-medium text-sm">Dust Lane Particles</h4>
+                  <div className="space-y-2">
+                    <Label htmlFor="dust-lane-particles">Particle Count</Label>
+                    <Input
+                      id="dust-lane-particles"
+                      type="number"
+                      value={localSettings.dustLaneParticles}
+                      onChange={(e) => setLocalSettings(prev => ({
+                        ...prev,
+                        dustLaneParticles: parseInt(e.target.value) || 15000
+                      }))}
+                      min="1000"
+                      max="50000"
+                      step="1000"
+                    />
+                    <span className="text-xs text-gray-400">For spiral galaxy dust lanes</span>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Opacity: {localSettings.dustLaneOpacity.toFixed(2)}</Label>
+                    <Slider
+                      value={[localSettings.dustLaneOpacity]}
+                      onValueChange={([value]) => setLocalSettings(prev => ({
+                        ...prev,
+                        dustLaneOpacity: value
+                      }))}
+                      min={0.1}
+                      max={1.0}
+                      step={0.05}
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Color Intensity: {localSettings.dustLaneColorIntensity.toFixed(1)}</Label>
+                    <Slider
+                      value={[localSettings.dustLaneColorIntensity]}
+                      onValueChange={([value]) => setLocalSettings(prev => ({
+                        ...prev,
+                        dustLaneColorIntensity: value
+                      }))}
+                      min={0.2}
+                      max={2.0}
+                      step={0.1}
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Bloom Effect: {localSettings.dustLaneBloom.toFixed(1)}</Label>
+                    <Slider
+                      value={[localSettings.dustLaneBloom]}
+                      onValueChange={([value]) => setLocalSettings(prev => ({
+                        ...prev,
+                        dustLaneBloom: value
+                      }))}
+                      min={0.2}
+                      max={3.0}
+                      step={0.1}
+                      className="w-full"
+                    />
+                  </div>
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="star-forming-particles">Star-forming Region Particles</Label>
-                  <Input
-                    id="star-forming-particles"
-                    type="number"
-                    value={localSettings.starFormingParticles}
-                    onChange={(e) => setLocalSettings(prev => ({
-                      ...prev,
-                      starFormingParticles: parseInt(e.target.value) || 12000
-                    }))}
-                    min="1000"
-                    max="50000"
-                    step="1000"
-                  />
-                  <span className="text-xs text-gray-400">For nebula and star-forming regions</span>
+                {/* Star-forming Region Particles */}
+                <div className="space-y-4 p-4 border rounded-lg">
+                  <h4 className="font-medium text-sm">Star-forming Region Particles</h4>
+                  <div className="space-y-2">
+                    <Label htmlFor="star-forming-particles">Particle Count</Label>
+                    <Input
+                      id="star-forming-particles"
+                      type="number"
+                      value={localSettings.starFormingParticles}
+                      onChange={(e) => setLocalSettings(prev => ({
+                        ...prev,
+                        starFormingParticles: parseInt(e.target.value) || 12000
+                      }))}
+                      min="1000"
+                      max="50000"
+                      step="1000"
+                    />
+                    <span className="text-xs text-gray-400">For nebula and star-forming regions</span>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Opacity: {localSettings.starFormingOpacity.toFixed(2)}</Label>
+                    <Slider
+                      value={[localSettings.starFormingOpacity]}
+                      onValueChange={([value]) => setLocalSettings(prev => ({
+                        ...prev,
+                        starFormingOpacity: value
+                      }))}
+                      min={0.1}
+                      max={1.0}
+                      step={0.05}
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Color Intensity: {localSettings.starFormingColorIntensity.toFixed(1)}</Label>
+                    <Slider
+                      value={[localSettings.starFormingColorIntensity]}
+                      onValueChange={([value]) => setLocalSettings(prev => ({
+                        ...prev,
+                        starFormingColorIntensity: value
+                      }))}
+                      min={0.2}
+                      max={2.0}
+                      step={0.1}
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Bloom Effect: {localSettings.starFormingBloom.toFixed(1)}</Label>
+                    <Slider
+                      value={[localSettings.starFormingBloom]}
+                      onValueChange={([value]) => setLocalSettings(prev => ({
+                        ...prev,
+                        starFormingBloom: value
+                      }))}
+                      min={0.2}
+                      max={3.0}
+                      step={0.1}
+                      className="w-full"
+                    />
+                  </div>
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="cosmic-dust-particles">Cosmic Dust Particles</Label>
-                  <Input
-                    id="cosmic-dust-particles"
-                    type="number"
-                    value={localSettings.cosmicDustParticles}
-                    onChange={(e) => setLocalSettings(prev => ({
-                      ...prev,
-                      cosmicDustParticles: parseInt(e.target.value) || 10000
-                    }))}
-                    min="1000"
-                    max="50000"
-                    step="1000"
-                  />
-                  <span className="text-xs text-gray-400">For globular galaxy cosmic dust</span>
+                {/* Cosmic Dust Particles */}
+                <div className="space-y-4 p-4 border rounded-lg">
+                  <h4 className="font-medium text-sm">Cosmic Dust Particles</h4>
+                  <div className="space-y-2">
+                    <Label htmlFor="cosmic-dust-particles">Particle Count</Label>
+                    <Input
+                      id="cosmic-dust-particles"
+                      type="number"
+                      value={localSettings.cosmicDustParticles}
+                      onChange={(e) => setLocalSettings(prev => ({
+                        ...prev,
+                        cosmicDustParticles: parseInt(e.target.value) || 10000
+                      }))}
+                      min="1000"
+                      max="50000"
+                      step="1000"
+                    />
+                    <span className="text-xs text-gray-400">For globular galaxy cosmic dust</span>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Opacity: {localSettings.cosmicDustOpacity.toFixed(2)}</Label>
+                    <Slider
+                      value={[localSettings.cosmicDustOpacity]}
+                      onValueChange={([value]) => setLocalSettings(prev => ({
+                        ...prev,
+                        cosmicDustOpacity: value
+                      }))}
+                      min={0.1}
+                      max={1.0}
+                      step={0.05}
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Color Intensity: {localSettings.cosmicDustColorIntensity.toFixed(1)}</Label>
+                    <Slider
+                      value={[localSettings.cosmicDustColorIntensity]}
+                      onValueChange={([value]) => setLocalSettings(prev => ({
+                        ...prev,
+                        cosmicDustColorIntensity: value
+                      }))}
+                      min={0.2}
+                      max={2.0}
+                      step={0.1}
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Bloom Effect: {localSettings.cosmicDustBloom.toFixed(1)}</Label>
+                    <Slider
+                      value={[localSettings.cosmicDustBloom]}
+                      onValueChange={([value]) => setLocalSettings(prev => ({
+                        ...prev,
+                        cosmicDustBloom: value
+                      }))}
+                      min={0.2}
+                      max={3.0}
+                      step={0.1}
+                      className="w-full"
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>
