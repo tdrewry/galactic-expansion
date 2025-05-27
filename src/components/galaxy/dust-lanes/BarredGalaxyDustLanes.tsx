@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import * as THREE from 'three';
 import { DustLaneBase } from './DustLaneBase';
@@ -15,7 +16,7 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
   particleSize = 100,
   opacity = 0.4
 }) => {
-  // Generate particle positions for barred galaxy dust lanes
+  // Generate particle positions for barred galaxy with proper density distribution
   const { positions, colors, sizes } = useMemo(() => {
     const positionsArray = new Float32Array(numParticles * 3);
     const colorsArray = new Float32Array(numParticles * 3);
@@ -28,140 +29,131 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
       return seedValue / 233280;
     };
     
-    console.log(`Generating new barred galaxy structure for galaxy ${galaxy.seed}`);
+    console.log(`Generating barred galaxy with pressure wave dynamics for galaxy ${galaxy.seed}`);
     
     const galaxyRadius = 50000;
-    const coreRadius = galaxyRadius * 0.12;  // Central spiral region
+    const coreRadius = galaxyRadius * 0.15;  // Central feeding region
     const barLength = galaxyRadius * 0.35;   // Bar length
-    const barWidth = galaxyRadius * 0.06;    // Bar width
+    const barWidth = galaxyRadius * 0.08;    // Bar width
     
-    console.log(`New structure - Core: ${coreRadius}, Bar length: ${barLength}, Bar width: ${barWidth}`);
+    // Particle distribution: 20% central, 25% dense bar, 35% dense arms, 20% pressure waves
     
     for (let i = 0; i < numParticles; i++) {
       const i3 = i * 3;
       
-      // Distribute particles: 25% central spiral, 35% bar, 40% outer arms
       const rand = seededRandom();
       let x, z, y;
       let particleType;
+      let densityType; // 'high', 'medium', 'low'
       let armDistanceRatio = 0;
       
-      if (rand < 0.25) {
-        // ELLIPTICAL CENTRAL SPIRAL - connects to bar endpoints
+      if (rand < 0.20) {
+        // CENTRAL SPIRAL FEEDING REGION - high density
         particleType = 'central';
+        densityType = 'high';
         
         const spiralProgress = seededRandom();
         const spiralDistance = spiralProgress * coreRadius;
         
-        // Create elliptical spiral that connects to bar endpoints
-        const spiralTightness = 2.5; // Moderate spiral
+        // Tight spiral that feeds directly into bar ends
+        const spiralTightness = 3.2;
         const spiralAngle = spiralProgress * Math.PI * spiralTightness;
         
-        // Two spiral arms that feed into the bar ends
+        // Two feeding arms toward bar endpoints
         const armIndex = Math.floor(seededRandom() * 2);
-        const baseAngle = armIndex === 0 ? 0 : Math.PI; // Opposite directions
+        const baseAngle = armIndex === 0 ? 0.2 : Math.PI - 0.2; // Slightly angled toward bar
         const finalAngle = baseAngle + spiralAngle;
         
-        // ELLIPTICAL DEFORMATION
-        // Create ellipse with major axis along the bar direction (x-axis)
-        const ellipseRatioX = 1.6; // Stretch along x-axis to connect to bar
-        const ellipseRatioZ = 0.7; // Compress along z-axis
-        
-        // Base position on ellipse
-        const baseX = Math.cos(finalAngle) * spiralDistance * ellipseRatioX;
-        const baseZ = Math.sin(finalAngle) * spiralDistance * ellipseRatioZ;
-        
-        // As we approach the outer edge, bend towards bar connection points
-        const connectionFactor = spiralProgress; // 0 at center, 1 at edge
-        const barConnectionX = (barLength * 0.85) * (armIndex === 0 ? 1 : -1);
-        const barConnectionZ = 0;
-        
-        // Blend between elliptical spiral and bar connection point
-        const blendedX = baseX + connectionFactor * 0.3 * (barConnectionX - baseX);
-        const blendedZ = baseZ + connectionFactor * 0.3 * (barConnectionZ - baseZ);
-        
-        // Spiral width increases as we move outward
-        const spiralWidth = 600 + spiralProgress * 1000;
+        // Dense spiral core
+        const spiralWidth = 400 + spiralProgress * 600;
         const widthOffset = (seededRandom() - 0.5) * spiralWidth;
         const widthAngle = finalAngle + Math.PI / 2;
         
-        // Add noise to central spiral
-        const centralNoiseScale = 300;
-        const noiseX = (seededRandom() - 0.5) * centralNoiseScale;
-        const noiseZ = (seededRandom() - 0.5) * centralNoiseScale;
+        x = Math.cos(finalAngle) * spiralDistance + Math.cos(widthAngle) * widthOffset;
+        z = Math.sin(finalAngle) * spiralDistance + Math.sin(widthAngle) * widthOffset;
+        y = (seededRandom() - 0.5) * 600;
         
-        x = blendedX + Math.cos(widthAngle) * widthOffset * ellipseRatioX + noiseX;
-        z = blendedZ + Math.sin(widthAngle) * widthOffset * ellipseRatioZ + noiseZ;
-        y = (seededRandom() - 0.5) * 800; // Thin disk
-        
-      } else if (rand < 0.6) {
-        // BAR REGION - horizontal extension from central spiral
-        particleType = 'bar';
+      } else if (rand < 0.45) {
+        // DENSE BAR CORE - very high density
+        particleType = 'bar-core';
+        densityType = 'high';
         
         const barProgress = seededRandom() * 2 - 1; // -1 to 1
-        
-        // Taper the bar at the ends
         const barProgressAbs = Math.abs(barProgress);
-        const taperFactor = 1.0 - Math.pow(barProgressAbs, 2.0);
-        const effectiveBarWidth = barWidth * Math.max(0.4, taperFactor);
         
-        const barOffset = (seededRandom() - 0.5) * effectiveBarWidth;
+        // Dense core of the bar
+        const coreWidth = barWidth * 0.4; // Narrow dense core
+        const barOffset = (seededRandom() - 0.5) * coreWidth;
         
-        // Add noise to bar particles
-        const barNoiseScale = 600;
-        const noiseX = (seededRandom() - 0.5) * barNoiseScale;
-        const noiseZ = (seededRandom() - 0.5) * barNoiseScale;
+        x = barProgress * barLength * 0.9;
+        z = barOffset;
+        y = (seededRandom() - 0.5) * 800;
         
-        x = barProgress * barLength + noiseX;
-        z = barOffset + noiseZ;
-        y = (seededRandom() - 0.5) * 1000;
+      } else if (rand < 0.65) {
+        // BAR PRESSURE WAVES - medium to low density
+        particleType = 'bar-waves';
+        densityType = seededRandom() < 0.6 ? 'medium' : 'low';
+        
+        const waveDistance = seededRandom() * barLength * 1.4; // Extend beyond bar
+        const waveAngle = (seededRandom() - 0.5) * Math.PI * 0.3; // Slight angle spread
+        
+        // Create wave patterns perpendicular to bar
+        const waveFrequency = 4;
+        const wavePhase = (waveDistance / barLength) * Math.PI * waveFrequency;
+        const waveAmplitude = barWidth * (1.5 + Math.sin(wavePhase) * 0.8);
+        
+        const baseX = (seededRandom() - 0.5) * waveDistance;
+        const waveOffset = (seededRandom() - 0.5) * waveAmplitude;
+        
+        x = baseX + Math.cos(waveAngle) * waveOffset * 0.3;
+        z = waveOffset + Math.sin(waveAngle) * waveOffset * 0.3;
+        y = (seededRandom() - 0.5) * 1200;
         
       } else {
-        // OUTER SPIRAL ARMS - start from bar ends
+        // SPIRAL ARMS - high density (where star systems live)
         particleType = 'arms';
+        densityType = 'high';
         
         const armIndex = Math.floor(seededRandom() * 2);
         
-        // Simplified density distribution - remove the threshold that causes stripes
+        // Smooth density distribution for arms
         const rawDistance = seededRandom();
-        // Use a smooth power curve for density falloff
-        armDistanceRatio = Math.pow(rawDistance, 1.2);
+        armDistanceRatio = Math.pow(rawDistance, 0.8); // Less aggressive falloff
         
-        const armDistance = armDistanceRatio * galaxyRadius * 0.85;
+        const armDistance = armDistanceRatio * galaxyRadius * 0.9;
         
-        // Start from bar ends
+        // Start from bar ends with proper connection
         const barEndSign = armIndex === 0 ? 1 : -1;
         const barEndX = (barLength * 0.85) * barEndSign;
         const barEndZ = 0;
         
-        // Spiral calculation starting nearly horizontal
+        // Spiral calculation with proper curvature
         const baseAngle = armIndex === 0 ? 0.1 : Math.PI - 0.1;
-        const spiralTightness = 1.2 + seededRandom() * 0.4;
+        const spiralTightness = 1.1 + seededRandom() * 0.3;
         const spiralCurve = armDistanceRatio * Math.PI * spiralTightness;
         const finalAngle = baseAngle + spiralCurve;
         
-        // Arm width grows with distance
-        const baseArmWidth = 800;
-        const widthGrowth = 1.0 + armDistanceRatio * 3.5;
+        // Dense arm core with variations
+        const baseArmWidth = 600;
+        const widthGrowth = 1.0 + armDistanceRatio * 2.5;
         const armWidth = baseArmWidth * widthGrowth;
-        const widthOffset = (seededRandom() - 0.5) * armWidth;
+        
+        // Create density variations within the arm
+        const densityVariation = Math.sin(armDistanceRatio * Math.PI * 8) * 0.3;
+        const effectiveWidth = armWidth * (1.0 + densityVariation);
+        const widthOffset = (seededRandom() - 0.5) * effectiveWidth;
         const widthAngle = finalAngle + Math.PI / 2;
         
-        // Add noise to arm particles
-        const armNoiseScale = 600 + armDistanceRatio * 500;
-        const armNoiseX = (seededRandom() - 0.5) * armNoiseScale;
-        const armNoiseZ = (seededRandom() - 0.5) * armNoiseScale;
-        
-        x = barEndX + Math.cos(finalAngle) * armDistance + Math.cos(widthAngle) * widthOffset + armNoiseX;
-        z = barEndZ + Math.sin(finalAngle) * armDistance + Math.sin(widthAngle) * widthOffset + armNoiseZ;
-        y = (seededRandom() - 0.5) * (800 + armDistanceRatio * 800);
+        x = barEndX + Math.cos(finalAngle) * armDistance + Math.cos(widthAngle) * widthOffset;
+        z = barEndZ + Math.sin(finalAngle) * armDistance + Math.sin(widthAngle) * widthOffset;
+        y = (seededRandom() - 0.5) * (600 + armDistanceRatio * 600);
       }
       
       positionsArray[i3] = x;
       positionsArray[i3 + 1] = y;
       positionsArray[i3 + 2] = z;
       
-      // Enhanced colors based on particle type and position
+      // Enhanced colors based on particle type and density
       const dustColor = new THREE.Color();
       
       if (particleType === 'central') {
@@ -169,23 +161,31 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
         dustColor.setHSL(
           0.05 + seededRandom() * 0.1,  // Orange to yellow
           0.9 + seededRandom() * 0.1,   // High saturation
-          0.7 + seededRandom() * 0.3    // Bright
+          0.8 + seededRandom() * 0.2    // Very bright
         );
-      } else if (particleType === 'bar') {
-        // Bar particles - medium brightness, warm
+      } else if (particleType === 'bar-core') {
+        // Dense bar core - very bright, hot colors
         dustColor.setHSL(
-          0.08 + seededRandom() * 0.08, // Orange-red
-          0.8 + seededRandom() * 0.2,   // High saturation
-          0.6 + seededRandom() * 0.3    // Medium-bright
+          0.08 + seededRandom() * 0.06, // Orange-red
+          0.95 + seededRandom() * 0.05, // Very high saturation
+          0.9 + seededRandom() * 0.1    // Very bright
+        );
+      } else if (particleType === 'bar-waves') {
+        // Pressure waves - dimmer, cooler colors based on density
+        const waveBrightness = densityType === 'medium' ? 0.4 : 0.25;
+        dustColor.setHSL(
+          0.15 + seededRandom() * 0.15, // Yellow to cyan
+          0.5 + seededRandom() * 0.3,   // Medium saturation
+          waveBrightness + seededRandom() * 0.2
         );
       } else {
-        // Arm particles - much brighter, remove excessive dimming
-        const brightnessReduction = armDistanceRatio * 0.15; // Reduced from 0.4
+        // Arm particles - bright, where star systems are
+        const brightness = 0.7 - armDistanceRatio * 0.3; // Some distance falloff
         
         dustColor.setHSL(
           0.12 + seededRandom() * 0.12, // Yellow to cyan
-          0.7 + seededRandom() * 0.2,   // Good saturation
-          (0.6 + seededRandom() * 0.3) * (1.0 - brightnessReduction) // Brighter base
+          0.8 + seededRandom() * 0.2,   // High saturation
+          brightness + seededRandom() * 0.3
         );
       }
       
@@ -193,23 +193,26 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
       colorsArray[i3 + 1] = dustColor.g;
       colorsArray[i3 + 2] = dustColor.b;
       
-      // Enhanced particle sizes based on type
+      // Particle sizes based on density type
       const baseSize = particleSize * 3;
       let sizeMultiplier;
       
-      if (particleType === 'central') {
-        sizeMultiplier = 1.3;
-      } else if (particleType === 'bar') {
-        sizeMultiplier = 1.2;
+      if (densityType === 'high') {
+        sizeMultiplier = 1.4 + seededRandom() * 0.6; // Large, bright particles
+      } else if (densityType === 'medium') {
+        sizeMultiplier = 0.8 + seededRandom() * 0.4; // Medium particles
       } else {
-        // Arm particles: maintain good size throughout
-        sizeMultiplier = 1.0 - armDistanceRatio * 0.3; // Less size reduction
+        sizeMultiplier = 0.4 + seededRandom() * 0.3; // Small, faint particles
       }
       
-      sizesArray[i] = baseSize * sizeMultiplier * (0.8 + seededRandom() * 1.4);
+      if (particleType === 'arms') {
+        sizeMultiplier *= (1.0 - armDistanceRatio * 0.2); // Slight size reduction with distance
+      }
+      
+      sizesArray[i] = baseSize * sizeMultiplier;
     }
     
-    console.log(`Generated ${numParticles} particles with elliptical central spiral → bar → arms structure`);
+    console.log(`Generated ${numParticles} particles with pressure wave dynamics and density variations`);
     
     return {
       positions: positionsArray,
