@@ -203,7 +203,7 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
                     }))}
                   />
                   <span className="text-sm text-gray-400">
-                    (0 = natural, >0 = debug mode)
+                    (0 = natural, &gt;0 = debug mode)
                   </span>
                 </div>
               </div>
