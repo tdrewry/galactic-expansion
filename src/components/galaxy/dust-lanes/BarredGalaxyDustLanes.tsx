@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import * as THREE from 'three';
 import { DustLaneBase } from './DustLaneBase';
@@ -32,22 +31,22 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
     console.log(`Generating new barred galaxy structure for galaxy ${galaxy.seed}`);
     
     const galaxyRadius = 50000;
-    const coreRadius = galaxyRadius * 0.15;  // Central spiral region
-    const barLength = galaxyRadius * 0.3;    // Bar length
-    const barWidth = galaxyRadius * 0.08;    // Bar width
+    const coreRadius = galaxyRadius * 0.12;  // Central spiral region
+    const barLength = galaxyRadius * 0.35;   // Bar length
+    const barWidth = galaxyRadius * 0.06;    // Bar width
     
     console.log(`New structure - Core: ${coreRadius}, Bar length: ${barLength}, Bar width: ${barWidth}`);
     
     for (let i = 0; i < numParticles; i++) {
       const i3 = i * 3;
       
-      // Distribute particles: 30% central spiral, 40% bar, 30% outer arms
+      // Distribute particles: 25% central spiral, 35% bar, 40% outer arms
       const rand = seededRandom();
       let x, z, y;
       let particleType;
       let armDistanceRatio = 0;
       
-      if (rand < 0.3) {
+      if (rand < 0.25) {
         // CENTRAL SPIRAL REGION - feeds into the bar
         particleType = 'central';
         
@@ -77,7 +76,7 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
         z = Math.sin(finalAngle) * spiralDistance + Math.sin(widthAngle) * widthOffset + noiseZ;
         y = (seededRandom() - 0.5) * 800; // Thin disk
         
-      } else if (rand < 0.7) {
+      } else if (rand < 0.6) {
         // BAR REGION - horizontal extension from central spiral
         particleType = 'bar';
         
@@ -105,47 +104,39 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
         
         const armIndex = Math.floor(seededRandom() * 2);
         
-        // Enhanced density distribution for smooth connection
+        // Simplified density distribution - remove the threshold that causes stripes
         const rawDistance = seededRandom();
-        const earlyArmThreshold = 0.25;
+        // Use a smooth power curve for density falloff
+        armDistanceRatio = Math.pow(rawDistance, 1.2);
         
-        if (rawDistance < earlyArmThreshold) {
-          // Early arm: high density near bar connection
-          armDistanceRatio = Math.pow(rawDistance / earlyArmThreshold, 0.6) * earlyArmThreshold;
-        } else {
-          // Later arm: gradual falloff
-          const laterProgress = (rawDistance - earlyArmThreshold) / (1.0 - earlyArmThreshold);
-          armDistanceRatio = earlyArmThreshold + laterProgress * (1.0 - earlyArmThreshold) * Math.pow(laterProgress, 1.8);
-        }
-        
-        const armDistance = armDistanceRatio * galaxyRadius * 0.8;
+        const armDistance = armDistanceRatio * galaxyRadius * 0.85;
         
         // Start from bar ends
         const barEndSign = armIndex === 0 ? 1 : -1;
-        const barEndX = (barLength * 0.8) * barEndSign; // Start slightly inside bar end
+        const barEndX = (barLength * 0.85) * barEndSign;
         const barEndZ = 0;
         
         // Spiral calculation starting nearly horizontal
-        const baseAngle = armIndex === 0 ? 0.1 : Math.PI - 0.1; // Nearly horizontal start
-        const spiralTightness = 1.0 + seededRandom() * 0.6;
+        const baseAngle = armIndex === 0 ? 0.1 : Math.PI - 0.1;
+        const spiralTightness = 1.2 + seededRandom() * 0.4;
         const spiralCurve = armDistanceRatio * Math.PI * spiralTightness;
         const finalAngle = baseAngle + spiralCurve;
         
         // Arm width grows with distance
-        const baseArmWidth = 600;
-        const widthGrowth = 1.0 + armDistanceRatio * 4.0;
+        const baseArmWidth = 800;
+        const widthGrowth = 1.0 + armDistanceRatio * 3.5;
         const armWidth = baseArmWidth * widthGrowth;
         const widthOffset = (seededRandom() - 0.5) * armWidth;
         const widthAngle = finalAngle + Math.PI / 2;
         
         // Add noise to arm particles
-        const armNoiseScale = 500 + armDistanceRatio * 600;
+        const armNoiseScale = 600 + armDistanceRatio * 500;
         const armNoiseX = (seededRandom() - 0.5) * armNoiseScale;
         const armNoiseZ = (seededRandom() - 0.5) * armNoiseScale;
         
         x = barEndX + Math.cos(finalAngle) * armDistance + Math.cos(widthAngle) * widthOffset + armNoiseX;
         z = barEndZ + Math.sin(finalAngle) * armDistance + Math.sin(widthAngle) * widthOffset + armNoiseZ;
-        y = (seededRandom() - 0.5) * (700 + armDistanceRatio * 900);
+        y = (seededRandom() - 0.5) * (800 + armDistanceRatio * 800);
       }
       
       positionsArray[i3] = x;
@@ -170,18 +161,13 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
           0.6 + seededRandom() * 0.3    // Medium-bright
         );
       } else {
-        // Arm particles - cooler colors, brightness based on distance
-        let brightnessReduction;
-        if (armDistanceRatio < 0.25) {
-          brightnessReduction = armDistanceRatio * 0.1;
-        } else {
-          brightnessReduction = 0.025 + (armDistanceRatio - 0.25) * 0.4;
-        }
+        // Arm particles - much brighter, remove excessive dimming
+        const brightnessReduction = armDistanceRatio * 0.15; // Reduced from 0.4
         
         dustColor.setHSL(
           0.12 + seededRandom() * 0.12, // Yellow to cyan
           0.7 + seededRandom() * 0.2,   // Good saturation
-          (0.5 + seededRandom() * 0.4) * (1.0 - brightnessReduction)
+          (0.6 + seededRandom() * 0.3) * (1.0 - brightnessReduction) // Brighter base
         );
       }
       
@@ -194,16 +180,12 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
       let sizeMultiplier;
       
       if (particleType === 'central') {
-        sizeMultiplier = 1.3; // Larger central particles
+        sizeMultiplier = 1.3;
       } else if (particleType === 'bar') {
-        sizeMultiplier = 1.2; // Medium bar particles
+        sizeMultiplier = 1.2;
       } else {
-        // Arm particles: larger at start, smaller at ends
-        if (armDistanceRatio < 0.25) {
-          sizeMultiplier = 1.1 - armDistanceRatio * 0.2;
-        } else {
-          sizeMultiplier = 1.05 - (armDistanceRatio - 0.25) * 0.6;
-        }
+        // Arm particles: maintain good size throughout
+        sizeMultiplier = 1.0 - armDistanceRatio * 0.3; // Less size reduction
       }
       
       sizesArray[i] = baseSize * sizeMultiplier * (0.8 + seededRandom() * 1.4);
