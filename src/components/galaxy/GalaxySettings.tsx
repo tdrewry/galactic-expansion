@@ -67,7 +67,7 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
       raymarchingSamples: 8,
       minimumVisibility: 0.1,
       showDustLanes: true,
-      showStarFormingRegions: true,
+      showStarFormingRegions: false,
       showCosmicDust: true
     };
     setLocalSettings(defaultSettings);

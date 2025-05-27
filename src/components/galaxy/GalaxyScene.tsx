@@ -108,8 +108,8 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
         />
       ))}
       
-      {/* Nebulae */}
-      {galaxy.nebulae.map((nebula) => (
+      {/* Nebulae - only render when star-forming regions are enabled */}
+      {showStarFormingRegions && galaxy.nebulae.map((nebula) => (
         <Nebula key={nebula.id} nebula={nebula} />
       ))}
       

@@ -19,7 +19,7 @@ const Index = () => {
   const [raymarchingSamples, setRaymarchingSamples] = useState(8);
   const [minimumVisibility, setMinimumVisibility] = useState(0.1);
   const [showDustLanes, setShowDustLanes] = useState(true);
-  const [showStarFormingRegions, setShowStarFormingRegions] = useState(true);
+  const [showStarFormingRegions, setShowStarFormingRegions] = useState(false);
   const [showCosmicDust, setShowCosmicDust] = useState(true);
   const [selectedSystem, setSelectedSystem] = useState<StarSystem | null>(null);
   const [selectedStar, setSelectedStar] = useState<'primary' | 'binary' | 'trinary'>('primary');

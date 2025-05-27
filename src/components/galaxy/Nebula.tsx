@@ -11,13 +11,8 @@ interface NebulaProps {
 export const Nebula: React.FC<NebulaProps> = ({ nebula }) => {
   const meshRef = useRef<Mesh>(null);
   
-  // Re-enable subtle rotation animation
-  useFrame((state, delta) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y += delta * 0.01;
-      meshRef.current.rotation.x += delta * 0.005;
-    }
-  });
+  // DISABLED ANIMATIONS FOR PERFORMANCE
+  console.log('Nebula animations disabled for performance');
 
   return (
     <mesh 
