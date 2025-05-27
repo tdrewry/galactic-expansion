@@ -36,7 +36,7 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
     const barLength = galaxyRadius * 0.3; // Same as generateBarredSpiralPosition
     const barWidth = galaxyRadius * 0.1;   // Same as generateBarredSpiralPosition
     
-    console.log(`Updated dust lanes - Bar length: ${barLength}, Bar width: ${barWidth}, with tapered ends`);
+    console.log(`Updated dust lanes - Bar length: ${barLength}, Bar width: ${barWidth}, with tapered ends and noise`);
     
     for (let i = 0; i < numParticles; i++) {
       const i3 = i * 3;
@@ -58,9 +58,13 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
         
         const barOffset = (seededRandom() - 0.5) * effectiveBarWidth;
         
-        // No rotation - align with star bar exactly
-        x = barProgress * barLength;
-        z = barOffset;
+        // Add noise to bar particle positions
+        const noiseScale = 800; // Amount of random displacement
+        const noiseX = (seededRandom() - 0.5) * noiseScale;
+        const noiseZ = (seededRandom() - 0.5) * noiseScale;
+        
+        x = barProgress * barLength + noiseX;
+        z = barOffset + noiseZ;
         y = (seededRandom() - 0.5) * 1000; // Match star disk thickness
         
         armDistanceRatio = 0;
@@ -103,8 +107,13 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
         const widthOffset = (seededRandom() - 0.5) * armWidth;
         const widthAngle = finalAngle + Math.PI / 2;
         
-        x = barEndX + Math.cos(finalAngle) * armDistance + Math.cos(widthAngle) * widthOffset;
-        z = barEndZ + Math.sin(finalAngle) * armDistance + Math.sin(widthAngle) * widthOffset;
+        // Add noise to arm particle positions
+        const armNoiseScale = 600 + armDistanceRatio * 400; // More noise further out
+        const armNoiseX = (seededRandom() - 0.5) * armNoiseScale;
+        const armNoiseZ = (seededRandom() - 0.5) * armNoiseScale;
+        
+        x = barEndX + Math.cos(finalAngle) * armDistance + Math.cos(widthAngle) * widthOffset + armNoiseX;
+        z = barEndZ + Math.sin(finalAngle) * armDistance + Math.sin(widthAngle) * widthOffset + armNoiseZ;
         y = (seededRandom() - 0.5) * (600 + armDistanceRatio * 800);
       }
       
@@ -161,7 +170,7 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
       sizesArray[i] = baseSize * sizeMultiplier * (0.8 + seededRandom() * 1.5);
     }
     
-    console.log(`Generated ${numParticles} particles for barred galaxy with tapered bar and improved arm falloff`);
+    console.log(`Generated ${numParticles} particles for barred galaxy with tapered bar, spiral arms, and noise`);
     
     return {
       positions: positionsArray,
