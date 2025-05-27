@@ -1,4 +1,3 @@
-
 import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { ShaderMaterial, Vector3 } from 'three';
@@ -13,7 +12,7 @@ interface GalaxyHazeProps {
 
 export const GalaxyHaze: React.FC<GalaxyHazeProps> = ({ 
   galaxy, 
-  intensity = 0.3,
+  intensity = 0.2,
   color = '#4488ff'
 }) => {
   const materialRef = useRef<ShaderMaterial>(null);
@@ -21,16 +20,14 @@ export const GalaxyHaze: React.FC<GalaxyHazeProps> = ({
 
   const vertexShader = `
     varying vec3 vWorldPosition;
-    varying vec3 vViewPosition;
-    varying float vDistanceToCamera;
+    varying vec3 vViewDirection;
     
     void main() {
       vec4 worldPos = modelMatrix * vec4(position, 1.0);
       vWorldPosition = worldPos.xyz;
       
       vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-      vViewPosition = -mvPosition.xyz;
-      vDistanceToCamera = length(mvPosition.xyz);
+      vViewDirection = normalize(-mvPosition.xyz);
       
       gl_Position = projectionMatrix * mvPosition;
     }
@@ -43,8 +40,7 @@ export const GalaxyHaze: React.FC<GalaxyHazeProps> = ({
     uniform vec3 cameraPosition;
     
     varying vec3 vWorldPosition;
-    varying vec3 vViewPosition;
-    varying float vDistanceToCamera;
+    varying vec3 vViewDirection;
 
     float noise(vec3 p) {
       return fract(sin(dot(p, vec3(12.9898, 78.233, 45.164))) * 43758.5453);
@@ -54,26 +50,24 @@ export const GalaxyHaze: React.FC<GalaxyHazeProps> = ({
       // Distance from galactic center
       float centerDist = length(vWorldPosition);
       
-      // Create falloff from galactic center
-      float galacticFalloff = 1.0 / (1.0 + centerDist * 0.00001);
+      // Create volumetric density based on distance from center
+      float density = 1.0 / (1.0 + centerDist * 0.00002);
       
-      // Distance-based alpha - closer to camera = more transparent
-      float distanceAlpha = 1.0 / (1.0 + vDistanceToCamera * 0.00005);
+      // Add noise for variation
+      vec3 noisePos = vWorldPosition * 0.00001 + vec3(time * 0.0001);
+      float noiseValue = noise(noisePos) * 0.3 + 0.7;
       
-      // Add subtle noise for variation
-      vec3 noisePos = vWorldPosition * 0.00003 + vec3(time * 0.0001);
-      float noiseValue = noise(noisePos) * 0.5 + 0.5;
+      // View-dependent fade
+      float viewFade = abs(dot(vViewDirection, normalize(vWorldPosition)));
+      viewFade = pow(viewFade, 2.0);
       
-      // Combine effects for final density
-      float finalAlpha = galacticFalloff * distanceAlpha * noiseValue * intensity;
+      // Combine effects
+      float finalAlpha = density * noiseValue * viewFade * intensity;
       
-      // Clamp alpha to very low values for subtle effect
-      finalAlpha = clamp(finalAlpha, 0.0, 0.15);
+      // Keep it subtle
+      finalAlpha = clamp(finalAlpha, 0.0, 0.1);
       
-      // Blue-purple haze color with some variation
-      vec3 hazeColor = mix(color, color * 0.7, noiseValue * 0.3);
-      
-      gl_FragColor = vec4(hazeColor, finalAlpha);
+      gl_FragColor = vec4(color, finalAlpha);
     }
   `;
 
@@ -91,11 +85,11 @@ export const GalaxyHaze: React.FC<GalaxyHazeProps> = ({
     }
   });
 
-  console.log('GalaxyHaze rendering with volumetric effect, intensity:', intensity);
+  console.log('GalaxyHaze rendering with corrected shader uniforms');
 
   return (
     <mesh ref={meshRef} position={[0, 0, 0]}>
-      <sphereGeometry args={[120000, 32, 24]} />
+      <sphereGeometry args={[150000, 32, 24]} />
       <shaderMaterial
         ref={materialRef}
         vertexShader={vertexShader}
@@ -105,7 +99,7 @@ export const GalaxyHaze: React.FC<GalaxyHazeProps> = ({
         blending={THREE.AdditiveBlending}
         depthWrite={false}
         depthTest={true}
-        side={THREE.BackSide}
+        side={THREE.DoubleSide}
       />
     </mesh>
   );
