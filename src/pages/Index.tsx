@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { GalaxyMap } from '../components/GalaxyMap';
 import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
@@ -12,6 +13,7 @@ import { Label } from '@/components/ui/label';
 const Index = () => {
   const [galaxySeed, setGalaxySeed] = useState(12345);
   const [inputSeed, setInputSeed] = useState('12345');
+  const [appTitle, setAppTitle] = useState('Stardust Voyager');
   const [numSystems, setNumSystems] = useState(1000);
   const [numNebulae, setNumNebulae] = useState(50);
   const [binaryFrequency, setBinaryFrequency] = useState(0.15);
@@ -50,6 +52,7 @@ const Index = () => {
     showDustLanes?: boolean;
     showStarFormingRegions?: boolean;
     showCosmicDust?: boolean;
+    appTitle?: string;
   }) => {
     setNumSystems(settings.numSystems);
     setNumNebulae(settings.numNebulae);
@@ -69,6 +72,9 @@ const Index = () => {
     }
     if (settings.showCosmicDust !== undefined) {
       setShowCosmicDust(settings.showCosmicDust);
+    }
+    if (settings.appTitle !== undefined) {
+      setAppTitle(settings.appTitle);
     }
     
     setSelectedSystem(null);
@@ -108,7 +114,7 @@ const Index = () => {
     <div className="h-screen bg-black text-white flex flex-col overflow-hidden">
       <header className="bg-gray-900 p-4 border-b border-gray-700 flex-shrink-0">
         <div className="container mx-auto flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Stardust Voyager Fleet</h1>
+          <h1 className="text-2xl font-bold">{appTitle}</h1>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <Input
@@ -134,6 +140,7 @@ const Index = () => {
                 showDustLanes={showDustLanes}
                 showStarFormingRegions={showStarFormingRegions}
                 showCosmicDust={showCosmicDust}
+                appTitle={appTitle}
                 onSettingsChange={handleSettingsChange}
               />
             </div>

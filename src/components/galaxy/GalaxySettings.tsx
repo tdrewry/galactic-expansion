@@ -17,6 +17,7 @@ interface GalaxySettingsProps {
   showDustLanes?: boolean;
   showStarFormingRegions?: boolean;
   showCosmicDust?: boolean;
+  appTitle?: string;
   onSettingsChange: (settings: {
     numSystems: number;
     numNebulae: number;
@@ -27,6 +28,7 @@ interface GalaxySettingsProps {
     showDustLanes?: boolean;
     showStarFormingRegions?: boolean;
     showCosmicDust?: boolean;
+    appTitle?: string;
   }) => void;
 }
 
@@ -38,8 +40,9 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
   raymarchingSamples = 8,
   minimumVisibility = 0.1,
   showDustLanes = true,
-  showStarFormingRegions = true,
+  showStarFormingRegions = false,
   showCosmicDust = true,
+  appTitle = 'Stardust Voyager',
   onSettingsChange
 }) => {
   const [localSettings, setLocalSettings] = React.useState({
@@ -51,7 +54,8 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
     minimumVisibility,
     showDustLanes,
     showStarFormingRegions,
-    showCosmicDust
+    showCosmicDust,
+    appTitle
   });
 
   const handleApply = () => {
@@ -68,7 +72,8 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
       minimumVisibility: 0.1,
       showDustLanes: true,
       showStarFormingRegions: false,
-      showCosmicDust: true
+      showCosmicDust: true,
+      appTitle: 'Stardust Voyager'
     };
     setLocalSettings(defaultSettings);
     onSettingsChange(defaultSettings);
@@ -91,6 +96,27 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
         </SheetHeader>
         
         <div className="space-y-6 mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm">Application</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="app-title">Application Title</Label>
+                <Input
+                  id="app-title"
+                  type="text"
+                  value={localSettings.appTitle}
+                  onChange={(e) => setLocalSettings(prev => ({
+                    ...prev,
+                    appTitle: e.target.value
+                  }))}
+                  placeholder="Enter application title"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle className="text-sm">Visual Features</CardTitle>
