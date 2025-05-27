@@ -141,13 +141,13 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
     }
 
     void main() {
-      // Calculate ray direction from camera through current pixel
-      vec3 rayOrigin = cameraPosition;
-      vec3 rayDir = normalize(vWorldPosition - cameraPosition);
+      // Check if cameraPosition is valid, fallback to view direction
+      vec3 rayOrigin = length(cameraPosition) > 0.0 ? cameraPosition : vWorldPosition - vViewDirection * 100.0;
+      vec3 rayDir = normalize(vWorldPosition - rayOrigin);
       
-      // Find intersection with sphere bounds
-      vec3 sphereCenter = vec3(0.0);
-      float sphereRadius = 1.0;
+      // Find intersection with sphere bounds (centered at mesh position)
+      vec3 sphereCenter = vWorldPosition - vLocalPosition;
+      float sphereRadius = size;
       
       // Ray-sphere intersection
       vec3 oc = rayOrigin - sphereCenter;
@@ -181,8 +181,8 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
         float t = tNear + float(i) * stepSize;
         vec3 samplePoint = rayOrigin + rayDir * t;
         
-        // Transform to local space
-        vec3 localPoint = (samplePoint - vWorldPosition) / size;
+        // Transform to local space relative to sphere center
+        vec3 localPoint = (samplePoint - sphereCenter) / size;
         
         float sampleDensity = cloudDensity(localPoint);
         
@@ -222,13 +222,17 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
     cloudType: { value: cloudType === 'dust' ? 0.0 : cloudType === 'nebula' ? 1.0 : 2.0 },
     raymarchingSamples: { value: raymarchingSamples },
     minimumVisibility: { value: minimumVisibility },
-    cameraPosition: { value: new THREE.Vector3() }
+    cameraPosition: { value: new THREE.Vector3(0, 0, 0) }
   }), [color, opacity, density, size, cloudType, raymarchingSamples, minimumVisibility]);
 
   useFrame((state) => {
     if (materialRef.current) {
       materialRef.current.uniforms.time.value = state.clock.elapsedTime;
-      materialRef.current.uniforms.cameraPosition.value.copy(state.camera.position);
+      
+      // Safely update camera position
+      if (state.camera && state.camera.position) {
+        materialRef.current.uniforms.cameraPosition.value.copy(state.camera.position);
+      }
     }
   });
 
