@@ -29,6 +29,28 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
     const dustLanes = [];
     const starFormingRegions = [];
     const cosmicDust = [];
+
+    // Helper function to calculate star system density at a given position
+    const calculateStarDensity = (position: [number, number, number], radius: number = 8000) => {
+      const [x, y, z] = position;
+      let nearbyStars = 0;
+      
+      for (const system of galaxy.starSystems) {
+        const [sx, sy, sz] = system.position;
+        const distance = Math.sqrt(
+          Math.pow(x - sx, 2) + 
+          Math.pow(y - sy, 2) + 
+          Math.pow(z - sz, 2)
+        );
+        
+        if (distance <= radius) {
+          nearbyStars++;
+        }
+      }
+      
+      // Normalize density (typical values might be 0-20 stars in radius)
+      return Math.min(nearbyStars / 15.0, 1.0);
+    };
     
     if (galaxy.galaxyType === 'spiral' || galaxy.galaxyType === 'barred-spiral') {
       console.log('Creating spiral galaxy dust lanes and star-forming regions');
@@ -42,20 +64,33 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
           const spiralAngle = angle + t * Math.PI * 1.5;
           const distance = t * armLength;
           
+          const position: [number, number, number] = [
+            Math.cos(spiralAngle) * distance,
+            (Math.random() - 0.5) * 1500,
+            Math.sin(spiralAngle) * distance
+          ];
+
+          // Calculate star density for this dust lane position
+          const density = calculateStarDensity(position);
+          
+          // Base intensity increases with star density
+          const baseIntensity = 0.4 + (density * 0.6);
+          
+          // Color transitions from gray to white based on density
+          const grayValue = Math.floor(100 + (density * 155)); // 100-255 range
+          const dustColor = `rgb(${grayValue}, ${grayValue}, ${grayValue})`;
+          
           dustLanes.push({
             id: `dust-lane-${i}-${j}`,
-            position: [
-              Math.cos(spiralAngle) * distance,
-              (Math.random() - 0.5) * 1500,
-              Math.sin(spiralAngle) * distance
-            ] as [number, number, number],
+            position,
             size: 4000 + Math.random() * 3000,
-            color: '#8B4513',
-            opacity: 0.4,
-            density: 0.8
+            color: dustColor,
+            opacity: baseIntensity,
+            density: 0.6 + (density * 0.4) // 0.6 to 1.0 range
           });
         }
       }
+      
       
       for (let i = 0; i < 8; i++) {
         const angle = Math.random() * Math.PI * 2;
@@ -74,6 +109,7 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
           density: 1.0
         });
       }
+      
       
       for (let i = 0; i < 40; i++) {
         const angle = Math.random() * Math.PI * 2;
@@ -95,6 +131,7 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
     } else if (galaxy.galaxyType === 'globular') {
       console.log('Creating globular cluster 3D distributed material');
       
+      
       for (let i = 0; i < 30; i++) {
         const distance = Math.pow(Math.random(), 0.5) * 30000;
         const theta = Math.random() * Math.PI * 2;
@@ -113,6 +150,7 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
           density: 0.7
         });
       }
+      
       
       for (let i = 0; i < 3; i++) {
         const distance = Math.pow(Math.random(), 0.3) * 20000;
@@ -135,6 +173,7 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
     } else if (galaxy.galaxyType === 'elliptical') {
       console.log('Creating elliptical galaxy material distribution');
       
+      
       for (let i = 0; i < 25; i++) {
         const distance = Math.pow(Math.random(), 0.7) * 40000;
         const angle = Math.random() * Math.PI * 2;
@@ -153,6 +192,7 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
           density: 0.7
         });
       }
+      
       
       for (let i = 0; i < 4; i++) {
         const distance = Math.pow(Math.random(), 0.8) * 25000;
@@ -181,7 +221,7 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
     });
     
     return { dustLanes, starFormingRegions, cosmicDust };
-  }, [galaxy.galaxyType]);
+  }, [galaxy.galaxyType, galaxy.starSystems]);
 
   useFrame(() => {
     if (groupRef.current) {
