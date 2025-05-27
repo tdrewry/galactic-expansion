@@ -2,7 +2,7 @@
 import React from 'react';
 import { SpiralGalaxyDustLanes } from './dust-lanes/SpiralGalaxyDustLanes';
 import { GlobularGalaxyDustLanes } from './dust-lanes/GlobularGalaxyDustLanes';
-import { BarredGalaxyDustLanes } from './dust-lanes/BarredGalaxyDustLanes';
+import { EfficientBarredGalaxyDustLanes } from './dust-lanes/EfficientBarredGalaxyDustLanes';
 
 interface ParticleDustLanesProps {
   galaxy: any;
@@ -42,9 +42,9 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
   }
   
   if (isBarredSpiralGalaxy && showDustLanes) {
-    console.log(`Galaxy ${galaxy.seed}: Rendering barred spiral galaxy dust lanes with ${numParticles} particles`);
+    console.log(`Galaxy ${galaxy.seed}: Rendering efficient barred spiral galaxy dust lanes with ${numParticles} particles`);
     return (
-      <BarredGalaxyDustLanes
+      <EfficientBarredGalaxyDustLanes
         galaxy={galaxy}
         numParticles={numParticles}
         particleSize={particleSize}
