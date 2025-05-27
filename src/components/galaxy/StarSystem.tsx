@@ -9,6 +9,7 @@ import { StarCore } from './star-system/StarCore';
 import { StarGlow } from './star-system/StarGlow';
 import { StarSpikes } from './star-system/StarSpikes';
 import { SelectionRing } from './star-system/SelectionRing';
+import { ExploredHalo } from './star-system/ExploredHalo';
 
 interface StarSystemProps {
   system: StarSystemType;
@@ -23,6 +24,7 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
   const outerGlowRef = useRef<Mesh>(null);
   const spikesRef = useRef<Group>(null);
   const selectionRingRef = useRef<Mesh>(null);
+  const exploredHaloRef = useRef<Mesh>(null);
   
   const { color, glow } = useMemo(() => getStarColors(system.starType), [system.starType]);
   const { core, innerGlow, outerGlow, spikeLength } = useMemo(() => getStarSizes(system.starType), [system.starType]);
@@ -82,6 +84,7 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
       <StarGlow ref={innerGlowRef} size={innerGlow} color={color} opacity={0.8} segments={12} />
       <StarCore ref={coreRef} core={core} color={color} />
       <StarSpikes ref={spikesRef} core={core} spikeLength={spikeLength} color={color} />
+      <ExploredHalo ref={exploredHaloRef} outerGlow={outerGlow} isVisible={system.explored} />
       <SelectionRing ref={selectionRingRef} outerGlow={outerGlow} isVisible={isSelected} />
     </group>
   );

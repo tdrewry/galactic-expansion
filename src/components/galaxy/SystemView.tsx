@@ -6,14 +6,20 @@ interface SystemViewProps {
   system: StarSystem;
   selectedStar?: 'primary' | 'binary' | 'trinary';
   onBodySelect: (body: Planet | Moon | null) => void;
+  highlightedBodyId?: string | null;
 }
 
-export const SystemView: React.FC<SystemViewProps> = ({ system, selectedStar = 'primary', onBodySelect }) => {
+export const SystemView: React.FC<SystemViewProps> = ({ 
+  system, 
+  selectedStar = 'primary', 
+  onBodySelect,
+  highlightedBodyId = null
+}) => {
   const [selectedBody, setSelectedBody] = useState<Planet | Moon | null>(null);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
-  const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
+  const [lastPointerPos, setLastPointerPos] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
 
   console.log('SystemView rendering with system:', system.id, 'selectedStar:', selectedStar);
@@ -58,29 +64,28 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, selectedStar = '
     onBodySelect(body);
   };
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (e.button === 0) { // Left mouse button
-      setIsDragging(true);
-      setLastMousePos({ x: e.clientX, y: e.clientY });
-      e.preventDefault();
-    }
+  // Touch and mouse friendly pointer events
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    setIsDragging(true);
+    setLastPointerPos({ x: e.clientX, y: e.clientY });
+    e.preventDefault();
   }, []);
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (isDragging) {
-      const deltaX = e.clientX - lastMousePos.x;
-      const deltaY = e.clientY - lastMousePos.y;
+      const deltaX = e.clientX - lastPointerPos.x;
+      const deltaY = e.clientY - lastPointerPos.y;
       
       setPan(prev => ({
         x: prev.x + deltaX,
         y: prev.y + deltaY
       }));
       
-      setLastMousePos({ x: e.clientX, y: e.clientY });
+      setLastPointerPos({ x: e.clientX, y: e.clientY });
     }
-  }, [isDragging, lastMousePos]);
+  }, [isDragging, lastPointerPos]);
 
-  const handleMouseUp = useCallback(() => {
+  const handlePointerUp = useCallback(() => {
     setIsDragging(false);
   }, []);
 
@@ -151,6 +156,10 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, selectedStar = '
     transformOrigin: 'center center'
   };
 
+  const isBodyHighlighted = (bodyId: string) => {
+    return highlightedBodyId === bodyId;
+  };
+
   if (!currentStarData) {
     return (
       <div className="bg-gray-800 rounded-lg p-4">
@@ -176,12 +185,12 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, selectedStar = '
       {/* Elite Dangerous style system map */}
       <div 
         ref={containerRef}
-        className="relative bg-black overflow-hidden cursor-move"
+        className="relative bg-black overflow-hidden cursor-move touch-none"
         style={{ height: '400px' }}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerUp}
         onWheel={handleWheel}
         onWheelCapture={handleWheel}
       >
@@ -242,7 +251,8 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, selectedStar = '
               {/* Planet */}
               <div 
                 className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer hover:scale-125 transition-all duration-200 rounded-full border-2 ${
-                  selectedBody?.id === pos.planet.id ? 'border-green-400 shadow-lg' : 'border-transparent'
+                  selectedBody?.id === pos.planet.id ? 'border-green-400 shadow-lg' : 
+                  isBodyHighlighted(pos.planet.id) ? 'border-yellow-400 shadow-lg' : 'border-transparent'
                 }`}
                 style={{ 
                   left: pos.x, 
@@ -250,7 +260,8 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, selectedStar = '
                   backgroundColor: getPlanetColor(pos.planet.type),
                   width: '16px',
                   height: '16px',
-                  boxShadow: selectedBody?.id === pos.planet.id ? '0 0 15px rgba(34, 197, 94, 0.6)' : 'none'
+                  boxShadow: selectedBody?.id === pos.planet.id ? '0 0 15px rgba(34, 197, 94, 0.6)' : 
+                            isBodyHighlighted(pos.planet.id) ? '0 0 15px rgba(234, 179, 8, 0.6)' : 'none'
                 }}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -285,14 +296,16 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, selectedStar = '
                       <div
                         key={moon.id}
                         className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer hover:scale-150 transition-all duration-200 rounded-full border ${
-                          selectedBody?.id === moon.id ? 'border-green-400 bg-green-400' : 'border-gray-400 bg-gray-400'
+                          selectedBody?.id === moon.id ? 'border-green-400 bg-green-400' : 
+                          isBodyHighlighted(moon.id) ? 'border-yellow-400 bg-yellow-400' : 'border-gray-400 bg-gray-400'
                         }`}
                         style={{ 
                           left: moonX, 
                           top: moonY,
                           width: '6px',
                           height: '6px',
-                          boxShadow: selectedBody?.id === moon.id ? '0 0 10px rgba(34, 197, 94, 0.8)' : 'none'
+                          boxShadow: selectedBody?.id === moon.id ? '0 0 10px rgba(34, 197, 94, 0.8)' : 
+                                    isBodyHighlighted(moon.id) ? '0 0 10px rgba(234, 179, 8, 0.8)' : 'none'
                         }}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -314,8 +327,8 @@ export const SystemView: React.FC<SystemViewProps> = ({ system, selectedStar = '
         </div>
 
         <div className="absolute bottom-2 right-2 text-xs text-gray-500">
-          <div>Scroll: Zoom | Drag: Pan</div>
-          <div>Click celestial bodies for details</div>
+          <div>Pinch/Scroll: Zoom | Drag: Pan</div>
+          <div>Tap celestial bodies for details</div>
         </div>
       </div>
 
