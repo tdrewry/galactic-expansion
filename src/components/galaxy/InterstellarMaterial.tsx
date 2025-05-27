@@ -12,6 +12,15 @@ interface InterstellarMaterialProps {
   showDustLanes?: boolean;
   showStarFormingRegions?: boolean;
   showCosmicDust?: boolean;
+  dustLaneParticles?: number;
+  starFormingParticles?: number;
+  cosmicDustParticles?: number;
+  dustLaneOpacity?: number;
+  starFormingOpacity?: number;
+  cosmicDustOpacity?: number;
+  dustLaneColorIntensity?: number;
+  starFormingColorIntensity?: number;
+  cosmicDustColorIntensity?: number;
 }
 
 export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({ 
@@ -20,7 +29,16 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
   minimumVisibility = 0.1,
   showDustLanes = true,
   showStarFormingRegions = false,
-  showCosmicDust = false
+  showCosmicDust = false,
+  dustLaneParticles = 15000,
+  starFormingParticles = 12000,
+  cosmicDustParticles = 10000,
+  dustLaneOpacity = 0.4,
+  starFormingOpacity = 0.3,
+  cosmicDustOpacity = 0.4,
+  dustLaneColorIntensity = 1.0,
+  starFormingColorIntensity = 1.2,
+  cosmicDustColorIntensity = 0.8
 }) => {
   const groupRef = useRef<Group>(null);
   
@@ -32,9 +50,12 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
       {showDustLanes && (
         <ParticleDustLanes
           galaxy={galaxy}
-          numParticles={15000} // Increased from 5000
+          numParticles={dustLaneParticles}
           particleSize={100}
-          opacity={0.4}
+          opacity={dustLaneOpacity}
+          showDustLanes={showDustLanes}
+          showCosmicDust={showCosmicDust}
+          colorIntensity={dustLaneColorIntensity}
         />
       )}
     </group>

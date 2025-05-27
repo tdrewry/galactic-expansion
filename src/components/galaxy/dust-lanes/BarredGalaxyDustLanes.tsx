@@ -7,13 +7,15 @@ interface BarredGalaxyDustLanesProps {
   numParticles?: number;
   particleSize?: number;
   opacity?: number;
+  colorIntensity?: number;
 }
 
 export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
   galaxy,
   numParticles = 15000,
   particleSize = 100,
-  opacity = 0.4
+  opacity = 0.4,
+  colorIntensity = 1.0
 }) => {
   // Generate particle positions for barred galaxy with proper density distribution
   const { positions, colors, sizes } = useMemo(() => {
@@ -28,7 +30,7 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
       return seedValue / 233280;
     };
     
-    console.log(`Generating barred galaxy with pressure wave dynamics for galaxy ${galaxy.seed}`);
+    console.log(`Generating barred galaxy with pressure wave dynamics for galaxy ${galaxy.seed}, color intensity: ${colorIntensity}`);
     
     const galaxyRadius = 50000;
     const coreRadius = galaxyRadius * 0.15;  // Central feeding region
@@ -170,7 +172,7 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
       positionsArray[i3 + 1] = y;
       positionsArray[i3 + 2] = z;
       
-      // Enhanced colors based on particle type and density
+      // Enhanced colors based on particle type and density with colorIntensity applied
       const dustColor = new THREE.Color();
       
       if (particleType === 'central') {
@@ -178,14 +180,14 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
         dustColor.setHSL(
           0.05 + seededRandom() * 0.1,  // Orange to yellow
           0.9 + seededRandom() * 0.1,   // High saturation
-          0.8 + seededRandom() * 0.2    // Very bright
+          (0.8 + seededRandom() * 0.2) * colorIntensity    // Very bright with intensity
         );
       } else if (particleType === 'bar-core') {
         // Dense bar core - very bright, hot colors
         dustColor.setHSL(
           0.08 + seededRandom() * 0.06, // Orange-red
           0.95 + seededRandom() * 0.05, // Very high saturation
-          0.9 + seededRandom() * 0.1    // Very bright
+          (0.9 + seededRandom() * 0.1) * colorIntensity    // Very bright with intensity
         );
       } else if (particleType === 'bar-waves') {
         // Pressure waves - dimmer, cooler colors based on density
@@ -193,7 +195,7 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
         dustColor.setHSL(
           0.15 + seededRandom() * 0.15, // Yellow to cyan
           0.5 + seededRandom() * 0.3,   // Medium saturation
-          waveBrightness + seededRandom() * 0.2
+          (waveBrightness + seededRandom() * 0.2) * colorIntensity
         );
       } else {
         // Arm particles - bright, where star systems are
@@ -202,7 +204,7 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
         dustColor.setHSL(
           0.12 + seededRandom() * 0.12, // Yellow to cyan
           0.8 + seededRandom() * 0.2,   // High saturation
-          brightness + seededRandom() * 0.3
+          (brightness + seededRandom() * 0.3) * colorIntensity
         );
       }
       
@@ -236,7 +238,7 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
       colors: colorsArray,
       sizes: sizesArray
     };
-  }, [numParticles, particleSize, galaxy.seed]);
+  }, [numParticles, particleSize, galaxy.seed, colorIntensity]);
 
   return (
     <DustLaneBase
