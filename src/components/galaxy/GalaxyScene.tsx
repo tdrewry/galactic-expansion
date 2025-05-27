@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
@@ -6,7 +5,6 @@ import { Galaxy, StarSystem as StarSystemType } from '../../utils/galaxyGenerato
 import { StarSystem } from './StarSystem';
 import { Nebula } from './Nebula';
 import { InterstellarMaterial } from './InterstellarMaterial';
-import { GalaxyHaze } from './GalaxyHaze';
 import * as THREE from 'three';
 
 interface GalaxySceneProps {
@@ -83,9 +81,6 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
         saturation={0} 
         fade 
       />
-      
-      {/* Galaxy Haze - subtle volumetric effect */}
-      <GalaxyHaze galaxy={galaxy} intensity={0.5} color="#4488ff" />
       
       {/* Galactic Center */}
       <mesh position={[0, 0, 0]} onClick={handleBackgroundClick}>
