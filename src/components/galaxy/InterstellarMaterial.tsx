@@ -1,3 +1,4 @@
+
 import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Group } from 'three';
@@ -115,17 +116,29 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
         const angle = Math.random() * Math.PI * 2;
         const distance = Math.random() * 50000;
         
+        const position: [number, number, number] = [
+          Math.cos(angle) * distance,
+          (Math.random() - 0.5) * 3000,
+          Math.sin(angle) * distance
+        ];
+
+        // Calculate star density for cosmic dust
+        const density = calculateStarDensity(position);
+        
+        // Base intensity for cosmic dust (lower than dust lanes)
+        const baseIntensity = 0.2 + (density * 0.4);
+        
+        // Color transitions from darker gray to lighter gray based on density
+        const grayValue = Math.floor(80 + (density * 120)); // 80-200 range (darker than dust lanes)
+        const dustColor = `rgb(${grayValue}, ${grayValue}, ${grayValue})`;
+        
         cosmicDust.push({
           id: `cosmic-dust-${i}`,
-          position: [
-            Math.cos(angle) * distance,
-            (Math.random() - 0.5) * 3000,
-            Math.sin(angle) * distance
-          ] as [number, number, number],
+          position,
           size: 3000 + Math.random() * 2000,
-          color: '#696969',
-          opacity: 0.3,
-          density: 0.6
+          color: dustColor,
+          opacity: baseIntensity,
+          density: 0.5 + (density * 0.3) // 0.5 to 0.8 range
         });
       }
     } else if (galaxy.galaxyType === 'globular') {
@@ -141,13 +154,19 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
         const y = distance * Math.sin(phi) * Math.sin(theta);
         const z = distance * Math.cos(phi);
         
+        const position: [number, number, number] = [x, y, z];
+        const density = calculateStarDensity(position);
+        const baseIntensity = 0.2 + (density * 0.4);
+        const grayValue = Math.floor(80 + (density * 120));
+        const dustColor = `rgb(${grayValue}, ${grayValue}, ${grayValue})`;
+        
         cosmicDust.push({
           id: `globular-dust-${i}`,
-          position: [x, y, z] as [number, number, number],
+          position,
           size: 3500 + Math.random() * 2500,
-          color: '#4A4A4A',
-          opacity: 0.4,
-          density: 0.7
+          color: dustColor,
+          opacity: baseIntensity,
+          density: 0.5 + (density * 0.3)
         });
       }
       
@@ -179,17 +198,24 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
         const angle = Math.random() * Math.PI * 2;
         const height = (Math.random() - 0.5) * distance * 0.3;
         
+        const position: [number, number, number] = [
+          distance * Math.cos(angle),
+          height,
+          distance * Math.sin(angle) * 0.6
+        ];
+
+        const density = calculateStarDensity(position);
+        const baseIntensity = 0.2 + (density * 0.4);
+        const grayValue = Math.floor(80 + (density * 120));
+        const dustColor = `rgb(${grayValue}, ${grayValue}, ${grayValue})`;
+        
         cosmicDust.push({
           id: `elliptical-dust-${i}`,
-          position: [
-            distance * Math.cos(angle),
-            height,
-            distance * Math.sin(angle) * 0.6
-          ] as [number, number, number],
+          position,
           size: 3200 + Math.random() * 2300,
-          color: '#5A5A5A',
-          opacity: 0.4,
-          density: 0.7
+          color: dustColor,
+          opacity: baseIntensity,
+          density: 0.5 + (density * 0.3)
         });
       }
       
