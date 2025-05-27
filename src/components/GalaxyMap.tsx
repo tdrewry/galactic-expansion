@@ -14,6 +14,9 @@ interface GalaxyMapProps {
   trinaryFrequency?: number;
   raymarchingSamples?: number;
   minimumVisibility?: number;
+  showDustLanes?: boolean;
+  showStarFormingRegions?: boolean;
+  showCosmicDust?: boolean;
   onSystemSelect?: (system: StarSystem) => void;
   selectedSystem?: StarSystem | null;
   selectedStar?: 'primary' | 'binary' | 'trinary';
@@ -28,6 +31,9 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
   trinaryFrequency = 0.03,
   raymarchingSamples = 8,
   minimumVisibility = 0.1,
+  showDustLanes = true,
+  showStarFormingRegions = true,
+  showCosmicDust = true,
   onSystemSelect,
   selectedSystem: propSelectedSystem = null,
   selectedStar: propSelectedStar = 'primary',
@@ -83,6 +89,9 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
           onSystemSelect={handleSystemSelect}
           raymarchingSamples={raymarchingSamples}
           minimumVisibility={minimumVisibility}
+          showDustLanes={showDustLanes}
+          showStarFormingRegions={showStarFormingRegions}
+          showCosmicDust={showCosmicDust}
         />
       </Canvas>
       
