@@ -101,9 +101,18 @@ export function generateGalaxy(
   const starSystems: StarSystem[] = [];
   const nebulae: Nebula[] = [];
   
-  // Choose galaxy type - only spiral and globular for now
-  const galaxyTypes: Galaxy['galaxyType'][] = ['spiral', 'globular'];
-  const galaxyType = rng.choice(galaxyTypes);
+  // Choose galaxy type - keep all types for seed consistency but substitute unsupported ones
+  const galaxyTypes: Galaxy['galaxyType'][] = ['spiral', 'barred-spiral', 'globular', 'elliptical'];
+  let galaxyType = rng.choice(galaxyTypes);
+  
+  // Substitute unsupported galaxy types
+  if (galaxyType === 'barred-spiral') {
+    console.log(`Galaxy ${seed}: Substituting barred-spiral with spiral`);
+    galaxyType = 'spiral';
+  } else if (galaxyType === 'elliptical') {
+    console.log(`Galaxy ${seed}: Substituting elliptical with globular`);
+    galaxyType = 'globular';
+  }
 
   // Generate star systems based on galaxy type
   
