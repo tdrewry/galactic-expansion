@@ -55,7 +55,7 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
     
     // Galaxy age affects spiral characteristics
     const galaxyAge = seededRandom(); // 0 = young, 1 = old
-    const spiralTightness = 0.8 + galaxyAge * 0.7; // How tightly wound the arms are
+    const spiralTightness = 1.2 + galaxyAge * 0.8; // How tightly wound the arms are
     
     console.log(`Bar length: ${barLength}, Bar width: ${barWidth}, Bar angle: ${(barAngle * 180 / Math.PI).toFixed(1)}°`);
     
@@ -81,8 +81,9 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
         // Spiral arm particles - two arms extending from bar ends
         const armIndex = Math.floor(seededRandom() * 2); // 0 or 1 for two arms
         
-        // Distance along the spiral arm (0 to 1, biased toward outer regions)
-        const armDistanceRatio = Math.pow(seededRandom(), 0.6);
+        // Distance along the spiral arm (0 to 1, with proper density falloff)
+        // Use power distribution to reduce density at outer edges
+        const armDistanceRatio = Math.pow(seededRandom(), 1.5); // This creates density falloff
         const armDistance = armDistanceRatio * galaxyRadius * 0.8;
         
         // Starting point: end of the bar
@@ -90,14 +91,15 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
         const barEndX = (barLength / 2) * barEndSign * Math.cos(barAngle);
         const barEndZ = (barLength / 2) * barEndSign * Math.sin(barAngle);
         
-        // Spiral angle calculation
-        // Each arm curves away from the bar in opposite directions
-        const baseAngle = barAngle + (armIndex === 0 ? 0 : Math.PI);
-        const spiralCurve = armDistanceRatio * Math.PI * spiralTightness * (armIndex === 0 ? 1 : -1);
-        const finalAngle = baseAngle + spiralCurve;
+        // Spiral angle calculation - BOTH ARMS ROTATE IN SAME DIRECTION
+        const baseAngle = barAngle + (armIndex === 0 ? 0 : Math.PI); // 180° apart
+        // Both arms curve in the same direction (positive spiralCurve)
+        const spiralCurve = armDistanceRatio * Math.PI * spiralTightness;
+        const finalAngle = baseAngle + spiralCurve; // Same direction for both arms
         
-        // Add some width to the spiral arms
-        const armWidth = (1500 + seededRandom() * 2000) * (1.2 - armDistanceRatio * 0.3);
+        // Add some width to the spiral arms (wider at base, narrower at ends)
+        const baseArmWidth = 2500 + seededRandom() * 1500;
+        const armWidth = baseArmWidth * (1.0 - armDistanceRatio * 0.6); // Narrower at ends
         const widthOffset = (seededRandom() - 0.5) * armWidth;
         const widthAngle = finalAngle + Math.PI / 2; // Perpendicular to arm direction
         
@@ -133,8 +135,8 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
       colorsArray[i3 + 1] = dustColor.g;
       colorsArray[i3 + 2] = dustColor.b;
       
-      // Particle sizes - larger particles in the bar
-      const sizeMultiplier = isBarParticle ? 1.4 : 1.0;
+      // Particle sizes - larger particles in the bar, smaller at arm ends
+      const sizeMultiplier = isBarParticle ? 1.4 : (1.0 - armDistanceRatio * 0.3);
       sizesArray[i] = particleSize * sizeMultiplier * (0.4 + seededRandom() * 1.2);
     }
     
