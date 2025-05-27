@@ -2,6 +2,7 @@
 import React, { forwardRef } from 'react';
 import { Group } from 'three';
 import { AdditiveBlending } from 'three';
+import { Billboard } from '@react-three/drei';
 
 interface StarSpikesProps {
   core: number;
@@ -15,7 +16,7 @@ export const StarSpikes = forwardRef<Group, StarSpikesProps>(({
   color 
 }, ref) => {
   return (
-    <group ref={ref}>
+    <Billboard ref={ref}>
       {/* Main cross spikes */}
       <mesh>
         <planeGeometry args={[core * 0.1, spikeLength]} />
@@ -61,7 +62,7 @@ export const StarSpikes = forwardRef<Group, StarSpikesProps>(({
           depthWrite={false}
         />
       </mesh>
-    </group>
+    </Billboard>
   );
 });
 
