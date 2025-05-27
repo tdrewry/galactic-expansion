@@ -13,7 +13,7 @@ interface GalaxyHazeProps {
 
 export const GalaxyHaze: React.FC<GalaxyHazeProps> = ({ 
   galaxy, 
-  intensity = 0.3,
+  intensity = 0.6,
   color = '#4488ff'
 }) => {
   const materialRef = useRef<ShaderMaterial>(null);
@@ -23,6 +23,7 @@ export const GalaxyHaze: React.FC<GalaxyHazeProps> = ({
     varying vec3 vWorldPosition;
     varying vec3 vNormal;
     varying vec2 vUv;
+    varying vec3 vViewPosition;
     
     void main() {
       vUv = uv;
@@ -31,7 +32,10 @@ export const GalaxyHaze: React.FC<GalaxyHazeProps> = ({
       vec4 worldPos = modelMatrix * vec4(position, 1.0);
       vWorldPosition = worldPos.xyz;
       
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+      vViewPosition = -mvPosition.xyz;
+      
+      gl_Position = projectionMatrix * mvPosition;
     }
   `;
 
@@ -39,15 +43,16 @@ export const GalaxyHaze: React.FC<GalaxyHazeProps> = ({
     uniform float time;
     uniform vec3 color;
     uniform float intensity;
-    uniform vec3 starPositions[${Math.min(galaxy.starSystems.length, 100)}];
+    uniform vec3 starPositions[${Math.min(galaxy.starSystems.length, 50)}];
     uniform int numStars;
     uniform vec3 uCameraPos;
     
     varying vec3 vWorldPosition;
     varying vec3 vNormal;
     varying vec2 vUv;
+    varying vec3 vViewPosition;
 
-    // Simple noise function
+    // Improved noise function
     float noise(vec3 p) {
       return fract(sin(dot(p, vec3(12.9898, 78.233, 45.164))) * 43758.5453);
     }
@@ -56,31 +61,32 @@ export const GalaxyHaze: React.FC<GalaxyHazeProps> = ({
       float f = 0.0;
       f += 0.5000 * noise(p); p *= 2.01;
       f += 0.2500 * noise(p); p *= 2.02;
-      f += 0.1250 * noise(p);
-      return f / 0.875;
+      f += 0.1250 * noise(p); p *= 2.03;
+      f += 0.0625 * noise(p);
+      return f / 0.9375;
     }
 
     float calculateStarDensity(vec3 pos) {
       float density = 0.0;
       
-      // Sample a subset of stars for performance
-      for (int i = 0; i < 100; i++) {
+      // Sample stars for density calculation
+      for (int i = 0; i < 50; i++) {
         if (i >= numStars) break;
         
         vec3 starPos = starPositions[i];
         float dist = distance(pos, starPos);
         
-        // Influence decreases with distance
-        float influence = 1.0 / (1.0 + dist * 0.0001);
+        // Stronger influence for closer stars
+        float influence = 1000.0 / (1.0 + dist * 0.001);
         density += influence;
       }
       
-      // Galactic center boost
+      // Strong galactic center influence
       float centerDist = length(pos);
-      float centerInfluence = 1.0 / (1.0 + centerDist * 0.00005);
-      density += centerInfluence * 2.0;
+      float centerInfluence = 5000.0 / (1.0 + centerDist * 0.0001);
+      density += centerInfluence;
       
-      return density;
+      return density * 0.001; // Scale down the result
     }
 
     void main() {
@@ -90,38 +96,47 @@ export const GalaxyHaze: React.FC<GalaxyHazeProps> = ({
       // Calculate star density at this position
       float starDensity = calculateStarDensity(vWorldPosition);
       
-      // Add some animated noise for visual interest
-      vec3 animatedPos = vWorldPosition + vec3(time * 0.001, time * 0.0005, time * 0.0008);
-      float noiseValue = fbm(animatedPos * 0.00001) * 0.3;
+      // Add animated noise for visual variation
+      vec3 animatedPos = vWorldPosition + vec3(time * 0.002, time * 0.001, time * 0.0015);
+      float noiseValue = fbm(animatedPos * 0.0001) * 0.5;
       
-      // Distance from galactic center
+      // Distance from galactic center for falloff
       float centerDist = length(vWorldPosition);
-      float galacticFalloff = 1.0 - smoothstep(30000.0, 80000.0, centerDist);
+      float galacticFalloff = 1.0 - smoothstep(20000.0, 100000.0, centerDist);
       
-      // View angle effect - more haze when looking through the galaxy
-      float viewDot = abs(dot(normalize(vWorldPosition), rayDir));
-      float viewEffect = 1.0 + viewDot * 0.5;
+      // View-dependent effects - more haze when looking through the galaxy
+      float viewDistance = length(vViewPosition);
+      float viewEffect = 1.0 + (1.0 / (1.0 + viewDistance * 0.00001));
       
-      // Combine all factors
-      float finalDensity = (starDensity * 0.1 + noiseValue) * galacticFalloff * viewEffect * intensity;
+      // Fresnel effect for edge highlighting
+      float fresnel = 1.0 - abs(dot(normalize(vViewPosition), vNormal));
+      fresnel = pow(fresnel, 2.0);
       
-      // Color variation based on density
-      vec3 finalColor = mix(color * 0.5, color, starDensity * 0.1);
+      // Combine all factors for final density
+      float baseDensity = (starDensity + noiseValue * 0.3) * galacticFalloff;
+      float finalDensity = (baseDensity + fresnel * 0.2) * viewEffect * intensity;
       
-      float alpha = clamp(finalDensity, 0.0, 0.8);
+      // Color variation based on density and position
+      vec3 centerColor = vec3(1.0, 0.8, 0.4); // Warm center
+      vec3 edgeColor = color; // Cool edges
+      float colorMix = clamp(starDensity * 2.0, 0.0, 1.0);
+      vec3 finalColor = mix(edgeColor, centerColor, colorMix);
+      
+      // Ensure visible alpha
+      float alpha = clamp(finalDensity, 0.0, 0.9);
       
       gl_FragColor = vec4(finalColor, alpha);
     }
   `;
 
   const uniforms = useMemo(() => {
-    // Take up to 100 star positions for density calculation
-    const starPositions = galaxy.starSystems.slice(0, 100).map(system => 
+    // Take up to 50 star positions for better performance
+    const starPositions = galaxy.starSystems.slice(0, 50).map(system => 
       new Vector3(system.position[0], system.position[1], system.position[2])
     );
     
-    // Pad array to 100 elements
-    while (starPositions.length < 100) {
+    // Pad array to 50 elements
+    while (starPositions.length < 50) {
       starPositions.push(new Vector3(0, 0, 0));
     }
 
@@ -130,7 +145,7 @@ export const GalaxyHaze: React.FC<GalaxyHazeProps> = ({
       color: { value: new THREE.Color(color) },
       intensity: { value: intensity },
       starPositions: { value: starPositions },
-      numStars: { value: Math.min(galaxy.starSystems.length, 100) },
+      numStars: { value: Math.min(galaxy.starSystems.length, 50) },
       uCameraPos: { value: new Vector3() }
     };
   }, [galaxy, color, intensity]);
@@ -142,11 +157,11 @@ export const GalaxyHaze: React.FC<GalaxyHazeProps> = ({
     }
   });
 
-  console.log('GalaxyHaze created with', galaxy.starSystems.length, 'stars');
+  console.log('GalaxyHaze rendering with intensity:', intensity, 'and', Math.min(galaxy.starSystems.length, 50), 'stars');
 
   return (
-    <mesh ref={meshRef} position={[0, 0, 0]}>
-      <sphereGeometry args={[90000, 32, 24]} />
+    <mesh ref={meshRef} position={[0, 0, 0]} renderOrder={-1}>
+      <sphereGeometry args={[120000, 64, 32]} />
       <shaderMaterial
         ref={materialRef}
         vertexShader={vertexShader}
@@ -156,7 +171,7 @@ export const GalaxyHaze: React.FC<GalaxyHazeProps> = ({
         blending={THREE.AdditiveBlending}
         depthWrite={false}
         depthTest={true}
-        side={THREE.BackSide}
+        side={THREE.DoubleSide}
       />
     </mesh>
   );
