@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { BarredGalaxyDustLanes } from './dust-lanes/BarredGalaxyDustLanes';
 import { SpiralGalaxyDustLanes } from './dust-lanes/SpiralGalaxyDustLanes';
+import { GlobularGalaxyDustLanes } from './dust-lanes/GlobularGalaxyDustLanes';
 
 interface ParticleDustLanesProps {
   galaxy: any;
@@ -12,25 +12,13 @@ interface ParticleDustLanesProps {
 
 export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
   galaxy,
-  numParticles = 15000, // Increased from 5000 to 15000
+  numParticles = 15000,
   particleSize = 100,
   opacity = 0.4
 }) => {
   // Check galaxy type and render appropriate dust lanes
-  const isBarredGalaxy = galaxy.galaxyType === 'barred-spiral';
   const isSpiralGalaxy = galaxy.galaxyType === 'spiral';
-  
-  if (isBarredGalaxy) {
-    console.log(`Galaxy ${galaxy.seed}: Rendering barred galaxy dust lanes`);
-    return (
-      <BarredGalaxyDustLanes
-        galaxy={galaxy}
-        numParticles={numParticles}
-        particleSize={particleSize}
-        opacity={opacity}
-      />
-    );
-  }
+  const isGlobularGalaxy = galaxy.galaxyType === 'globular';
   
   if (isSpiralGalaxy) {
     console.log(`Galaxy ${galaxy.seed}: Rendering spiral galaxy dust lanes`);
@@ -44,7 +32,19 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
     );
   }
   
-  // For other galaxy types (elliptical, globular), no dust lanes
+  if (isGlobularGalaxy) {
+    console.log(`Galaxy ${galaxy.seed}: Rendering globular galaxy dust lanes`);
+    return (
+      <GlobularGalaxyDustLanes
+        galaxy={galaxy}
+        numParticles={numParticles}
+        particleSize={particleSize}
+        opacity={opacity}
+      />
+    );
+  }
+  
+  // No dust lanes for unsupported galaxy types
   console.log(`Galaxy ${galaxy.seed}: No dust lanes for galaxy type ${galaxy.galaxyType}`);
   return null;
 };

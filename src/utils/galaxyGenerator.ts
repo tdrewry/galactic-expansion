@@ -101,8 +101,8 @@ export function generateGalaxy(
   const starSystems: StarSystem[] = [];
   const nebulae: Nebula[] = [];
   
-  // Choose galaxy type with proper typing
-  const galaxyTypes: Galaxy['galaxyType'][] = ['spiral', 'barred-spiral', 'globular', 'elliptical'];
+  // Choose galaxy type - only spiral and globular for now
+  const galaxyTypes: Galaxy['galaxyType'][] = ['spiral', 'globular'];
   const galaxyType = rng.choice(galaxyTypes);
 
   // Generate star systems based on galaxy type
@@ -120,14 +120,8 @@ export function generateGalaxy(
       case 'spiral':
         position = generateSpiralPosition(rng, i, numSystems, galaxyRadius);
         break;
-      case 'barred-spiral':
-        position = generateBarredSpiralPosition(rng, i, numSystems, galaxyRadius);
-        break;
       case 'globular':
         position = generateGlobularPosition(rng, galaxyRadius);
-        break;
-      case 'elliptical':
-        position = generateEllipticalPosition(rng, galaxyRadius);
         break;
       default:
         position = generateSpiralPosition(rng, i, numSystems, galaxyRadius);
