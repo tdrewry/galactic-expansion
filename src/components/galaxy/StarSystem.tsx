@@ -24,13 +24,13 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
   const spikesRef = useRef<Group>(null);
   const selectionRingRef = useRef<Mesh>(null);
   
-  const { color, glowColor } = useMemo(() => getStarColors(system.starType), [system.starType]);
+  const { color, glow } = useMemo(() => getStarColors(system.starType), [system.starType]);
   const { core, innerGlow, outerGlow, spikeLength } = useMemo(() => getStarSizes(system.starType), [system.starType]);
 
   // Twinkling animation
   useFrame((state) => {
     if (coreRef.current && innerGlowRef.current && outerGlowRef.current) {
-      const systemIdNum = typeof system.id === 'string' ? parseInt(system.id.replace(/\D/g, ''), 10) || 0 : system.id;
+      const systemIdNum = typeof system.id === 'string' ? parseInt(system.id.replace(/\D/g, ''), 10) || 0 : Number(system.id);
       const twinkle = 0.8 + Math.sin(state.clock.elapsedTime * 3 + systemIdNum * 0.1) * 0.2;
       
       (coreRef.current.material as MeshBasicMaterial).opacity = twinkle;
@@ -78,7 +78,7 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
         <meshBasicMaterial transparent opacity={0} />
       </mesh>
 
-      <StarGlow ref={outerGlowRef} size={outerGlow} color={glowColor} opacity={0.4} segments={16} />
+      <StarGlow ref={outerGlowRef} size={outerGlow} color={glow} opacity={0.4} segments={16} />
       <StarGlow ref={innerGlowRef} size={innerGlow} color={color} opacity={0.8} segments={12} />
       <StarCore ref={coreRef} core={core} color={color} />
       <StarSpikes ref={spikesRef} core={core} spikeLength={spikeLength} color={color} />
