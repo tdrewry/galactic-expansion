@@ -1,3 +1,4 @@
+
 import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { ShaderMaterial, Vector3 } from 'three';
@@ -37,7 +38,7 @@ export const GalaxyHaze: React.FC<GalaxyHazeProps> = ({
     uniform float time;
     uniform vec3 color;
     uniform float intensity;
-    uniform vec3 cameraPosition;
+    uniform vec3 uniformHazeCameraPosition;
     
     varying vec3 vWorldPosition;
     varying vec3 vViewDirection;
@@ -75,17 +76,17 @@ export const GalaxyHaze: React.FC<GalaxyHazeProps> = ({
     time: { value: 0.0 },
     color: { value: new THREE.Color(color) },
     intensity: { value: intensity },
-    cameraPosition: { value: new Vector3() }
+    uniformHazeCameraPosition: { value: new Vector3() }
   }), [color, intensity]);
 
   useFrame((state) => {
     if (materialRef.current) {
       materialRef.current.uniforms.time.value = state.clock.elapsedTime;
-      materialRef.current.uniforms.cameraPosition.value.copy(state.camera.position);
+      materialRef.current.uniforms.uniformHazeCameraPosition.value.copy(state.camera.position);
     }
   });
 
-  console.log('GalaxyHaze rendering with corrected shader uniforms');
+  console.log('GalaxyHaze rendering with renamed camera position uniform');
 
   return (
     <mesh ref={meshRef} position={[0, 0, 0]}>
