@@ -74,12 +74,12 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
       <pointLight position={[0, 0, 0]} intensity={3} color="#ffaa00" />
       
       {/* Galaxy Haze - renders first with higher intensity */}
-      <GalaxyHaze galaxy={galaxy} intensity={0.8} color="#6699ff" />
+      <GalaxyHaze galaxy={galaxy} intensity={1.2} color="#4488ff" />
       
-      {/* Galactic Center */}
+      {/* Galactic Center - made less opaque */}
       <mesh position={[0, 0, 0]} onClick={handleBackgroundClick}>
         <sphereGeometry args={[800, 32, 24]} />
-        <meshBasicMaterial color="#ffaa00" />
+        <meshBasicMaterial color="#ffaa00" transparent opacity={0.8} />
       </mesh>
       
       {/* Interstellar Material - renders behind stars */}
