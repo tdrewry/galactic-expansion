@@ -46,7 +46,7 @@ export const VolumetricCloud3D: React.FC<VolumetricCloud3DProps> = ({
     uniform float opacity;
     uniform float density;
     uniform float size;
-    uniform vec3 cameraPosition;
+    uniform vec3 uCameraPos;
     
     varying vec3 vWorldPosition;
     varying vec3 vLocalPosition;
@@ -135,7 +135,7 @@ export const VolumetricCloud3D: React.FC<VolumetricCloud3DProps> = ({
 
     void main() {
       // Ray setup
-      vec3 rayOrigin = cameraPosition;
+      vec3 rayOrigin = uCameraPos;
       vec3 rayDir = normalize(vWorldPosition - rayOrigin);
       
       // Sphere intersection
@@ -216,13 +216,13 @@ export const VolumetricCloud3D: React.FC<VolumetricCloud3DProps> = ({
     opacity: { value: opacity },
     density: { value: density },
     size: { value: size },
-    cameraPosition: { value: new Vector3() }
+    uCameraPos: { value: new Vector3() }
   }), [color, opacity, density, size]);
 
   useFrame((state) => {
     if (materialRef.current) {
       materialRef.current.uniforms.time.value = state.clock.elapsedTime;
-      materialRef.current.uniforms.cameraPosition.value.copy(state.camera.position);
+      materialRef.current.uniforms.uCameraPos.value.copy(state.camera.position);
     }
   });
 
