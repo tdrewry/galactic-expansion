@@ -41,8 +41,8 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
     for (let i = 0; i < numParticles; i++) {
       const i3 = i * 3;
       
-      // 30% of particles form the central bar (same as star generation), 70% form the spiral arms
-      const isBarParticle = seededRandom() < 0.3;
+      // TRIPLED density: 90% of particles form the central bar, 10% form the spiral arms
+      const isBarParticle = seededRandom() < 0.9;
       
       let x, z, y;
       let armDistanceRatio = 0;
@@ -123,7 +123,7 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
       sizesArray[i] = baseSize * sizeMultiplier * (0.8 + seededRandom() * 1.5);
     }
     
-    console.log(`Generated ${numParticles} particles for barred galaxy with aligned bar`);
+    console.log(`Generated ${numParticles} particles for barred galaxy with tripled bar density`);
     
     return {
       positions: positionsArray,
