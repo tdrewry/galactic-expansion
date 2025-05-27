@@ -1,9 +1,11 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
 import { Settings } from 'lucide-react';
 
@@ -29,6 +31,9 @@ interface GalaxySettingsProps {
     showStarFormingRegions?: boolean;
     showCosmicDust?: boolean;
     appTitle?: string;
+    dustLaneParticles?: number;
+    starFormingParticles?: number;
+    cosmicDustParticles?: number;
   }) => void;
 }
 
@@ -55,7 +60,10 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
     showDustLanes,
     showStarFormingRegions,
     showCosmicDust,
-    appTitle
+    appTitle,
+    dustLaneParticles: 15000,
+    starFormingParticles: 12000,
+    cosmicDustParticles: 10000
   });
 
   const handleApply = () => {
@@ -73,7 +81,10 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
       showDustLanes: true,
       showStarFormingRegions: false,
       showCosmicDust: true,
-      appTitle: 'Stardust Voyager'
+      appTitle: 'Stardust Voyager',
+      dustLaneParticles: 15000,
+      starFormingParticles: 12000,
+      cosmicDustParticles: 10000
     };
     setLocalSettings(defaultSettings);
     onSettingsChange(defaultSettings);
@@ -87,215 +98,13 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
           Settings
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-96">
-        <SheetHeader>
+      <SheetContent side="right" className="w-96 flex flex-col">
+        <SheetHeader className="flex-shrink-0 pb-4 border-b">
           <SheetTitle>Galaxy Generation Settings</SheetTitle>
           <SheetDescription>
-            Configure parameters for procedural galaxy generation and cloud rendering
+            Configure parameters for procedural galaxy generation
           </SheetDescription>
-        </SheetHeader>
-        
-        <div className="space-y-6 mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Application</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="app-title">Application Title</Label>
-                <Input
-                  id="app-title"
-                  type="text"
-                  value={localSettings.appTitle}
-                  onChange={(e) => setLocalSettings(prev => ({
-                    ...prev,
-                    appTitle: e.target.value
-                  }))}
-                  placeholder="Enter application title"
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Visual Features</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="dust-lanes">Dust Lanes</Label>
-                <Switch
-                  id="dust-lanes"
-                  checked={localSettings.showDustLanes}
-                  onCheckedChange={(checked) => setLocalSettings(prev => ({
-                    ...prev,
-                    showDustLanes: checked
-                  }))}
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <Label htmlFor="star-forming">Star-forming Regions (Nebulae)</Label>
-                <Switch
-                  id="star-forming"
-                  checked={localSettings.showStarFormingRegions}
-                  onCheckedChange={(checked) => setLocalSettings(prev => ({
-                    ...prev,
-                    showStarFormingRegions: checked
-                  }))}
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <Label htmlFor="cosmic-dust">Cosmic Dust</Label>
-                <Switch
-                  id="cosmic-dust"
-                  checked={localSettings.showCosmicDust}
-                  onCheckedChange={(checked) => setLocalSettings(prev => ({
-                    ...prev,
-                    showCosmicDust: checked
-                  }))}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Galaxy Size</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="systems">Star Systems</Label>
-                <Input
-                  id="systems"
-                  type="number"
-                  value={localSettings.numSystems}
-                  onChange={(e) => setLocalSettings(prev => ({
-                    ...prev,
-                    numSystems: parseInt(e.target.value) || 1000
-                  }))}
-                  min="100"
-                  max="5000"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="nebulae">Nebulae</Label>
-                <Input
-                  id="nebulae"
-                  type="number"
-                  value={localSettings.numNebulae}
-                  onChange={(e) => setLocalSettings(prev => ({
-                    ...prev,
-                    numNebulae: parseInt(e.target.value) || 50
-                  }))}
-                  min="10"
-                  max="200"
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Star System Types</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="binary">Binary System Frequency</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="binary"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max="1"
-                    value={localSettings.binaryFrequency}
-                    onChange={(e) => setLocalSettings(prev => ({
-                      ...prev,
-                      binaryFrequency: parseFloat(e.target.value) || 0
-                    }))}
-                  />
-                  <span className="text-sm text-gray-400">
-                    ({Math.round(localSettings.binaryFrequency * 100)}%)
-                  </span>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="trinary">Trinary System Frequency</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="trinary"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max="1"
-                    value={localSettings.trinaryFrequency}
-                    onChange={(e) => setLocalSettings(prev => ({
-                      ...prev,
-                      trinaryFrequency: parseFloat(e.target.value) || 0
-                    }))}
-                  />
-                  <span className="text-sm text-gray-400">
-                    ({Math.round(localSettings.trinaryFrequency * 100)}%)
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Cloud Rendering</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="raymarching">Raymarching Samples</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="raymarching"
-                    type="number"
-                    min="4"
-                    max="32"
-                    value={localSettings.raymarchingSamples}
-                    onChange={(e) => setLocalSettings(prev => ({
-                      ...prev,
-                      raymarchingSamples: parseInt(e.target.value) || 8
-                    }))}
-                  />
-                  <span className="text-sm text-gray-400">
-                    (Higher = better quality, lower performance)
-                  </span>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="visibility">Minimum Visibility</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="visibility"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max="1"
-                    value={localSettings.minimumVisibility}
-                    onChange={(e) => setLocalSettings(prev => ({
-                      ...prev,
-                      minimumVisibility: parseFloat(e.target.value) || 0
-                    }))}
-                  />
-                  <span className="text-sm text-gray-400">
-                    (0 = natural, &gt;0 = debug mode)
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="flex gap-2">
+          <div className="flex gap-2 pt-4">
             <Button onClick={handleApply} className="flex-1">
               Apply Settings
             </Button>
@@ -303,7 +112,219 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
               Reset
             </Button>
           </div>
-        </div>
+        </SheetHeader>
+        
+        <ScrollArea className="flex-1 -mx-6 px-6">
+          <div className="space-y-6 py-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Application</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="app-title">Application Title</Label>
+                  <Input
+                    id="app-title"
+                    type="text"
+                    value={localSettings.appTitle}
+                    onChange={(e) => setLocalSettings(prev => ({
+                      ...prev,
+                      appTitle: e.target.value
+                    }))}
+                    placeholder="Enter application title"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Visual Features</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="dust-lanes">Dust Lanes</Label>
+                  <Switch
+                    id="dust-lanes"
+                    checked={localSettings.showDustLanes}
+                    onCheckedChange={(checked) => setLocalSettings(prev => ({
+                      ...prev,
+                      showDustLanes: checked
+                    }))}
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="star-forming">Star-forming Regions (Nebulae)</Label>
+                  <Switch
+                    id="star-forming"
+                    checked={localSettings.showStarFormingRegions}
+                    onCheckedChange={(checked) => setLocalSettings(prev => ({
+                      ...prev,
+                      showStarFormingRegions: checked
+                    }))}
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="cosmic-dust">Cosmic Dust</Label>
+                  <Switch
+                    id="cosmic-dust"
+                    checked={localSettings.showCosmicDust}
+                    onCheckedChange={(checked) => setLocalSettings(prev => ({
+                      ...prev,
+                      showCosmicDust: checked
+                    }))}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Galaxy Size</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="systems">Star Systems</Label>
+                  <Input
+                    id="systems"
+                    type="number"
+                    value={localSettings.numSystems}
+                    onChange={(e) => setLocalSettings(prev => ({
+                      ...prev,
+                      numSystems: parseInt(e.target.value) || 1000
+                    }))}
+                    min="100"
+                    max="5000"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="nebulae">Nebulae</Label>
+                  <Input
+                    id="nebulae"
+                    type="number"
+                    value={localSettings.numNebulae}
+                    onChange={(e) => setLocalSettings(prev => ({
+                      ...prev,
+                      numNebulae: parseInt(e.target.value) || 50
+                    }))}
+                    min="10"
+                    max="200"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Particle System Detail</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="dust-lane-particles">Dust Lane Particles</Label>
+                  <Input
+                    id="dust-lane-particles"
+                    type="number"
+                    value={localSettings.dustLaneParticles}
+                    onChange={(e) => setLocalSettings(prev => ({
+                      ...prev,
+                      dustLaneParticles: parseInt(e.target.value) || 15000
+                    }))}
+                    min="1000"
+                    max="50000"
+                    step="1000"
+                  />
+                  <span className="text-xs text-gray-400">For spiral galaxy dust lanes</span>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="star-forming-particles">Star-forming Region Particles</Label>
+                  <Input
+                    id="star-forming-particles"
+                    type="number"
+                    value={localSettings.starFormingParticles}
+                    onChange={(e) => setLocalSettings(prev => ({
+                      ...prev,
+                      starFormingParticles: parseInt(e.target.value) || 12000
+                    }))}
+                    min="1000"
+                    max="50000"
+                    step="1000"
+                  />
+                  <span className="text-xs text-gray-400">For nebula and star-forming regions</span>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="cosmic-dust-particles">Cosmic Dust Particles</Label>
+                  <Input
+                    id="cosmic-dust-particles"
+                    type="number"
+                    value={localSettings.cosmicDustParticles}
+                    onChange={(e) => setLocalSettings(prev => ({
+                      ...prev,
+                      cosmicDustParticles: parseInt(e.target.value) || 10000
+                    }))}
+                    min="1000"
+                    max="50000"
+                    step="1000"
+                  />
+                  <span className="text-xs text-gray-400">For globular galaxy cosmic dust</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Star System Types</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="binary">Binary System Frequency</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="binary"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="1"
+                      value={localSettings.binaryFrequency}
+                      onChange={(e) => setLocalSettings(prev => ({
+                        ...prev,
+                        binaryFrequency: parseFloat(e.target.value) || 0
+                      }))}
+                    />
+                    <span className="text-sm text-gray-400">
+                      ({Math.round(localSettings.binaryFrequency * 100)}%)
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="trinary">Trinary System Frequency</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="trinary"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="1"
+                      value={localSettings.trinaryFrequency}
+                      onChange={(e) => setLocalSettings(prev => ({
+                        ...prev,
+                        trinaryFrequency: parseFloat(e.target.value) || 0
+                      }))}
+                    />
+                    <span className="text-sm text-gray-400">
+                      ({Math.round(localSettings.trinaryFrequency * 100)}%)
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </ScrollArea>
       </SheetContent>
     </Sheet>
   );
