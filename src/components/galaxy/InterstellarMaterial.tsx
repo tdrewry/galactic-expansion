@@ -1,4 +1,3 @@
-
 import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Group } from 'three';
@@ -9,16 +8,21 @@ interface InterstellarMaterialProps {
   galaxy: Galaxy;
   raymarchingSamples?: number;
   minimumVisibility?: number;
+  showDustLanes?: boolean;
+  showStarFormingRegions?: boolean;
+  showCosmicDust?: boolean;
 }
 
 export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({ 
   galaxy, 
   raymarchingSamples = 8, 
-  minimumVisibility = 0.1 
+  minimumVisibility = 0.1,
+  showDustLanes = true,
+  showStarFormingRegions = true,
+  showCosmicDust = true
 }) => {
   const groupRef = useRef<Group>(null);
   
-  // Generate interstellar material based on galaxy type
   const { dustLanes, starFormingRegions, cosmicDust } = useMemo(() => {
     console.log('Generating interstellar material for galaxy type:', galaxy.galaxyType);
     
@@ -29,12 +33,10 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
     if (galaxy.galaxyType === 'spiral' || galaxy.galaxyType === 'barred-spiral') {
       console.log('Creating spiral galaxy dust lanes and star-forming regions');
       
-      // Create spiral dust lanes for spiral galaxies
       for (let i = 0; i < 4; i++) {
         const angle = (i / 4) * Math.PI * 2;
         const armLength = 45000;
         
-        // Create dust lane along spiral arm
         for (let j = 0; j < 15; j++) {
           const t = j / 15;
           const spiralAngle = angle + t * Math.PI * 1.5;
@@ -55,7 +57,6 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
         }
       }
       
-      // Create star-forming regions along spiral arms
       for (let i = 0; i < 8; i++) {
         const angle = Math.random() * Math.PI * 2;
         const distance = 15000 + Math.random() * 25000;
@@ -74,7 +75,6 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
         });
       }
       
-      // Create general cosmic dust in disk
       for (let i = 0; i < 40; i++) {
         const angle = Math.random() * Math.PI * 2;
         const distance = Math.random() * 50000;
@@ -95,12 +95,7 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
     } else if (galaxy.galaxyType === 'globular') {
       console.log('Creating globular cluster 3D distributed material');
       
-      // For globular clusters, distribute material throughout the 3D volume
-      // No dust lanes - all material is distributed spherically
-      
-      // Create diffuse interstellar material throughout the cluster
       for (let i = 0; i < 30; i++) {
-        // Spherical distribution with higher density toward center
         const distance = Math.pow(Math.random(), 0.5) * 30000;
         const theta = Math.random() * Math.PI * 2;
         const phi = Math.acos(1 - 2 * Math.random());
@@ -119,7 +114,6 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
         });
       }
       
-      // Sparse star-forming regions in globular clusters (very few)
       for (let i = 0; i < 3; i++) {
         const distance = Math.pow(Math.random(), 0.3) * 20000;
         const theta = Math.random() * Math.PI * 2;
@@ -141,9 +135,6 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
     } else if (galaxy.galaxyType === 'elliptical') {
       console.log('Creating elliptical galaxy material distribution');
       
-      // Elliptical galaxies have less organized structure
-      // Material is distributed in an elliptical pattern but still somewhat flattened
-      
       for (let i = 0; i < 25; i++) {
         const distance = Math.pow(Math.random(), 0.7) * 40000;
         const angle = Math.random() * Math.PI * 2;
@@ -163,7 +154,6 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
         });
       }
       
-      // Few star-forming regions in elliptical galaxies
       for (let i = 0; i < 4; i++) {
         const distance = Math.pow(Math.random(), 0.8) * 25000;
         const angle = Math.random() * Math.PI * 2;
@@ -194,7 +184,6 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
   }, [galaxy.galaxyType]);
 
   useFrame(() => {
-    // Gentle rotation and animation
     if (groupRef.current) {
       groupRef.current.rotation.y += 0.0001;
     }
@@ -202,8 +191,7 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
 
   return (
     <group ref={groupRef}>
-      {/* Dust Lanes (only for spiral galaxies) */}
-      {dustLanes.map((dust) => (
+      {showDustLanes && dustLanes.map((dust) => (
         <VolumetricCloudRaymarched
           key={dust.id}
           position={dust.position}
@@ -217,8 +205,7 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
         />
       ))}
       
-      {/* Star-forming Regions */}
-      {starFormingRegions.map((region) => (
+      {showStarFormingRegions && starFormingRegions.map((region) => (
         <VolumetricCloudRaymarched
           key={region.id}
           position={region.position}
@@ -232,8 +219,7 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
         />
       ))}
       
-      {/* Cosmic Dust */}
-      {cosmicDust.map((dust) => (
+      {showCosmicDust && cosmicDust.map((dust) => (
         <VolumetricCloudRaymarched
           key={dust.id}
           position={dust.position}

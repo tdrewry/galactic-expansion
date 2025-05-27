@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { GalaxyMap } from '../components/GalaxyMap';
 import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
@@ -19,6 +18,9 @@ const Index = () => {
   const [trinaryFrequency, setTriinaryFrequency] = useState(0.03);
   const [raymarchingSamples, setRaymarchingSamples] = useState(8);
   const [minimumVisibility, setMinimumVisibility] = useState(0.1);
+  const [showDustLanes, setShowDustLanes] = useState(true);
+  const [showStarFormingRegions, setShowStarFormingRegions] = useState(true);
+  const [showCosmicDust, setShowCosmicDust] = useState(true);
   const [selectedSystem, setSelectedSystem] = useState<StarSystem | null>(null);
   const [selectedStar, setSelectedStar] = useState<'primary' | 'binary' | 'trinary'>('primary');
   const [selectedBody, setSelectedBody] = useState<Planet | Moon | null>(null);
@@ -45,6 +47,9 @@ const Index = () => {
     trinaryFrequency: number;
     raymarchingSamples?: number;
     minimumVisibility?: number;
+    showDustLanes?: boolean;
+    showStarFormingRegions?: boolean;
+    showCosmicDust?: boolean;
   }) => {
     setNumSystems(settings.numSystems);
     setNumNebulae(settings.numNebulae);
@@ -56,8 +61,16 @@ const Index = () => {
     if (settings.minimumVisibility !== undefined) {
       setMinimumVisibility(settings.minimumVisibility);
     }
+    if (settings.showDustLanes !== undefined) {
+      setShowDustLanes(settings.showDustLanes);
+    }
+    if (settings.showStarFormingRegions !== undefined) {
+      setShowStarFormingRegions(settings.showStarFormingRegions);
+    }
+    if (settings.showCosmicDust !== undefined) {
+      setShowCosmicDust(settings.showCosmicDust);
+    }
     
-    // Auto-regenerate galaxy with new settings
     setSelectedSystem(null);
     setSelectedBody(null);
   };
@@ -65,14 +78,14 @@ const Index = () => {
   const handleSystemSelect = (system: StarSystem) => {
     console.log('Index: System selected:', system.id);
     setSelectedSystem(system);
-    setSelectedStar('primary'); // Reset to primary when selecting new system
+    setSelectedStar('primary');
     setSelectedBody(null);
   };
 
   const handleStarSelect = (star: 'primary' | 'binary' | 'trinary') => {
     console.log('Index: Star selected:', star);
     setSelectedStar(star);
-    setSelectedBody(null); // Clear selected body when switching stars
+    setSelectedBody(null);
   };
 
   const handleBodySelect = (body: Planet | Moon | null) => {
@@ -80,7 +93,6 @@ const Index = () => {
     setSelectedBody(body);
   };
 
-  // Calculate total planets across all stars in the system
   const getTotalPlanets = (system: StarSystem) => {
     let total = system.planets.length;
     if (system.binaryCompanion) {
@@ -119,6 +131,9 @@ const Index = () => {
                 trinaryFrequency={trinaryFrequency}
                 raymarchingSamples={raymarchingSamples}
                 minimumVisibility={minimumVisibility}
+                showDustLanes={showDustLanes}
+                showStarFormingRegions={showStarFormingRegions}
+                showCosmicDust={showCosmicDust}
                 onSettingsChange={handleSettingsChange}
               />
             </div>
@@ -126,10 +141,8 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Main Content with Resizable Layout */}
       <div className="flex-1 min-h-0">
         <ResizablePanelGroup direction="horizontal" className="h-full">
-          {/* Galaxy Map Panel */}
           <ResizablePanel defaultSize={70} minSize={30}>
             <div className="h-full">
               <GalaxyMap 
@@ -140,6 +153,9 @@ const Index = () => {
                 trinaryFrequency={trinaryFrequency}
                 raymarchingSamples={raymarchingSamples}
                 minimumVisibility={minimumVisibility}
+                showDustLanes={showDustLanes}
+                showStarFormingRegions={showStarFormingRegions}
+                showCosmicDust={showCosmicDust}
                 onSystemSelect={handleSystemSelect}
                 selectedSystem={selectedSystem}
                 selectedStar={selectedStar}
@@ -148,15 +164,12 @@ const Index = () => {
             </div>
           </ResizablePanel>
 
-          {/* Resizable Handle */}
           {selectedSystem && (
             <>
               <ResizableHandle withHandle />
               
-              {/* System Details Panel */}
               <ResizablePanel defaultSize={30} minSize={20} maxSize={60}>
                 <div className="h-full bg-gray-900 border-l border-gray-700 flex flex-col">
-                  {/* Fixed System Overview */}
                   <div className="flex-shrink-0 p-4 border-b border-gray-600">
                     <Card className="bg-gray-800 border-gray-600">
                       <CardHeader>
@@ -199,10 +212,8 @@ const Index = () => {
                     </Card>
                   </div>
 
-                  {/* Scrollable content area */}
                   <div className="flex-1 overflow-y-auto">
                     <div className="p-4">
-                      {/* System View - This shows the orbital diagram with celestial body details */}
                       <SystemView 
                         system={selectedSystem} 
                         selectedStar={selectedStar}

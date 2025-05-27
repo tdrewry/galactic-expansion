@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Switch } from '@/components/ui/switch';
 import { Settings } from 'lucide-react';
 
 interface GalaxySettingsProps {
@@ -14,6 +14,9 @@ interface GalaxySettingsProps {
   trinaryFrequency: number;
   raymarchingSamples?: number;
   minimumVisibility?: number;
+  showDustLanes?: boolean;
+  showStarFormingRegions?: boolean;
+  showCosmicDust?: boolean;
   onSettingsChange: (settings: {
     numSystems: number;
     numNebulae: number;
@@ -21,6 +24,9 @@ interface GalaxySettingsProps {
     trinaryFrequency: number;
     raymarchingSamples?: number;
     minimumVisibility?: number;
+    showDustLanes?: boolean;
+    showStarFormingRegions?: boolean;
+    showCosmicDust?: boolean;
   }) => void;
 }
 
@@ -31,6 +37,9 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
   trinaryFrequency,
   raymarchingSamples = 8,
   minimumVisibility = 0.1,
+  showDustLanes = true,
+  showStarFormingRegions = true,
+  showCosmicDust = true,
   onSettingsChange
 }) => {
   const [localSettings, setLocalSettings] = React.useState({
@@ -39,7 +48,10 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
     binaryFrequency,
     trinaryFrequency,
     raymarchingSamples,
-    minimumVisibility
+    minimumVisibility,
+    showDustLanes,
+    showStarFormingRegions,
+    showCosmicDust
   });
 
   const handleApply = () => {
@@ -53,7 +65,10 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
       binaryFrequency: 0.15,
       trinaryFrequency: 0.03,
       raymarchingSamples: 8,
-      minimumVisibility: 0.1
+      minimumVisibility: 0.1,
+      showDustLanes: true,
+      showStarFormingRegions: true,
+      showCosmicDust: true
     };
     setLocalSettings(defaultSettings);
     onSettingsChange(defaultSettings);
@@ -76,6 +91,50 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
         </SheetHeader>
         
         <div className="space-y-6 mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm">Visual Features</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="dust-lanes">Dust Lanes</Label>
+                <Switch
+                  id="dust-lanes"
+                  checked={localSettings.showDustLanes}
+                  onCheckedChange={(checked) => setLocalSettings(prev => ({
+                    ...prev,
+                    showDustLanes: checked
+                  }))}
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <Label htmlFor="star-forming">Star-forming Regions (Nebulae)</Label>
+                <Switch
+                  id="star-forming"
+                  checked={localSettings.showStarFormingRegions}
+                  onCheckedChange={(checked) => setLocalSettings(prev => ({
+                    ...prev,
+                    showStarFormingRegions: checked
+                  }))}
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <Label htmlFor="cosmic-dust">Cosmic Dust</Label>
+                <Switch
+                  id="cosmic-dust"
+                  checked={localSettings.showCosmicDust}
+                  onCheckedChange={(checked) => setLocalSettings(prev => ({
+                    ...prev,
+                    showCosmicDust: checked
+                  }))}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          
           <Card>
             <CardHeader>
               <CardTitle className="text-sm">Galaxy Size</CardTitle>

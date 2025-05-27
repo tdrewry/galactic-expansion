@@ -127,32 +127,49 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
       return clamp(falloff * cloudShape * density, 0.0, 1.0);
     }
 
-    // M42-style glow calculation without rim lighting
-    vec3 calculateGlow(vec3 rayDir, vec3 localPoint, float cloudDens, vec3 baseColor) {
-      // Distance from center for internal variations
+    // Different glow calculations for each cloud type
+    vec3 calculateGlow(vec3 rayDir, vec3 localPoint, float cloudDens, vec3 baseColor, float type) {
       float distFromCenter = length(localPoint);
       
-      // Internal emission based on density
-      float emission = cloudDens * 2.0;
-      
-      // Color temperature variation like M42
-      vec3 hotColor = vec3(1.0, 0.8, 0.6); // warm center
-      vec3 coolColor = vec3(0.6, 0.8, 1.0); // cool edges
-      
-      // Mix colors based on distance and density
-      float colorMix = smoothstep(0.3, 0.8, distFromCenter);
-      vec3 temperatureColor = mix(hotColor, coolColor, colorMix);
-      
-      // Combine base color with temperature
-      vec3 glowColor = baseColor * temperatureColor;
-      
-      // Add bright emission at dense areas
-      glowColor += vec3(0.3, 0.2, 0.8) * pow(cloudDens, 2.0) * 0.5;
-      
-      // Overall brightness boost for glow effect
-      glowColor *= (1.0 + emission * 0.8);
-      
-      return glowColor;
+      if (type < 0.5) {
+        // Dust lanes - subtle with rim lighting for definition
+        float rimGlow = 1.0 - smoothstep(0.7, 1.0, distFromCenter);
+        rimGlow = pow(rimGlow, 1.5);
+        
+        vec3 dustColor = baseColor * 0.8;
+        dustColor += rimGlow * vec3(0.4, 0.3, 0.2) * 0.3;
+        
+        return dustColor * (1.0 + cloudDens * 0.5);
+        
+      } else if (type < 1.5) {
+        // Nebulae - M42-style internal glow without rim lighting
+        float emission = cloudDens * 2.0;
+        
+        vec3 hotColor = vec3(1.0, 0.8, 0.6);
+        vec3 coolColor = vec3(0.6, 0.8, 1.0);
+        
+        float colorMix = smoothstep(0.3, 0.8, distFromCenter);
+        vec3 temperatureColor = mix(hotColor, coolColor, colorMix);
+        
+        vec3 glowColor = baseColor * temperatureColor;
+        glowColor += vec3(0.3, 0.2, 0.8) * pow(cloudDens, 2.0) * 0.5;
+        glowColor *= (1.0 + emission * 0.8);
+        
+        return glowColor;
+        
+      } else {
+        // Cosmic dust - balanced with moderate rim lighting
+        float rimGlow = 1.0 - smoothstep(0.6, 1.0, distFromCenter);
+        rimGlow = pow(rimGlow, 2.0);
+        
+        vec3 cosmicColor = baseColor * 0.9;
+        cosmicColor += rimGlow * vec3(0.5, 0.4, 0.6) * 0.2;
+        
+        float emission = cloudDens * 1.2;
+        cosmicColor *= (1.0 + emission * 0.4);
+        
+        return cosmicColor;
+      }
     }
 
     void main() {
@@ -195,13 +212,11 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
         float sampleDensity = cloudDensity(localPoint);
         
         if (sampleDensity > 0.01) {
-          // Calculate M42-style glow without rim lighting
-          vec3 glowColor = calculateGlow(rayDir, localPoint, sampleDensity, color);
+          vec3 glowColor = calculateGlow(rayDir, localPoint, sampleDensity, color, cloudType);
           
           float extinction = sampleDensity * stepSize * 2.5;
           float sampleTransmittance = exp(-extinction);
           
-          // Enhanced color accumulation for glow
           vec3 sampleColor = glowColor * sampleDensity * (1.0 - sampleTransmittance) * 1.5;
           accumulatedColor += totalTransmittance * sampleColor;
           
@@ -214,7 +229,6 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
       float finalAlpha = 1.0 - totalTransmittance;
       finalAlpha *= opacity;
       
-      // Boost glow intensity
       accumulatedColor *= 1.3;
       
       if (finalAlpha < minimumVisibility && minimumVisibility > 0.0) {
