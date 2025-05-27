@@ -1,4 +1,3 @@
-
 import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { ShaderMaterial } from 'three';
@@ -63,7 +62,6 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
     varying vec3 vViewDirection;
     varying vec2 vUv;
 
-    // Improved smooth noise functions
     vec3 hash3(vec3 p) {
       p = vec3(dot(p, vec3(127.1, 311.7, 74.7)),
                dot(p, vec3(269.5, 183.3, 246.1)),
@@ -101,51 +99,75 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
       return value;
     }
 
-    // More natural cloud density function
     float cloudDensity(vec3 pos) {
-      // Animate the cloud
       vec3 animatedPos = pos + time * 0.01;
       
-      // Create a softer falloff from center
       float dist = length(pos);
-      float falloff = 1.0 - smoothstep(0.1, 0.8, dist);
+      float falloff = 1.0 - smoothstep(0.1, 0.9, dist);
       
-      // Base cloud shape with softer edges
-      float baseNoise = fbm(animatedPos * 1.2, 3);
-      float detailNoise = fbm(animatedPos * 4.0, 2) * 0.5;
+      float baseNoise = fbm(animatedPos * 1.5, 3);
+      float detailNoise = fbm(animatedPos * 6.0, 2) * 0.3;
       
-      // Combine for natural cloud appearance
       float cloudShape = (baseNoise + detailNoise) * 0.5 + 0.5;
       
-      // Apply cloud type characteristics
       if(cloudType < 0.5) { 
-        // dust - wispy and sparse
-        cloudShape = pow(cloudShape, 1.8);
-        falloff *= 0.6;
+        cloudShape = pow(cloudShape, 1.5);
+        falloff *= 0.8;
       } else if(cloudType < 1.5) { 
-        // nebula - dense and billowy
-        cloudShape = pow(cloudShape, 0.8);
-        falloff *= 1.2;
+        cloudShape = pow(cloudShape, 0.6);
+        falloff *= 1.4;
       } else { 
-        // cosmic - medium with tendrils
-        float tendrils = fbm(animatedPos * 8.0, 2) * 0.3;
+        float tendrils = fbm(animatedPos * 10.0, 2) * 0.2;
         cloudShape += tendrils;
-        cloudShape = pow(cloudShape, 1.2);
+        cloudShape = pow(cloudShape, 1.0);
       }
       
-      // Soft density cutoff to avoid hard edges
-      cloudShape = smoothstep(0.3, 0.7, cloudShape);
+      cloudShape = smoothstep(0.2, 0.8, cloudShape);
       
       return clamp(falloff * cloudShape * density, 0.0, 1.0);
+    }
+
+    // M42-style glow calculation
+    vec3 calculateGlow(vec3 rayDir, vec3 localPoint, float cloudDens, vec3 baseColor) {
+      // Distance from center for rim lighting
+      float distFromCenter = length(localPoint);
+      
+      // Create rim glow effect
+      float rimGlow = 1.0 - smoothstep(0.6, 1.0, distFromCenter);
+      rimGlow = pow(rimGlow, 2.0);
+      
+      // Internal emission based on density
+      float emission = cloudDens * 2.0;
+      
+      // Color temperature variation like M42
+      vec3 hotColor = vec3(1.0, 0.8, 0.6); // warm center
+      vec3 coolColor = vec3(0.6, 0.8, 1.0); // cool edges
+      
+      // Mix colors based on distance and density
+      float colorMix = smoothstep(0.3, 0.8, distFromCenter);
+      vec3 temperatureColor = mix(hotColor, coolColor, colorMix);
+      
+      // Combine base color with temperature
+      vec3 glowColor = baseColor * temperatureColor;
+      
+      // Add bright emission at dense areas
+      glowColor += vec3(0.3, 0.2, 0.8) * pow(cloudDens, 2.0) * 0.5;
+      
+      // Rim lighting
+      glowColor += rimGlow * vec3(0.8, 0.6, 1.0) * 0.4;
+      
+      // Overall brightness boost for glow effect
+      glowColor *= (1.0 + emission * 0.8);
+      
+      return glowColor;
     }
 
     void main() {
       vec3 rayOrigin = length(uCameraPos) > 0.0 ? uCameraPos : vWorldPosition - vViewDirection * 100.0;
       vec3 rayDir = normalize(vWorldPosition - rayOrigin);
       
-      // Ray-sphere intersection
       vec3 sphereCenter = vWorldPosition - vLocalPosition;
-      float sphereRadius = size * 0.8; // Slightly smaller for softer edges
+      float sphereRadius = size * 0.9;
       
       vec3 oc = rayOrigin - sphereCenter;
       float b = dot(oc, rayDir);
@@ -166,12 +188,10 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
         discard;
       }
       
-      // Adaptive step size based on sample count
       float stepSize = (tFar - tNear) / float(raymarchingSamples);
       float totalTransmittance = 1.0;
       vec3 accumulatedColor = vec3(0.0);
       
-      // Raymarching with better integration
       for(int i = 0; i < 64; i++) {
         if(i >= raymarchingSamples) break;
         
@@ -182,23 +202,18 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
         float sampleDensity = cloudDensity(localPoint);
         
         if (sampleDensity > 0.01) {
-          // Calculate lighting
-          vec3 lightDir = normalize(vec3(1.0, 0.5, 0.3));
-          float lightDot = max(0.0, dot(normalize(localPoint), lightDir));
-          float lighting = 0.3 + 0.7 * lightDot;
+          // Calculate M42-style glow
+          vec3 glowColor = calculateGlow(rayDir, localPoint, sampleDensity, color);
           
-          // Beer's law for light attenuation
-          float extinction = sampleDensity * stepSize * 3.0;
+          float extinction = sampleDensity * stepSize * 2.5;
           float sampleTransmittance = exp(-extinction);
           
-          // Accumulate color
-          vec3 sampleColor = color * lighting * sampleDensity * (1.0 - sampleTransmittance);
+          // Enhanced color accumulation for glow
+          vec3 sampleColor = glowColor * sampleDensity * (1.0 - sampleTransmittance) * 1.5;
           accumulatedColor += totalTransmittance * sampleColor;
           
-          // Update transmittance
           totalTransmittance *= sampleTransmittance;
           
-          // Early exit if we're mostly opaque
           if (totalTransmittance < 0.01) break;
         }
       }
@@ -206,7 +221,9 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
       float finalAlpha = 1.0 - totalTransmittance;
       finalAlpha *= opacity;
       
-      // Ensure minimum visibility if needed
+      // Boost glow intensity
+      accumulatedColor *= 1.3;
+      
       if (finalAlpha < minimumVisibility && minimumVisibility > 0.0) {
         finalAlpha = minimumVisibility;
         accumulatedColor = color * minimumVisibility;
