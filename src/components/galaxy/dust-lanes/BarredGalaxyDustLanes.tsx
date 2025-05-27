@@ -12,7 +12,7 @@ interface BarredGalaxyDustLanesProps {
 
 export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
   galaxy,
-  numParticles = 5000,
+  numParticles = 15000, // Tripled from 5000 to 15000
   particleSize = 100,
   opacity = 0.4
 }) => {
@@ -41,8 +41,8 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
     for (let i = 0; i < numParticles; i++) {
       const i3 = i * 3;
       
-      // TRIPLED density: 90% of particles form the central bar, 10% form the spiral arms
-      const isBarParticle = seededRandom() < 0.9;
+      // 60% of particles form the central bar, 40% form the spiral arms
+      const isBarParticle = seededRandom() < 0.6;
       
       let x, z, y;
       let armDistanceRatio = 0;
@@ -123,7 +123,7 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
       sizesArray[i] = baseSize * sizeMultiplier * (0.8 + seededRandom() * 1.5);
     }
     
-    console.log(`Generated ${numParticles} particles for barred galaxy with tripled bar density`);
+    console.log(`Generated ${numParticles} particles for barred galaxy with increased density`);
     
     return {
       positions: positionsArray,

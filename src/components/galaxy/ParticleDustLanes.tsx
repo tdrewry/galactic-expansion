@@ -12,7 +12,7 @@ interface ParticleDustLanesProps {
 
 export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
   galaxy,
-  numParticles = 5000,
+  numParticles = 15000, // Increased from 5000 to 15000
   particleSize = 100,
   opacity = 0.4
 }) => {

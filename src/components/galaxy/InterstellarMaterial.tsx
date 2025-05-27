@@ -32,7 +32,7 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
       {showDustLanes && (
         <ParticleDustLanes
           galaxy={galaxy}
-          numParticles={5000}
+          numParticles={15000} // Increased from 5000
           particleSize={100}
           opacity={0.4}
         />
