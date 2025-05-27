@@ -85,9 +85,8 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
         // Spiral arm particles - two arms extending from bar ends
         const armIndex = Math.floor(seededRandom() * 2); // 0 or 1 for two arms
         
-        // Distance along the spiral arm (0 to 1, with proper density falloff)
-        // Use power distribution to reduce density at outer edges
-        armDistanceRatio = Math.pow(seededRandom(), 1.5); // This creates density falloff
+        // Distance along the spiral arm with stronger density falloff for thinner ends
+        armDistanceRatio = Math.pow(seededRandom(), 2.0); // Increased power for more dramatic thinning
         const armDistance = armDistanceRatio * galaxyRadius * 0.8;
         
         // Starting point: end of the bar
@@ -97,20 +96,20 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
         
         // Spiral angle calculation - BOTH ARMS ROTATE IN SAME DIRECTION
         const baseAngle = barAngle + (armIndex === 0 ? 0 : Math.PI); // 180° apart
-        // Both arms curve in the same direction (positive spiralCurve)
         const spiralCurve = armDistanceRatio * Math.PI * spiralTightness;
         const finalAngle = baseAngle + spiralCurve; // Same direction for both arms
         
-        // Add some width to the spiral arms (wider at base, narrower at ends)
-        const baseArmWidth = 2500 + seededRandom() * 1500;
-        const armWidth = baseArmWidth * (1.0 - armDistanceRatio * 0.6); // Narrower at ends
+        // Progressive arm widening: narrower at base, much wider at ends
+        const baseArmWidth = 1800 + seededRandom() * 1200; // Slightly smaller base width
+        const widthMultiplier = 1.0 + armDistanceRatio * 2.5; // Arms get 3.5x wider at the ends
+        const armWidth = baseArmWidth * widthMultiplier;
         const widthOffset = (seededRandom() - 0.5) * armWidth;
         const widthAngle = finalAngle + Math.PI / 2; // Perpendicular to arm direction
         
         // Final position
         x = barEndX + Math.cos(finalAngle) * armDistance + Math.cos(widthAngle) * widthOffset;
         z = barEndZ + Math.sin(finalAngle) * armDistance + Math.sin(widthAngle) * widthOffset;
-        y = (seededRandom() - 0.5) * (600 + armDistanceRatio * 400);
+        y = (seededRandom() - 0.5) * (600 + armDistanceRatio * 800); // More vertical spread at ends
       }
       
       positionsArray[i3] = x;
@@ -127,11 +126,12 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
           0.25 + seededRandom() * 0.35  // Lightness
         );
       } else {
-        // Arm particles - cooler, bluer colors
+        // Arm particles - cooler, bluer colors, dimmer at ends
+        const brightnessReduction = armDistanceRatio * 0.3; // Dimmer towards ends
         dustColor.setHSL(
           0.15 + seededRandom() * 0.1,  // Hue: yellow to cyan
           0.5 + seededRandom() * 0.4,   // Saturation
-          0.2 + seededRandom() * 0.4    // Lightness
+          (0.2 + seededRandom() * 0.4) * (1.0 - brightnessReduction) // Reduced brightness at ends
         );
       }
       
@@ -139,8 +139,8 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
       colorsArray[i3 + 1] = dustColor.g;
       colorsArray[i3 + 2] = dustColor.b;
       
-      // Particle sizes - larger particles in the bar, smaller at arm ends
-      const sizeMultiplier = isBarParticle ? 1.4 : (1.0 - armDistanceRatio * 0.3);
+      // Particle sizes - larger particles in the bar, much smaller at arm ends for thinning effect
+      const sizeMultiplier = isBarParticle ? 1.4 : (1.0 - armDistanceRatio * 0.6); // More size reduction at ends
       sizesArray[i] = particleSize * sizeMultiplier * (0.4 + seededRandom() * 1.2);
     }
     
