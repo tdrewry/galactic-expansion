@@ -127,14 +127,10 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
       return clamp(falloff * cloudShape * density, 0.0, 1.0);
     }
 
-    // M42-style glow calculation
+    // M42-style glow calculation without rim lighting
     vec3 calculateGlow(vec3 rayDir, vec3 localPoint, float cloudDens, vec3 baseColor) {
-      // Distance from center for rim lighting
+      // Distance from center for internal variations
       float distFromCenter = length(localPoint);
-      
-      // Create rim glow effect
-      float rimGlow = 1.0 - smoothstep(0.6, 1.0, distFromCenter);
-      rimGlow = pow(rimGlow, 2.0);
       
       // Internal emission based on density
       float emission = cloudDens * 2.0;
@@ -152,9 +148,6 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
       
       // Add bright emission at dense areas
       glowColor += vec3(0.3, 0.2, 0.8) * pow(cloudDens, 2.0) * 0.5;
-      
-      // Rim lighting
-      glowColor += rimGlow * vec3(0.8, 0.6, 1.0) * 0.4;
       
       // Overall brightness boost for glow effect
       glowColor *= (1.0 + emission * 0.8);
@@ -202,7 +195,7 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
         float sampleDensity = cloudDensity(localPoint);
         
         if (sampleDensity > 0.01) {
-          // Calculate M42-style glow
+          // Calculate M42-style glow without rim lighting
           vec3 glowColor = calculateGlow(rayDir, localPoint, sampleDensity, color);
           
           float extinction = sampleDensity * stepSize * 2.5;
