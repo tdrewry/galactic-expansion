@@ -57,11 +57,7 @@ export const VolumetricCloud3D: React.FC<VolumetricCloud3DProps> = ({
     varying vec3 vNormal;
     varying vec2 vUv;
 
-    // Improved noise functions for better cloud appearance
-    float hash(float n) {
-      return fract(sin(n) * 43758.5453123);
-    }
-
+    // Simplified noise function
     float hash(vec3 p) {
       return fract(sin(dot(p, vec3(12.9898, 78.233, 45.164))) * 43758.5453);
     }
@@ -69,95 +65,48 @@ export const VolumetricCloud3D: React.FC<VolumetricCloud3DProps> = ({
     float noise(vec3 p) {
       vec3 i = floor(p);
       vec3 f = fract(p);
-      
       f = f * f * (3.0 - 2.0 * f);
       
       float n = i.x + i.y * 57.0 + 113.0 * i.z;
-      
       return mix(
         mix(
-          mix(hash(n + 0.0), hash(n + 1.0), f.x),
-          mix(hash(n + 57.0), hash(n + 58.0), f.x), f.y),
+          mix(hash(vec3(n + 0.0)), hash(vec3(n + 1.0)), f.x),
+          mix(hash(vec3(n + 57.0)), hash(vec3(n + 58.0)), f.x), f.y),
         mix(
-          mix(hash(n + 113.0), hash(n + 114.0), f.x),
-          mix(hash(n + 170.0), hash(n + 171.0), f.x), f.y), f.z);
+          mix(hash(vec3(n + 113.0)), hash(vec3(n + 114.0)), f.x),
+          mix(hash(vec3(n + 170.0)), hash(vec3(n + 171.0)), f.x), f.y), f.z);
     }
 
-    // Fractal Brownian Motion for realistic cloud patterns
+    // Simplified FBM with fewer octaves
     float fbm(vec3 p) {
       float f = 0.0;
-      f += 0.5000 * noise(p); p *= 2.02;
-      f += 0.2500 * noise(p); p *= 2.03;
-      f += 0.1250 * noise(p); p *= 2.01;
-      f += 0.0625 * noise(p); p *= 2.04;
-      f += 0.0312 * noise(p);
-      return f / 0.9687;
-    }
-
-    // Worley noise for additional cloud structure
-    float worley(vec3 p) {
-      vec3 cell = floor(p);
-      float minDist = 1.0;
-      
-      for (int i = -1; i <= 1; i++) {
-        for (int j = -1; j <= 1; j++) {
-          for (int k = -1; k <= 1; k++) {
-            vec3 neighbor = cell + vec3(float(i), float(j), float(k));
-            vec3 point = neighbor + vec3(
-              hash(neighbor),
-              hash(neighbor + vec3(1.0, 0.0, 0.0)),
-              hash(neighbor + vec3(0.0, 1.0, 0.0))
-            );
-            float dist = distance(p, point);
-            minDist = min(minDist, dist);
-          }
-        }
-      }
-      
-      return minDist;
+      f += 0.5000 * noise(p); p *= 2.01;
+      f += 0.2500 * noise(p); p *= 2.02;
+      f += 0.1250 * noise(p);
+      return f / 0.875;
     }
 
     float cloudDensity(vec3 p) {
-      vec3 animatedPos = p + vec3(time * 0.02, time * 0.01, time * 0.015);
+      vec3 animatedPos = p + vec3(time * 0.01, time * 0.005, time * 0.008);
       
-      // Distance from center falloff with smooth edges
+      // Distance falloff
       float dist = length(p);
-      float falloff = 1.0 - smoothstep(0.2, 0.8, dist);
-      falloff = pow(falloff, 2.0);
+      float falloff = 1.0 - smoothstep(0.1, 0.7, dist);
+      falloff = falloff * falloff;
       
-      // Base cloud shape using FBM
-      float cloudShape = fbm(animatedPos * 2.0);
+      // Simplified cloud shape
+      float cloudShape = fbm(animatedPos * 1.5);
       
-      // Add detail with higher frequency noise
-      float cloudDetail = fbm(animatedPos * 8.0) * 0.5;
-      
-      // Add wispy structure with Worley noise
-      float cloudStructure = 1.0 - worley(animatedPos * 4.0);
-      cloudStructure = smoothstep(0.1, 0.9, cloudStructure);
-      
-      // Combine all noise layers
-      float combinedNoise = cloudShape * 0.6 + cloudDetail * 0.3 + cloudStructure * 0.1;
-      
-      // Apply falloff and density control
-      float finalDensity = combinedNoise * falloff * density;
-      
-      // Add some threshold to create more defined cloud edges
-      finalDensity = smoothstep(0.1, 0.9, finalDensity);
-      
-      return max(0.0, finalDensity);
-    }
-
-    // Simple phase function for light scattering
-    float henyeyGreenstein(float cosTheta, float g) {
-      float g2 = g * g;
-      return (1.0 - g2) / (4.0 * 3.14159 * pow(1.0 + g2 - 2.0 * g * cosTheta, 1.5));
+      // Apply density and falloff
+      float finalDensity = cloudShape * falloff * density;
+      return max(0.0, smoothstep(0.2, 0.8, finalDensity));
     }
 
     void main() {
       vec3 rayOrigin = uCameraPos;
       vec3 rayDir = normalize(vWorldPosition - rayOrigin);
       
-      // Get the sphere center in world space
+      // Get sphere center and radius
       vec3 sphereCenter = vWorldPosition - vLocalPosition;
       float sphereRadius = size * 0.5;
       
@@ -181,18 +130,18 @@ export const VolumetricCloud3D: React.FC<VolumetricCloud3DProps> = ({
         discard;
       }
       
-      // Volumetric raymarching
-      int numSamples = 32;
+      // Reduced raymarching samples for performance
+      int numSamples = 16; // Reduced from 32
       float stepSize = (tFar - tNear) / float(numSamples);
       
       float transmittance = 1.0;
       vec3 lightColor = color;
       vec3 scatteredLight = vec3(0.0);
       
-      // Light direction (simplified - coming from above and forward)
-      vec3 lightDir = normalize(vec3(0.3, 1.0, 0.5));
+      // Simplified lighting
+      vec3 lightDir = normalize(vec3(0.5, 1.0, 0.3));
       
-      for (int i = 0; i < 32; i++) {
+      for (int i = 0; i < 16; i++) {
         if (i >= numSamples) break;
         
         float t = tNear + (float(i) + 0.5) * stepSize;
@@ -202,44 +151,28 @@ export const VolumetricCloud3D: React.FC<VolumetricCloud3DProps> = ({
         float sampleDensity = cloudDensity(localPos);
         
         if (sampleDensity > 0.01) {
-          // Calculate light attenuation through the cloud
-          float lightAttenuation = 1.0;
+          // Simplified light attenuation
+          float lightAttenuation = 0.8;
           
-          // Sample towards light for shadow calculation
-          for (int j = 0; j < 6; j++) {
-            vec3 lightSamplePos = samplePos + lightDir * float(j) * stepSize * 2.0;
-            vec3 lightLocalPos = (lightSamplePos - sphereCenter) / size;
-            
-            if (length(lightLocalPos) < 0.5) {
-              lightAttenuation *= exp(-cloudDensity(lightLocalPos) * stepSize * 3.0);
-            }
-          }
-          
-          // Phase function for forward/backward scattering
-          float cosTheta = dot(rayDir, lightDir);
-          float phase = mix(henyeyGreenstein(cosTheta, 0.3), henyeyGreenstein(cosTheta, -0.3), 0.7);
-          
-          // Light scattering calculation
-          float extinction = sampleDensity * stepSize * 8.0;
+          // Basic extinction and scattering
+          float extinction = sampleDensity * stepSize * 4.0;
           float sampleTransmittance = exp(-extinction);
           
           vec3 sampleScattering = lightColor * sampleDensity * transmittance * 
-                                 (1.0 - sampleTransmittance) * lightAttenuation * phase;
+                                 (1.0 - sampleTransmittance) * lightAttenuation;
           
           scatteredLight += sampleScattering;
           transmittance *= sampleTransmittance;
           
-          // Early termination if transmittance is very low
-          if (transmittance < 0.01) break;
+          // Early exit for performance
+          if (transmittance < 0.02) break;
         }
       }
       
-      // Final color calculation
+      // Final color
       float alpha = (1.0 - transmittance) * opacity;
-      vec3 finalColor = scatteredLight * 3.0; // Brighten the clouds
-      
-      // Add some ambient lighting to prevent completely black areas
-      finalColor += lightColor * 0.1 * (1.0 - transmittance);
+      vec3 finalColor = scatteredLight * 2.0;
+      finalColor += lightColor * 0.05 * (1.0 - transmittance);
       
       gl_FragColor = vec4(finalColor, alpha);
     }
@@ -263,7 +196,7 @@ export const VolumetricCloud3D: React.FC<VolumetricCloud3DProps> = ({
 
   return (
     <mesh ref={meshRef} position={position}>
-      <sphereGeometry args={[size, 32, 24]} />
+      <sphereGeometry args={[size, 24, 16]} />
       <shaderMaterial
         ref={materialRef}
         vertexShader={vertexShader}
