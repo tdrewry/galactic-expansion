@@ -84,8 +84,8 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
         fade 
       />
       
-      {/* Galaxy Haze - render early but after background */}
-      <GalaxyHaze galaxy={galaxy} intensity={3.0} color="#4488ff" />
+      {/* Galaxy Haze - subtle volumetric effect */}
+      <GalaxyHaze galaxy={galaxy} intensity={0.5} color="#4488ff" />
       
       {/* Galactic Center */}
       <mesh position={[0, 0, 0]} onClick={handleBackgroundClick}>
