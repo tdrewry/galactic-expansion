@@ -24,6 +24,16 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
     const colorsArray = new Float32Array(numParticles * 3);
     const sizesArray = new Float32Array(numParticles);
     
+    // Only generate particles for barred galaxies
+    if (galaxy.type !== 'barred') {
+      console.log(`Galaxy ${galaxy.seed}: Not a barred galaxy (${galaxy.type}), skipping dust lanes`);
+      return {
+        positions: positionsArray,
+        colors: colorsArray,
+        sizes: sizesArray
+      };
+    }
+    
     // Seeded random number generator
     let seedValue = galaxy.seed;
     const seededRandom = () => {
@@ -37,13 +47,13 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
     
     // Galaxy age affects arm wrapping - older galaxies have more wrapped arms
     const galaxyAge = seededRandom(); // 0 = young, 1 = old
-    const spiralTightness = 0.3 + galaxyAge * 1.5; // Young: loose, Old: tight
-    const armWraps = 1 + galaxyAge * 3; // How many times arms wrap around
+    const spiralTightness = 0.3 + galaxyAge * 1.2; // Young: loose, Old: tight
+    const maxArmWraps = 1 + galaxyAge * 2; // How many times arms can wrap around
     
     // Bar orientation angle
     const barAngle = seededRandom() * Math.PI * 0.3; // 0-54 degrees
     
-    console.log(`Galaxy ${galaxy.seed}: age=${galaxyAge.toFixed(2)}, tightness=${spiralTightness.toFixed(2)}, wraps=${armWraps.toFixed(1)}`);
+    console.log(`Barred Galaxy ${galaxy.seed}: age=${galaxyAge.toFixed(2)}, tightness=${spiralTightness.toFixed(2)}, maxWraps=${maxArmWraps.toFixed(1)}`);
     
     for (let i = 0; i < numParticles; i++) {
       const i3 = i * 3;
@@ -71,21 +81,26 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
         const barEndX = (barLength / 2) * Math.cos(barEndAngle + barAngle);
         const barEndZ = (barLength / 2) * Math.sin(barEndAngle + barAngle);
         
-        // Distance along the spiral arm (non-linear distribution)
-        const armDistance = Math.pow(seededRandom(), 1.2) * (galaxyRadius * 0.8);
+        // Distance along the spiral arm (weighted toward outer regions)
+        const armDistanceRatio = Math.pow(seededRandom(), 0.8); // Bias toward outer regions
+        const armDistance = armDistanceRatio * (galaxyRadius * 0.8);
         
-        // Spiral angle - more wrapping for older galaxies
-        const spiralAngle = barEndAngle + barAngle + (armDistance / galaxyRadius) * Math.PI * 2 * armWraps;
+        // Spiral angle - start from bar end direction and curve outward
+        // Prevent figure-8 by ensuring arms curve away from center
+        const baseDirection = barEndAngle + barAngle; // Direction from center to bar end
+        const spiralCurvature = armDistanceRatio * Math.PI * maxArmWraps; // How much the arm curves
+        const spiralDirection = armIndex === 0 ? 1 : -1; // Arms curve in opposite directions
+        const spiralAngle = baseDirection + (spiralCurvature * spiralDirection);
         
-        // Add width to the spiral arms - wider for younger galaxies
+        // Add width to the spiral arms
         const armWidth = (2000 + seededRandom() * 3000) * (1.5 - galaxyAge * 0.5);
-        const offsetAngle = spiralAngle + (seededRandom() - 0.5) * 0.4;
+        const offsetAngle = spiralAngle + (seededRandom() - 0.5) * 0.3;
         const offsetDistance = armDistance + (seededRandom() - 0.5) * armWidth;
         
         // Calculate final position starting from bar end
         x = barEndX + Math.cos(offsetAngle) * offsetDistance;
         z = barEndZ + Math.sin(offsetAngle) * offsetDistance;
-        y = (seededRandom() - 0.5) * (400 + galaxyAge * 200); // More vertical spread in older galaxies
+        y = (seededRandom() - 0.5) * (400 + galaxyAge * 200);
       }
       
       positionsArray[i3] = x;
@@ -125,7 +140,12 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
       colors: colorsArray,
       sizes: sizesArray
     };
-  }, [numParticles, particleSize, galaxy.seed]);
+  }, [numParticles, particleSize, galaxy.seed, galaxy.type]);
+  
+  // Only render if this is a barred galaxy
+  if (galaxy.type !== 'barred') {
+    return null;
+  }
   
   // Slow rotation animation
   useFrame(() => {
