@@ -57,7 +57,7 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
     uniform float size;
     uniform int raymarchingSamples;
     uniform float minimumVisibility;
-    uniform vec3 cameraPosition;
+    uniform vec3 uCameraPos;
     
     varying vec3 vWorldPosition;
     varying vec3 vLocalPosition;
@@ -141,8 +141,8 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
     }
 
     void main() {
-      // Check if cameraPosition is valid, fallback to view direction
-      vec3 rayOrigin = length(cameraPosition) > 0.0 ? cameraPosition : vWorldPosition - vViewDirection * 100.0;
+      // Check if uCameraPos is valid, fallback to view direction
+      vec3 rayOrigin = length(uCameraPos) > 0.0 ? uCameraPos : vWorldPosition - vViewDirection * 100.0;
       vec3 rayDir = normalize(vWorldPosition - rayOrigin);
       
       // Find intersection with sphere bounds (centered at mesh position)
@@ -222,7 +222,7 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
     cloudType: { value: cloudType === 'dust' ? 0.0 : cloudType === 'nebula' ? 1.0 : 2.0 },
     raymarchingSamples: { value: raymarchingSamples },
     minimumVisibility: { value: minimumVisibility },
-    cameraPosition: { value: new THREE.Vector3(0, 0, 0) }
+    uCameraPos: { value: new THREE.Vector3(0, 0, 0) }
   }), [color, opacity, density, size, cloudType, raymarchingSamples, minimumVisibility]);
 
   useFrame((state) => {
@@ -231,7 +231,7 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
       
       // Safely update camera position
       if (state.camera && state.camera.position) {
-        materialRef.current.uniforms.cameraPosition.value.copy(state.camera.position);
+        materialRef.current.uniforms.uCameraPos.value.copy(state.camera.position);
       }
     }
   });
