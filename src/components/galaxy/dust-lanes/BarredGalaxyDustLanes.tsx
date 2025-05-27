@@ -12,7 +12,7 @@ interface BarredGalaxyDustLanesProps {
 
 export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
   galaxy,
-  numParticles = 15000, // Tripled from 5000 to 15000
+  numParticles = 15000,
   particleSize = 100,
   opacity = 0.4
 }) => {
@@ -36,7 +36,7 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
     const barLength = galaxyRadius * 0.3; // Same as generateBarredSpiralPosition
     const barWidth = galaxyRadius * 0.1;   // Same as generateBarredSpiralPosition
     
-    console.log(`Aligned dust lanes - Bar length: ${barLength}, Bar width: ${barWidth}, Bar angle: 0°`);
+    console.log(`Updated dust lanes - Bar length: ${barLength}, Bar width: ${barWidth}, with tapered ends`);
     
     for (let i = 0; i < numParticles; i++) {
       const i3 = i * 3;
@@ -48,29 +48,47 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
       let armDistanceRatio = 0;
       
       if (isBarParticle) {
-        // Central bar particles - use EXACT same logic as generateBarredSpiralPosition
+        // Central bar particles with tapering at the ends
         const barProgress = seededRandom() * 2 - 1; // -1 to 1
-        const barOffset = (seededRandom() - 0.5) * barWidth;
+        
+        // Calculate taper factor - narrow at the ends, full width in the middle
+        const barProgressAbs = Math.abs(barProgress);
+        const taperFactor = 1.0 - Math.pow(barProgressAbs, 2.5); // Aggressive tapering
+        const effectiveBarWidth = barWidth * Math.max(0.3, taperFactor); // Minimum 30% width at ends
+        
+        const barOffset = (seededRandom() - 0.5) * effectiveBarWidth;
         
         // No rotation - align with star bar exactly
         x = barProgress * barLength;
         z = barOffset;
-        y = (seededRandom() - 0.5) * 1000; // Match star disk thickness (was 500 in stars)
+        y = (seededRandom() - 0.5) * 1000; // Match star disk thickness
         
         armDistanceRatio = 0;
         
       } else {
-        // Spiral arm particles starting from bar ends
+        // Spiral arm particles starting from bar ends with improved falloff
         const armIndex = Math.floor(seededRandom() * 2);
         
-        // Enhanced density falloff for much thinner ends
-        armDistanceRatio = Math.pow(seededRandom(), 2.5);
+        // Improved density distribution for arms
+        // Much denser at start (0-25% of arm), then gradual falloff
+        const rawDistance = seededRandom();
+        const earlyArmThreshold = 0.25; // First 25% of arm length
+        
+        if (rawDistance < earlyArmThreshold) {
+          // Early arm: high density, less falloff
+          armDistanceRatio = Math.pow(rawDistance / earlyArmThreshold, 0.8) * earlyArmThreshold;
+        } else {
+          // Later arm: more aggressive falloff
+          const laterProgress = (rawDistance - earlyArmThreshold) / (1.0 - earlyArmThreshold);
+          armDistanceRatio = earlyArmThreshold + laterProgress * (1.0 - earlyArmThreshold) * Math.pow(laterProgress, 2.0);
+        }
+        
         const armDistance = armDistanceRatio * galaxyRadius * 0.8;
         
-        // Starting point: end of the bar (no rotation)
+        // Starting point: EXACT end of the tapered bar
         const barEndSign = armIndex === 0 ? 1 : -1;
         const barEndX = (barLength / 2) * barEndSign;
-        const barEndZ = 0;
+        const barEndZ = 0; // Arms start from the center line of the bar
         
         // Spiral angle calculation (starting from horizontal bar)
         const baseAngle = armIndex === 0 ? 0 : Math.PI;
@@ -78,10 +96,10 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
         const spiralCurve = armDistanceRatio * Math.PI * spiralTightness;
         const finalAngle = baseAngle + spiralCurve;
         
-        // Much wider arms at the ends for dramatic effect
-        const baseArmWidth = 1500 + seededRandom() * 1000;
-        const widthMultiplier = 1.0 + armDistanceRatio * 4.0;
-        const armWidth = baseArmWidth * widthMultiplier;
+        // Arm width calculation - start narrow at bar end, widen gradually
+        const baseArmWidth = 800; // Narrower starting width to match tapered bar end
+        const widthGrowth = 1.0 + armDistanceRatio * 3.0; // Grows to 4x initial width
+        const armWidth = baseArmWidth * widthGrowth;
         const widthOffset = (seededRandom() - 0.5) * armWidth;
         const widthAngle = finalAngle + Math.PI / 2;
         
@@ -94,7 +112,7 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
       positionsArray[i3 + 1] = y;
       positionsArray[i3 + 2] = z;
       
-      // Enhanced dust colors with much higher brightness
+      // Enhanced dust colors with brightness based on position
       const dustColor = new THREE.Color();
       if (isBarParticle) {
         // Bar particles - brighter, warmer colors
@@ -104,8 +122,16 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
           0.6 + seededRandom() * 0.4    // Much brighter
         );
       } else {
-        // Arm particles - brighter, cooler colors
-        const brightnessReduction = armDistanceRatio * 0.2;
+        // Arm particles - brightness based on distance with enhanced early arm brightness
+        let brightnessReduction;
+        if (armDistanceRatio < 0.25) {
+          // Early arm: minimal brightness reduction
+          brightnessReduction = armDistanceRatio * 0.1;
+        } else {
+          // Later arm: more aggressive brightness reduction
+          brightnessReduction = 0.025 + (armDistanceRatio - 0.25) * 0.3;
+        }
+        
         dustColor.setHSL(
           0.15 + seededRandom() * 0.1,  // Hue: yellow to cyan
           0.6 + seededRandom() * 0.3,   // Higher saturation
@@ -117,13 +143,25 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
       colorsArray[i3 + 1] = dustColor.g;
       colorsArray[i3 + 2] = dustColor.b;
       
-      // Enhanced particle sizes for better blur effect
+      // Enhanced particle sizes
       const baseSize = particleSize * 3;
-      const sizeMultiplier = isBarParticle ? 1.4 : (1.0 - armDistanceRatio * 0.6);
+      let sizeMultiplier;
+      
+      if (isBarParticle) {
+        sizeMultiplier = 1.4; // Consistent bar size
+      } else {
+        // Arm particles: larger at start, smaller at ends
+        if (armDistanceRatio < 0.25) {
+          sizeMultiplier = 1.2 - armDistanceRatio * 0.4; // Start large, gradually smaller
+        } else {
+          sizeMultiplier = 1.0 - (armDistanceRatio - 0.25) * 0.8; // Continue shrinking
+        }
+      }
+      
       sizesArray[i] = baseSize * sizeMultiplier * (0.8 + seededRandom() * 1.5);
     }
     
-    console.log(`Generated ${numParticles} particles for barred galaxy with increased density`);
+    console.log(`Generated ${numParticles} particles for barred galaxy with tapered bar and improved arm falloff`);
     
     return {
       positions: positionsArray,
