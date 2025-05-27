@@ -1,7 +1,7 @@
 
 import React, { useMemo } from 'react';
 import * as THREE from 'three';
-import { OptimizedDustLaneBase } from './OptimizedDustLaneBase';
+import { GPUParticleSystem } from './GPUParticleSystem';
 
 interface EfficientBarredGalaxyDustLanesProps {
   galaxy: any;
@@ -22,6 +22,7 @@ export const EfficientBarredGalaxyDustLanes: React.FC<EfficientBarredGalaxyDustL
   const { positions, colors, sizes } = useMemo(() => {
     console.log(`Generating efficient barred galaxy with ${numParticles} particles, color intensity: ${colorIntensity}`);
     
+    // Pre-allocate typed arrays for better performance
     const positionsArray = new Float32Array(numParticles * 3);
     const colorsArray = new Float32Array(numParticles * 3);
     const sizesArray = new Float32Array(numParticles);
@@ -42,8 +43,8 @@ export const EfficientBarredGalaxyDustLanes: React.FC<EfficientBarredGalaxyDustL
     // Pre-calculate color values for efficiency
     const baseColor = new THREE.Color();
     
-    // Batch process particles for better performance
-    const batchSize = 1000;
+    // Process particles in batches for better memory usage
+    const batchSize = 5000;
     for (let batch = 0; batch < Math.ceil(numParticles / batchSize); batch++) {
       const start = batch * batchSize;
       const end = Math.min(start + batchSize, numParticles);
@@ -57,9 +58,9 @@ export const EfficientBarredGalaxyDustLanes: React.FC<EfficientBarredGalaxyDustL
         let densityType;
         let armDistanceRatio = 0;
         
-        // Simplified particle distribution for better performance
+        // Efficient particle distribution
         if (rand < 0.15) {
-          // Central region
+          // Central region - bright core
           particleType = 'central';
           densityType = 'high';
           
@@ -73,7 +74,7 @@ export const EfficientBarredGalaxyDustLanes: React.FC<EfficientBarredGalaxyDustL
           y = (seededRandom() - 0.5) * 800;
           
         } else if (rand < 0.35) {
-          // Bar core
+          // Bar core - dense central bar
           particleType = 'bar-core';
           densityType = 'high';
           
@@ -86,7 +87,7 @@ export const EfficientBarredGalaxyDustLanes: React.FC<EfficientBarredGalaxyDustL
           y = (seededRandom() - 0.5) * 1000;
           
         } else if (rand < 0.55) {
-          // Pressure waves
+          // Pressure waves from bar
           particleType = 'bar-waves';
           densityType = seededRandom() < 0.6 ? 'medium' : 'low';
           
@@ -99,7 +100,7 @@ export const EfficientBarredGalaxyDustLanes: React.FC<EfficientBarredGalaxyDustL
           y = (seededRandom() - 0.5) * 1500;
           
         } else {
-          // Spiral arms
+          // Spiral arms extending from bar ends
           particleType = 'arms';
           densityType = 'high';
           
@@ -137,22 +138,22 @@ export const EfficientBarredGalaxyDustLanes: React.FC<EfficientBarredGalaxyDustL
         
         switch (particleType) {
           case 'central':
-            hue = 0.05 + seededRandom() * 0.1;
+            hue = 0.05 + seededRandom() * 0.1; // Orange-yellow core
             saturation = 0.9 + seededRandom() * 0.1;
             lightness = (0.8 + seededRandom() * 0.2) * colorIntensity;
             break;
           case 'bar-core':
-            hue = 0.08 + seededRandom() * 0.06;
+            hue = 0.08 + seededRandom() * 0.06; // Golden bar
             saturation = 0.95 + seededRandom() * 0.05;
             lightness = (0.9 + seededRandom() * 0.1) * colorIntensity;
             break;
           case 'bar-waves':
-            hue = 0.15 + seededRandom() * 0.15;
+            hue = 0.15 + seededRandom() * 0.15; // Reddish waves
             saturation = 0.5 + seededRandom() * 0.3;
             lightness = (0.3 + seededRandom() * 0.2) * colorIntensity;
             break;
           default: // arms
-            hue = 0.12 + seededRandom() * 0.12;
+            hue = 0.12 + seededRandom() * 0.12; // Yellow-orange arms
             saturation = 0.8 + seededRandom() * 0.2;
             lightness = (0.7 - armDistanceRatio * 0.3 + seededRandom() * 0.3) * colorIntensity;
         }
@@ -175,7 +176,7 @@ export const EfficientBarredGalaxyDustLanes: React.FC<EfficientBarredGalaxyDustL
       }
     }
     
-    console.log(`Generated ${numParticles} efficient particles with optimized rendering`);
+    console.log(`Generated ${numParticles} efficient GPU particles`);
     
     return {
       positions: positionsArray,
@@ -185,7 +186,7 @@ export const EfficientBarredGalaxyDustLanes: React.FC<EfficientBarredGalaxyDustL
   }, [numParticles, particleSize, galaxy.seed, colorIntensity]);
 
   return (
-    <OptimizedDustLaneBase
+    <GPUParticleSystem
       numParticles={numParticles}
       particleSize={particleSize}
       opacity={opacity}
