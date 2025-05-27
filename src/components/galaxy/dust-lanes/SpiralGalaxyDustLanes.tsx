@@ -29,7 +29,7 @@ export const SpiralGalaxyDustLanes: React.FC<SpiralGalaxyDustLanesProps> = ({
       return seedValue / 233280;
     };
     
-    console.log(`Generating spiral galaxy with realistic arm dynamics for galaxy ${galaxy.seed}`);
+    console.log(`Generating spiral galaxy with realistic coloration for galaxy ${galaxy.seed}`);
     
     const galaxyRadius = 50000;
     const coreRadius = galaxyRadius * 0.12;  // Central bulge
@@ -127,33 +127,78 @@ export const SpiralGalaxyDustLanes: React.FC<SpiralGalaxyDustLanesProps> = ({
       positionsArray[i3 + 1] = y;
       positionsArray[i3 + 2] = z;
       
-      // Enhanced colors based on particle type and density
+      // Realistic colors based on astronomical observations
       const dustColor = new THREE.Color();
       
       if (particleType === 'bulge') {
-        // Central bulge - warm, bright colors (older stars)
-        dustColor.setHSL(
-          0.08 + seededRandom() * 0.08, // Orange to yellow
-          0.8 + seededRandom() * 0.2,   // High saturation
-          0.7 + seededRandom() * 0.3    // Bright
-        );
+        // Central bulge - warm yellow-orange colors (older stellar population)
+        const colorVariation = seededRandom();
+        if (colorVariation < 0.7) {
+          // Dominant warm yellow-orange
+          dustColor.setRGB(
+            0.9 + seededRandom() * 0.1,   // High red
+            0.7 + seededRandom() * 0.2,   // Medium-high green  
+            0.4 + seededRandom() * 0.3    // Lower blue
+          );
+        } else {
+          // Some warmer orange tones
+          dustColor.setRGB(
+            1.0,                          // Full red
+            0.5 + seededRandom() * 0.3,   // Medium green
+            0.2 + seededRandom() * 0.2    // Low blue
+          );
+        }
       } else if (particleType === 'arms') {
-        // Spiral arms - bright, blue-white colors (active star formation)
-        const brightness = 0.8 - armDistanceRatio * 0.2; // Slight distance falloff
+        // Spiral arms - bright blue-white star formation regions with some variety
+        const colorVariation = seededRandom();
+        const brightness = 0.9 - armDistanceRatio * 0.1; // Slight distance falloff
         
-        dustColor.setHSL(
-          0.55 + seededRandom() * 0.15, // Blue to cyan
-          0.7 + seededRandom() * 0.3,   // High saturation
-          brightness + seededRandom() * 0.2
-        );
+        if (colorVariation < 0.6) {
+          // Dominant bright blue-white (active star formation)
+          dustColor.setRGB(
+            0.7 + seededRandom() * 0.3,   // High red for white
+            0.8 + seededRandom() * 0.2,   // High green for white
+            1.0                           // Full blue
+          );
+          dustColor.multiplyScalar(brightness);
+        } else if (colorVariation < 0.85) {
+          // Some cyan-blue regions
+          dustColor.setRGB(
+            0.4 + seededRandom() * 0.3,   // Medium red
+            0.8 + seededRandom() * 0.2,   // High green
+            1.0                           // Full blue
+          );
+          dustColor.multiplyScalar(brightness);
+        } else {
+          // Occasional reddish dust lanes within arms
+          dustColor.setRGB(
+            0.8 + seededRandom() * 0.2,   // High red
+            0.3 + seededRandom() * 0.2,   // Low green
+            0.2 + seededRandom() * 0.1    // Very low blue
+          );
+          dustColor.multiplyScalar(brightness * 0.6);
+        }
       } else {
-        // Inter-arm dust - dimmer, redder colors
+        // Inter-arm dust - darker reddish-brown dust lanes
         const brightness = densityType === 'medium' ? 0.3 : 0.15;
-        dustColor.setHSL(
-          0.0 + seededRandom() * 0.1,   // Red to orange
-          0.4 + seededRandom() * 0.4,   // Medium saturation
-          brightness + seededRandom() * 0.15
-        );
+        const colorVariation = seededRandom();
+        
+        if (colorVariation < 0.8) {
+          // Dominant reddish-brown dust
+          dustColor.setRGB(
+            0.6 + seededRandom() * 0.3,   // Medium-high red
+            0.3 + seededRandom() * 0.2,   // Low green
+            0.1 + seededRandom() * 0.1    // Very low blue
+          );
+        } else {
+          // Some darker brown regions
+          dustColor.setRGB(
+            0.4 + seededRandom() * 0.2,   // Lower red
+            0.2 + seededRandom() * 0.1,   // Very low green
+            0.05 + seededRandom() * 0.05  // Minimal blue
+          );
+        }
+        dustColor.multiplyScalar(brightness);
       }
       
       colorsArray[i3] = dustColor.r;
@@ -183,7 +228,7 @@ export const SpiralGalaxyDustLanes: React.FC<SpiralGalaxyDustLanesProps> = ({
       sizesArray[i] = baseSize * sizeMultiplier;
     }
     
-    console.log(`Generated ${numParticles} particles with spiral arm dynamics and bulge structure`);
+    console.log(`Generated ${numParticles} particles with realistic spiral galaxy coloration`);
     
     return {
       positions: positionsArray,
