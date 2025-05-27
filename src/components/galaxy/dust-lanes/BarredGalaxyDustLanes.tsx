@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import * as THREE from 'three';
 import { DustLaneBase } from './DustLaneBase';
@@ -71,7 +70,10 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
         
         x = Math.cos(finalAngle) * spiralDistance + Math.cos(widthAngle) * widthOffset;
         z = Math.sin(finalAngle) * spiralDistance + Math.sin(widthAngle) * widthOffset;
-        y = (seededRandom() - 0.5) * 600;
+        
+        // Increased vertical thickness for central region
+        const baseThickness = 800;
+        y = (seededRandom() - 0.5) * baseThickness;
         
       } else if (rand < 0.45) {
         // DENSE BAR CORE - very high density
@@ -87,7 +89,10 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
         
         x = barProgress * barLength * 0.9;
         z = barOffset;
-        y = (seededRandom() - 0.5) * 800;
+        
+        // Increased vertical thickness for bar region
+        const baseThickness = 1000;
+        y = (seededRandom() - 0.5) * baseThickness;
         
       } else if (rand < 0.65) {
         // BAR PRESSURE WAVES - medium to low density
@@ -107,7 +112,10 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
         
         x = baseX + Math.cos(waveAngle) * waveOffset * 0.3;
         z = waveOffset + Math.sin(waveAngle) * waveOffset * 0.3;
-        y = (seededRandom() - 0.5) * 1200;
+        
+        // Increased vertical thickness for pressure waves
+        const baseThickness = 1500;
+        y = (seededRandom() - 0.5) * baseThickness;
         
       } else {
         // SPIRAL ARMS - high density (where star systems live)
@@ -146,7 +154,16 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
         
         x = barEndX + Math.cos(finalAngle) * armDistance + Math.cos(widthAngle) * widthOffset;
         z = barEndZ + Math.sin(finalAngle) * armDistance + Math.sin(widthAngle) * widthOffset;
-        y = (seededRandom() - 0.5) * (600 + armDistanceRatio * 600);
+        
+        // Increased vertical thickness for spiral arms with distance-based scaling
+        const distanceFromCenter = Math.sqrt(x * x + z * z);
+        const normalizedDistance = distanceFromCenter / (galaxyRadius * 0.9);
+        
+        // Base thickness increases with distance, creating a flared halo
+        const baseThickness = 800;
+        const haloThickness = baseThickness * (1 + normalizedDistance * 2.5);
+        
+        y = (seededRandom() - 0.5) * haloThickness;
       }
       
       positionsArray[i3] = x;

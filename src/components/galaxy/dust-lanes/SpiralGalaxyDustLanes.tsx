@@ -39,7 +39,17 @@ export const SpiralGalaxyDustLanes: React.FC<SpiralGalaxyDustLanesProps> = ({
       
       let x = Math.cos(angle) * distance;
       let z = Math.sin(angle) * distance;
-      let y = (Math.random() - 0.5) * 2000;
+      
+      // Increased vertical distribution for thicker galactic halo
+      // Scale thickness based on distance from center for realistic halo shape
+      const distanceFromCenter = Math.sqrt(x * x + z * z);
+      const normalizedDistance = distanceFromCenter / (galacticRadius * 0.8);
+      
+      // Base thickness increases with distance, creating a flared halo
+      const baseThickness = 2000;
+      const haloThickness = baseThickness * (1 + normalizedDistance * 3);
+      
+      let y = (Math.random() - 0.5) * haloThickness;
       
       // Calculate distance from galactic center
       const distanceFromCore = Math.sqrt(x * x + z * z);
@@ -57,8 +67,8 @@ export const SpiralGalaxyDustLanes: React.FC<SpiralGalaxyDustLanesProps> = ({
         x = Math.cos(coreAngle) * newDistance;
         z = Math.sin(coreAngle) * newDistance;
         
-        // Add vertical displacement for 3D effect
-        y += deformationFactor * (Math.random() - 0.5) * 1500;
+        // Add vertical displacement for 3D effect around core
+        y += deformationFactor * (Math.random() - 0.5) * 2000;
       }
       
       positions[i * 3] = x;
