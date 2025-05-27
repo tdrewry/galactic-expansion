@@ -47,14 +47,14 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
       let armDistanceRatio = 0;
       
       if (rand < 0.25) {
-        // CENTRAL SPIRAL REGION - feeds into the bar
+        // ELLIPTICAL CENTRAL SPIRAL - connects to bar endpoints
         particleType = 'central';
         
         const spiralProgress = seededRandom();
         const spiralDistance = spiralProgress * coreRadius;
         
-        // Create tight spiral around core that connects to bar ends
-        const spiralTightness = 3.0; // Tight spiral
+        // Create elliptical spiral that connects to bar endpoints
+        const spiralTightness = 2.5; // Moderate spiral
         const spiralAngle = spiralProgress * Math.PI * spiralTightness;
         
         // Two spiral arms that feed into the bar ends
@@ -62,18 +62,36 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
         const baseAngle = armIndex === 0 ? 0 : Math.PI; // Opposite directions
         const finalAngle = baseAngle + spiralAngle;
         
+        // ELLIPTICAL DEFORMATION
+        // Create ellipse with major axis along the bar direction (x-axis)
+        const ellipseRatioX = 1.6; // Stretch along x-axis to connect to bar
+        const ellipseRatioZ = 0.7; // Compress along z-axis
+        
+        // Base position on ellipse
+        const baseX = Math.cos(finalAngle) * spiralDistance * ellipseRatioX;
+        const baseZ = Math.sin(finalAngle) * spiralDistance * ellipseRatioZ;
+        
+        // As we approach the outer edge, bend towards bar connection points
+        const connectionFactor = spiralProgress; // 0 at center, 1 at edge
+        const barConnectionX = (barLength * 0.85) * (armIndex === 0 ? 1 : -1);
+        const barConnectionZ = 0;
+        
+        // Blend between elliptical spiral and bar connection point
+        const blendedX = baseX + connectionFactor * 0.3 * (barConnectionX - baseX);
+        const blendedZ = baseZ + connectionFactor * 0.3 * (barConnectionZ - baseZ);
+        
         // Spiral width increases as we move outward
-        const spiralWidth = 800 + spiralProgress * 1200;
+        const spiralWidth = 600 + spiralProgress * 1000;
         const widthOffset = (seededRandom() - 0.5) * spiralWidth;
         const widthAngle = finalAngle + Math.PI / 2;
         
         // Add noise to central spiral
-        const centralNoiseScale = 400;
+        const centralNoiseScale = 300;
         const noiseX = (seededRandom() - 0.5) * centralNoiseScale;
         const noiseZ = (seededRandom() - 0.5) * centralNoiseScale;
         
-        x = Math.cos(finalAngle) * spiralDistance + Math.cos(widthAngle) * widthOffset + noiseX;
-        z = Math.sin(finalAngle) * spiralDistance + Math.sin(widthAngle) * widthOffset + noiseZ;
+        x = blendedX + Math.cos(widthAngle) * widthOffset * ellipseRatioX + noiseX;
+        z = blendedZ + Math.sin(widthAngle) * widthOffset * ellipseRatioZ + noiseZ;
         y = (seededRandom() - 0.5) * 800; // Thin disk
         
       } else if (rand < 0.6) {
@@ -191,7 +209,7 @@ export const BarredGalaxyDustLanes: React.FC<BarredGalaxyDustLanesProps> = ({
       sizesArray[i] = baseSize * sizeMultiplier * (0.8 + seededRandom() * 1.4);
     }
     
-    console.log(`Generated ${numParticles} particles with central spiral → bar → arms structure`);
+    console.log(`Generated ${numParticles} particles with elliptical central spiral → bar → arms structure`);
     
     return {
       positions: positionsArray,
