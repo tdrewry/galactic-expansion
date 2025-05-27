@@ -46,49 +46,8 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
     return sizeMap[system.starType] || { core: 20, innerGlow: 35, outerGlow: 60, spikeLength: 80 };
   }, [system.starType]);
 
-  useFrame((state) => {
-    // Core bright twinkling
-    if (coreRef.current) {
-      const twinkle = Math.sin(state.clock.elapsedTime * 8 + system.position[0] * 0.001) * 0.3 + 0.7;
-      (coreRef.current.material as MeshBasicMaterial).opacity = twinkle;
-      
-      if (isSelected) {
-        coreRef.current.scale.setScalar(Math.sin(state.clock.elapsedTime * 4) * 0.4 + 1.2);
-      } else {
-        coreRef.current.scale.setScalar(1);
-      }
-    }
-    
-    // Inner glow pulsing
-    if (innerGlowRef.current) {
-      const pulse = Math.sin(state.clock.elapsedTime * 4 + system.position[1] * 0.001) * 0.2 + 0.8;
-      (innerGlowRef.current.material as MeshBasicMaterial).opacity = pulse;
-      
-      if (isSelected) {
-        innerGlowRef.current.scale.setScalar(Math.sin(state.clock.elapsedTime * 3) * 0.3 + 1.1);
-      } else {
-        innerGlowRef.current.scale.setScalar(1);
-      }
-    }
-    
-    // Outer glow breathing
-    if (outerGlowRef.current) {
-      const breath = Math.sin(state.clock.elapsedTime * 2 + system.position[2] * 0.001) * 0.1 + 0.9;
-      (outerGlowRef.current.material as MeshBasicMaterial).opacity = 0.4 * breath;
-    }
-    
-    // Rotating spikes
-    if (spikesRef.current) {
-      spikesRef.current.rotation.z += 0.02;
-    }
-    
-    // Selection ring animation
-    if (selectionRingRef.current && isSelected) {
-      selectionRingRef.current.rotation.z += 0.05;
-      const ringPulse = Math.sin(state.clock.elapsedTime * 6) * 0.3 + 0.7;
-      (selectionRingRef.current.material as MeshBasicMaterial).opacity = ringPulse;
-    }
-  });
+  // DISABLED ALL ANIMATIONS FOR PERFORMANCE TESTING
+  console.log('StarSystem animations disabled for performance testing');
 
   const handleClick = (event: ThreeEvent<MouseEvent>) => {
     console.log('StarSystem click detected:', system.id, 'at position:', system.position);
