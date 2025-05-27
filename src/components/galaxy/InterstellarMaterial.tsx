@@ -1,4 +1,3 @@
-
 import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Group } from 'three';
@@ -77,9 +76,6 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
           color="#664422"
           opacity={lane.opacity}
           density={0.5}
-          cloudType="dust"
-          raymarchingSamples={raymarchingSamples}
-          minimumVisibility={minimumVisibility}
         />
       ))}
     </group>
