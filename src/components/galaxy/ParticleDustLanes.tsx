@@ -66,6 +66,7 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
       const isBarParticle = seededRandom() < 0.3;
       
       let x, z, y;
+      let armDistanceRatio = 0; // Initialize for all particles
       
       if (isBarParticle) {
         // Central bar particles - distributed along the bar
@@ -77,13 +78,16 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
         z = barPosition * Math.sin(barAngle) + barOffset * Math.cos(barAngle);
         y = (seededRandom() - 0.5) * 400; // Thin disk
         
+        // Bar particles don't have arm distance ratio
+        armDistanceRatio = 0;
+        
       } else {
         // Spiral arm particles - two arms extending from bar ends
         const armIndex = Math.floor(seededRandom() * 2); // 0 or 1 for two arms
         
         // Distance along the spiral arm (0 to 1, with proper density falloff)
         // Use power distribution to reduce density at outer edges
-        const armDistanceRatio = Math.pow(seededRandom(), 1.5); // This creates density falloff
+        armDistanceRatio = Math.pow(seededRandom(), 1.5); // This creates density falloff
         const armDistance = armDistanceRatio * galaxyRadius * 0.8;
         
         // Starting point: end of the bar
