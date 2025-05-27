@@ -14,6 +14,9 @@ interface GalaxySceneProps {
   onSystemSelect: (system: StarSystemType | null) => void;
   raymarchingSamples?: number;
   minimumVisibility?: number;
+  showDustLanes?: boolean;
+  showStarFormingRegions?: boolean;
+  showCosmicDust?: boolean;
 }
 
 export const GalaxyScene: React.FC<GalaxySceneProps> = ({ 
@@ -21,7 +24,10 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
   selectedSystem, 
   onSystemSelect,
   raymarchingSamples = 8,
-  minimumVisibility = 0.1
+  minimumVisibility = 0.1,
+  showDustLanes = true,
+  showStarFormingRegions = true,
+  showCosmicDust = true
 }) => {
   const { camera, gl } = useThree();
   const controlsRef = useRef<any>(null);
@@ -85,6 +91,9 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
         galaxy={galaxy} 
         raymarchingSamples={raymarchingSamples}
         minimumVisibility={minimumVisibility}
+        showDustLanes={showDustLanes}
+        showStarFormingRegions={showStarFormingRegions}
+        showCosmicDust={showCosmicDust}
       />
       
       {/* Star Systems */}
