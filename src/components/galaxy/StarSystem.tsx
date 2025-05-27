@@ -46,8 +46,16 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
     return sizeMap[system.starType] || { core: 20, innerGlow: 35, outerGlow: 60, spikeLength: 80 };
   }, [system.starType]);
 
-  // DISABLED ALL ANIMATIONS FOR PERFORMANCE TESTING
-  console.log('StarSystem animations disabled for performance testing');
+  // Only twinkling animation enabled for performance
+  useFrame((state) => {
+    if (coreRef.current && innerGlowRef.current && outerGlowRef.current) {
+      // Twinkling effect - vary opacity slightly
+      const twinkle = 0.8 + Math.sin(state.clock.elapsedTime * 3 + system.id * 0.1) * 0.2;
+      coreRef.current.material.opacity = twinkle;
+      innerGlowRef.current.material.opacity = 0.8 * twinkle;
+      outerGlowRef.current.material.opacity = 0.4 * twinkle;
+    }
+  });
 
   const handleClick = (event: ThreeEvent<MouseEvent>) => {
     console.log('StarSystem click detected:', system.id, 'at position:', system.position);
