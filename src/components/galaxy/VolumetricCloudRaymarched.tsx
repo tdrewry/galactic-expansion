@@ -31,6 +31,7 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
   const vertexShader = `
     varying vec3 vWorldPosition;
     varying vec3 vLocalPosition;
+    varying vec3 vViewDirection;
     varying vec2 vUv;
     
     void main() {
@@ -38,6 +39,11 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
       vLocalPosition = position;
       vec4 worldPos = modelMatrix * vec4(position, 1.0);
       vWorldPosition = worldPos.xyz;
+      
+      // Calculate view direction from camera to vertex
+      vec4 viewPos = modelViewMatrix * vec4(position, 1.0);
+      vViewDirection = normalize(-viewPos.xyz);
+      
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     }
   `;
@@ -51,9 +57,11 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
     uniform float size;
     uniform int raymarchingSamples;
     uniform float minimumVisibility;
+    uniform vec3 cameraPosition;
     
     varying vec3 vWorldPosition;
     varying vec3 vLocalPosition;
+    varying vec3 vViewDirection;
     varying vec2 vUv;
 
     // Improved noise functions
@@ -91,74 +99,115 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
       return value;
     }
 
-    // Cloud density function
+    // Enhanced cloud density function with more variation
     float cloudDensity(vec3 pos) {
       // Base cloud shape with animated distortion
-      vec3 animatedPos = pos + time * 0.01;
+      vec3 animatedPos = pos + time * 0.02;
       
       // Create base cloud volume with distance falloff
       float dist = length(pos);
-      float baseDensity = 1.0 - smoothstep(0.3, 1.0, dist);
+      float baseDensity = 1.0 - smoothstep(0.2, 0.9, dist);
       
-      // Add noise layers for detail
-      float noise1 = fbm(animatedPos * 2.0, 3);
-      float noise2 = fbm(animatedPos * 5.0, 2);
+      // Add multiple noise layers for realistic cloud structure
+      float noise1 = fbm(animatedPos * 1.5, 4);
+      float noise2 = fbm(animatedPos * 3.0, 3);
+      float noise3 = fbm(animatedPos * 8.0, 2);
       
-      // Combine noise layers
-      float cloudNoise = noise1 * 0.7 + noise2 * 0.3;
+      // Combine noise layers with different weights
+      float cloudNoise = noise1 * 0.5 + noise2 * 0.3 + noise3 * 0.2;
       
-      // Apply cloud type variations
+      // Apply cloud type variations with more pronounced differences
       if(cloudType < 0.5) { 
-        // dust - more wispy and sparse
-        cloudNoise = cloudNoise * 0.8 + 0.2;
-        baseDensity *= 1.2;
+        // dust - wispy and sparse with holes
+        cloudNoise = cloudNoise * 0.7 + 0.1;
+        baseDensity *= 0.8;
+        // Add holes for dust clouds
+        float holes = fbm(animatedPos * 4.0, 2);
+        cloudNoise *= smoothstep(0.3, 0.7, holes);
       } else if(cloudType < 1.5) { 
-        // nebula - more vibrant and dense
-        cloudNoise = cloudNoise * 1.4 + 0.3;
-        baseDensity *= 1.5;
+        // nebula - dense and colorful
+        cloudNoise = cloudNoise * 1.2 + 0.4;
+        baseDensity *= 1.4;
       } else { 
-        // cosmic - medium density with structure
-        cloudNoise = cloudNoise * 1.0 + 0.25;
-        baseDensity *= 1.3;
+        // cosmic - medium density with swirling structure
+        cloudNoise = cloudNoise * 1.0 + 0.3;
+        baseDensity *= 1.1;
+        // Add swirling pattern
+        float swirl = sin(animatedPos.x * 2.0 + animatedPos.z * 1.5 + time * 0.5) * 0.1;
+        cloudNoise += swirl;
       }
       
-      return baseDensity * cloudNoise * density;
+      return clamp(baseDensity * cloudNoise * density, 0.0, 1.0);
     }
 
     void main() {
-      // Use UV coordinates for simpler but more reliable sampling
-      vec3 samplePos = vLocalPosition;
+      // Calculate ray direction from camera through current pixel
+      vec3 rayOrigin = cameraPosition;
+      vec3 rayDir = normalize(vWorldPosition - cameraPosition);
       
-      // Sample cloud density at current position
-      float cloudSample = cloudDensity(samplePos);
+      // Find intersection with sphere bounds
+      vec3 sphereCenter = vec3(0.0);
+      float sphereRadius = 1.0;
       
-      // Add some depth by sampling along the view ray
-      vec3 rayDir = normalize(vLocalPosition);
-      float totalDensity = 0.0;
+      // Ray-sphere intersection
+      vec3 oc = rayOrigin - sphereCenter;
+      float b = dot(oc, rayDir);
+      float c = dot(oc, oc) - sphereRadius * sphereRadius;
+      float discriminant = b * b - c;
       
-      // Dynamic raymarching with configurable samples
-      float stepSize = 2.0 / float(raymarchingSamples);
-      for(int i = 0; i < 32; i++) {
-        if(i >= raymarchingSamples) break;
-        vec3 samplePoint = samplePos + rayDir * float(i) * stepSize;
-        if(length(samplePoint) > 1.0) break;
-        totalDensity += cloudDensity(samplePoint) / float(raymarchingSamples);
+      if (discriminant < 0.0) {
+        discard;
       }
       
-      // Combine samples
-      float finalDensity = max(cloudSample, totalDensity);
+      float t1 = -b - sqrt(discriminant);
+      float t2 = -b + sqrt(discriminant);
       
-      // Calculate final alpha with higher base visibility
-      float alpha = finalDensity * opacity * 2.0;
-      alpha = clamp(alpha, 0.0, 1.0);
+      // Ensure we start from the front face
+      float tNear = max(t1, 0.0);
+      float tFar = t2;
       
-      // Add some lighting variation
+      if (tNear >= tFar) {
+        discard;
+      }
+      
+      // Perform raymarching
+      float stepSize = (tFar - tNear) / float(raymarchingSamples);
+      float totalDensity = 0.0;
+      float transmittance = 1.0;
+      
+      for(int i = 0; i < 64; i++) {
+        if(i >= raymarchingSamples) break;
+        
+        float t = tNear + float(i) * stepSize;
+        vec3 samplePoint = rayOrigin + rayDir * t;
+        
+        // Transform to local space
+        vec3 localPoint = (samplePoint - vWorldPosition) / size;
+        
+        float sampleDensity = cloudDensity(localPoint);
+        
+        // Accumulate density with proper integration
+        totalDensity += sampleDensity * stepSize;
+        transmittance *= exp(-sampleDensity * stepSize * 2.0);
+        
+        // Early exit if we're fully opaque
+        if (transmittance < 0.01) break;
+      }
+      
+      // Calculate final alpha
+      float alpha = 1.0 - transmittance;
+      alpha *= opacity;
+      
+      // Add lighting variation based on view angle
       vec3 lightDir = normalize(vec3(1.0, 1.0, 0.5));
-      float lighting = 0.6 + 0.4 * max(0.0, dot(normalize(vLocalPosition), lightDir));
+      float lighting = 0.4 + 0.6 * max(0.0, dot(normalize(vLocalPosition), lightDir));
       vec3 finalColor = color * lighting;
       
-      // Apply configurable minimum visibility
+      // Apply configurable minimum visibility for debugging
       alpha = max(alpha, minimumVisibility);
+      
+      // Make the effect more visible by enhancing contrast
+      alpha = smoothstep(0.0, 1.0, alpha);
       
       gl_FragColor = vec4(finalColor, alpha);
     }
@@ -167,21 +216,23 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
   const uniforms = useMemo(() => ({
     time: { value: 0.0 },
     color: { value: new THREE.Color(color) },
-    opacity: { value: opacity * 3.0 },
-    density: { value: density * 2.0 },
+    opacity: { value: opacity * 2.0 },
+    density: { value: density * 1.5 },
     size: { value: size },
     cloudType: { value: cloudType === 'dust' ? 0.0 : cloudType === 'nebula' ? 1.0 : 2.0 },
     raymarchingSamples: { value: raymarchingSamples },
-    minimumVisibility: { value: minimumVisibility }
+    minimumVisibility: { value: minimumVisibility },
+    cameraPosition: { value: new THREE.Vector3() }
   }), [color, opacity, density, size, cloudType, raymarchingSamples, minimumVisibility]);
 
   useFrame((state) => {
     if (materialRef.current) {
       materialRef.current.uniforms.time.value = state.clock.elapsedTime;
+      materialRef.current.uniforms.cameraPosition.value.copy(state.camera.position);
     }
   });
 
-  console.log('VolumetricCloudRaymarched created at position:', position, 'size:', size, 'type:', cloudType, 'samples:', raymarchingSamples, 'minVis:', minimumVisibility);
+  console.log('VolumetricCloudRaymarched updated - position:', position, 'size:', size, 'type:', cloudType, 'samples:', raymarchingSamples, 'minVis:', minimumVisibility);
 
   return (
     <mesh ref={meshRef} position={position}>
@@ -195,7 +246,7 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
         blending={THREE.AdditiveBlending}
         depthWrite={false}
         depthTest={true}
-        side={THREE.DoubleSide}
+        side={THREE.FrontSide}
       />
     </mesh>
   );
