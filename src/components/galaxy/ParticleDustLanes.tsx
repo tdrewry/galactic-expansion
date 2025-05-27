@@ -1,4 +1,3 @@
-
 import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -25,8 +24,8 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
     const sizesArray = new Float32Array(numParticles);
     
     // Only generate particles for barred galaxies
-    if (galaxy.type !== 'barred') {
-      console.log(`Galaxy ${galaxy.seed}: Not a barred galaxy (${galaxy.type}), skipping dust lanes`);
+    if (galaxy.galaxyType !== 'barred-spiral') {
+      console.log(`Galaxy ${galaxy.seed}: Not a barred galaxy (${galaxy.galaxyType}), skipping dust lanes`);
       return {
         positions: positionsArray,
         colors: colorsArray,
@@ -140,10 +139,10 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
       colors: colorsArray,
       sizes: sizesArray
     };
-  }, [numParticles, particleSize, galaxy.seed, galaxy.type]);
+  }, [numParticles, particleSize, galaxy.seed, galaxy.galaxyType]);
   
   // Only render if this is a barred galaxy
-  if (galaxy.type !== 'barred') {
+  if (galaxy.galaxyType !== 'barred-spiral') {
     return null;
   }
   
