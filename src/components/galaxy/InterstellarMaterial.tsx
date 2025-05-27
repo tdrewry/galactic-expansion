@@ -25,128 +25,41 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
   const groupRef = useRef<Group>(null);
   
   const { cosmicDust } = useMemo(() => {
-    console.log('Generating cosmic dust with new volumetric clouds for galaxy type:', galaxy.galaxyType);
+    console.log('Generating cosmic dust with volumetric clouds for galaxy type:', galaxy.galaxyType);
     
     const cosmicDust = [];
 
-    // Helper function to calculate star system density at a given position
-    const calculateStarDensity = (position: [number, number, number], radius: number = 8000) => {
-      const [x, y, z] = position;
-      let nearbyStars = 0;
-      
-      for (const system of galaxy.starSystems) {
-        const [sx, sy, sz] = system.position;
-        const distance = Math.sqrt(
-          Math.pow(x - sx, 2) + 
-          Math.pow(y - sy, 2) + 
-          Math.pow(z - sz, 2)
-        );
+    if (showCosmicDust) {
+      if (galaxy.galaxyType === 'spiral' || galaxy.galaxyType === 'barred-spiral') {
+        console.log('Creating spiral galaxy cosmic dust');
         
-        if (distance <= radius) {
-          nearbyStars++;
+        // Generate fewer, larger cosmic dust clouds for testing
+        for (let i = 0; i < 10; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const distance = Math.random() * 30000;
+          
+          const position: [number, number, number] = [
+            Math.cos(angle) * distance,
+            (Math.random() - 0.5) * 2000,
+            Math.sin(angle) * distance
+          ];
+
+          cosmicDust.push({
+            id: `cosmic-dust-${i}`,
+            position,
+            size: 3000 + Math.random() * 2000, // Larger sizes for visibility
+            color: '#aaaaaa',
+            opacity: 0.6,
+            density: 0.8
+          });
         }
-      }
-      
-      // Normalize density (typical values might be 0-20 stars in radius)
-      return Math.min(nearbyStars / 15.0, 1.0);
-    };
-    
-    if (galaxy.galaxyType === 'spiral' || galaxy.galaxyType === 'barred-spiral') {
-      console.log('Creating spiral galaxy cosmic dust with volumetric clouds');
-      
-      // Generate cosmic dust throughout the galaxy
-      for (let i = 0; i < 40; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const distance = Math.random() * 50000;
-        
-        const position: [number, number, number] = [
-          Math.cos(angle) * distance,
-          (Math.random() - 0.5) * 3000,
-          Math.sin(angle) * distance
-        ];
-
-        // Calculate star density for cosmic dust
-        const density = calculateStarDensity(position);
-        
-        // Base intensity for cosmic dust
-        const baseIntensity = 0.3 + (density * 0.5);
-        
-        // Color transitions from darker gray to lighter gray based on density
-        const grayValue = Math.floor(80 + (density * 120)); // 80-200 range
-        const dustColor = `rgb(${grayValue}, ${grayValue}, ${grayValue})`;
-        
-        cosmicDust.push({
-          id: `cosmic-dust-${i}`,
-          position,
-          size: 2000 + Math.random() * 1500, // Smaller sizes for better volumetric effect
-          color: dustColor,
-          opacity: baseIntensity,
-          density: 0.4 + (density * 0.4) // 0.4 to 0.8 range
-        });
-      }
-    } else if (galaxy.galaxyType === 'globular') {
-      console.log('Creating globular cluster volumetric cosmic dust');
-      
-      for (let i = 0; i < 25; i++) {
-        const distance = Math.pow(Math.random(), 0.5) * 30000;
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.acos(1 - 2 * Math.random());
-        
-        const x = distance * Math.sin(phi) * Math.cos(theta);
-        const y = distance * Math.sin(phi) * Math.sin(theta);
-        const z = distance * Math.cos(phi);
-        
-        const position: [number, number, number] = [x, y, z];
-        const density = calculateStarDensity(position);
-        const baseIntensity = 0.3 + (density * 0.5);
-        const grayValue = Math.floor(80 + (density * 120));
-        const dustColor = `rgb(${grayValue}, ${grayValue}, ${grayValue})`;
-        
-        cosmicDust.push({
-          id: `globular-dust-${i}`,
-          position,
-          size: 2200 + Math.random() * 1300,
-          color: dustColor,
-          opacity: baseIntensity,
-          density: 0.4 + (density * 0.4)
-        });
-      }
-    } else if (galaxy.galaxyType === 'elliptical') {
-      console.log('Creating elliptical galaxy volumetric cosmic dust');
-      
-      for (let i = 0; i < 20; i++) {
-        const distance = Math.pow(Math.random(), 0.7) * 40000;
-        const angle = Math.random() * Math.PI * 2;
-        const height = (Math.random() - 0.5) * distance * 0.3;
-        
-        const position: [number, number, number] = [
-          distance * Math.cos(angle),
-          height,
-          distance * Math.sin(angle) * 0.6
-        ];
-
-        const density = calculateStarDensity(position);
-        const baseIntensity = 0.3 + (density * 0.5);
-        const grayValue = Math.floor(80 + (density * 120));
-        const dustColor = `rgb(${grayValue}, ${grayValue}, ${grayValue})`;
-        
-        cosmicDust.push({
-          id: `elliptical-dust-${i}`,
-          position,
-          size: 2100 + Math.random() * 1200,
-          color: dustColor,
-          opacity: baseIntensity,
-          density: 0.4 + (density * 0.4)
-        });
       }
     }
     
-    console.log('Generated volumetric cosmic dust:', {
-      cosmicDust: cosmicDust.length
-    });
+    console.log('Generated volumetric cosmic dust clouds:', cosmicDust.length);
     
     return { cosmicDust };
-  }, [galaxy.galaxyType, galaxy.starSystems]);
+  }, [galaxy.galaxyType, galaxy.starSystems, showCosmicDust]);
 
   useFrame(() => {
     if (groupRef.current) {
@@ -154,18 +67,23 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({
     }
   });
 
+  console.log('InterstellarMaterial rendering with', cosmicDust.length, 'cosmic dust clouds');
+
   return (
     <group ref={groupRef}>
-      {showCosmicDust && cosmicDust.map((dust) => (
-        <VolumetricCloud3D
-          key={dust.id}
-          position={dust.position}
-          size={dust.size}
-          color={dust.color}
-          opacity={dust.opacity}
-          density={dust.density}
-        />
-      ))}
+      {showCosmicDust && cosmicDust.map((dust) => {
+        console.log('Rendering cosmic dust cloud:', dust.id, 'at position:', dust.position);
+        return (
+          <VolumetricCloud3D
+            key={dust.id}
+            position={dust.position}
+            size={dust.size}
+            color={dust.color}
+            opacity={dust.opacity}
+            density={dust.density}
+          />
+        );
+      })}
     </group>
   );
 };
