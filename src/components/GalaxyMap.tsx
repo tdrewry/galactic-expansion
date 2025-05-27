@@ -12,6 +12,8 @@ interface GalaxyMapProps {
   numNebulae?: number;
   binaryFrequency?: number;
   trinaryFrequency?: number;
+  raymarchingSamples?: number;
+  minimumVisibility?: number;
   onSystemSelect?: (system: StarSystem) => void;
   selectedSystem?: StarSystem | null;
   selectedStar?: 'primary' | 'binary' | 'trinary';
@@ -24,6 +26,8 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
   numNebulae = 50,
   binaryFrequency = 0.15,
   trinaryFrequency = 0.03,
+  raymarchingSamples = 8,
+  minimumVisibility = 0.1,
   onSystemSelect,
   selectedSystem: propSelectedSystem = null,
   selectedStar: propSelectedStar = 'primary',
@@ -77,6 +81,8 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
           galaxy={galaxy}
           selectedSystem={currentSelectedSystem}
           onSystemSelect={handleSystemSelect}
+          raymarchingSamples={raymarchingSamples}
+          minimumVisibility={minimumVisibility}
         />
       </Canvas>
       

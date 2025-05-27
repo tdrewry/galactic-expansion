@@ -7,9 +7,15 @@ import { VolumetricCloudRaymarched } from './VolumetricCloudRaymarched';
 
 interface InterstellarMaterialProps {
   galaxy: Galaxy;
+  raymarchingSamples?: number;
+  minimumVisibility?: number;
 }
 
-export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({ galaxy }) => {
+export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({ 
+  galaxy, 
+  raymarchingSamples = 8, 
+  minimumVisibility = 0.1 
+}) => {
   const groupRef = useRef<Group>(null);
   
   // Generate interstellar material based on galaxy type
@@ -206,6 +212,8 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({ gala
           opacity={dust.opacity}
           density={dust.density}
           cloudType="dust"
+          raymarchingSamples={raymarchingSamples}
+          minimumVisibility={minimumVisibility}
         />
       ))}
       
@@ -219,6 +227,8 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({ gala
           opacity={region.opacity}
           density={region.density}
           cloudType="nebula"
+          raymarchingSamples={raymarchingSamples}
+          minimumVisibility={minimumVisibility}
         />
       ))}
       
@@ -232,6 +242,8 @@ export const InterstellarMaterial: React.FC<InterstellarMaterialProps> = ({ gala
           opacity={dust.opacity}
           density={dust.density}
           cloudType="cosmic"
+          raymarchingSamples={raymarchingSamples}
+          minimumVisibility={minimumVisibility}
         />
       ))}
     </group>

@@ -17,6 +17,8 @@ const Index = () => {
   const [numNebulae, setNumNebulae] = useState(50);
   const [binaryFrequency, setBinaryFrequency] = useState(0.15);
   const [trinaryFrequency, setTriinaryFrequency] = useState(0.03);
+  const [raymarchingSamples, setRaymarchingSamples] = useState(8);
+  const [minimumVisibility, setMinimumVisibility] = useState(0.1);
   const [selectedSystem, setSelectedSystem] = useState<StarSystem | null>(null);
   const [selectedStar, setSelectedStar] = useState<'primary' | 'binary' | 'trinary'>('primary');
   const [selectedBody, setSelectedBody] = useState<Planet | Moon | null>(null);
@@ -41,11 +43,19 @@ const Index = () => {
     numNebulae: number;
     binaryFrequency: number;
     trinaryFrequency: number;
+    raymarchingSamples?: number;
+    minimumVisibility?: number;
   }) => {
     setNumSystems(settings.numSystems);
     setNumNebulae(settings.numNebulae);
     setBinaryFrequency(settings.binaryFrequency);
     setTriinaryFrequency(settings.trinaryFrequency);
+    if (settings.raymarchingSamples !== undefined) {
+      setRaymarchingSamples(settings.raymarchingSamples);
+    }
+    if (settings.minimumVisibility !== undefined) {
+      setMinimumVisibility(settings.minimumVisibility);
+    }
     
     // Auto-regenerate galaxy with new settings
     setSelectedSystem(null);
@@ -107,6 +117,8 @@ const Index = () => {
                 numNebulae={numNebulae}
                 binaryFrequency={binaryFrequency}
                 trinaryFrequency={trinaryFrequency}
+                raymarchingSamples={raymarchingSamples}
+                minimumVisibility={minimumVisibility}
                 onSettingsChange={handleSettingsChange}
               />
             </div>
@@ -126,6 +138,8 @@ const Index = () => {
                 numNebulae={numNebulae}
                 binaryFrequency={binaryFrequency}
                 trinaryFrequency={trinaryFrequency}
+                raymarchingSamples={raymarchingSamples}
+                minimumVisibility={minimumVisibility}
                 onSystemSelect={handleSystemSelect}
                 selectedSystem={selectedSystem}
                 selectedStar={selectedStar}
@@ -204,7 +218,7 @@ const Index = () => {
       </div>
 
       <footer className="bg-gray-900 p-2 border-t border-gray-700 text-center text-sm text-gray-400 flex-shrink-0">
-        <p>Procedurally Generated Galaxy | Seed: {galaxySeed} | Systems: {numSystems} | Nebulae: {numNebulae} | Binary: {Math.round(binaryFrequency * 100)}% | Trinary: {Math.round(trinaryFrequency * 100)}% | Click and drag to navigate, scroll to zoom</p>
+        <p>Procedurally Generated Galaxy | Seed: {galaxySeed} | Systems: {numSystems} | Nebulae: {numNebulae} | Binary: {Math.round(binaryFrequency * 100)}% | Trinary: {Math.round(trinaryFrequency * 100)}% | Raymarching: {raymarchingSamples} samples | Click and drag to navigate, scroll to zoom</p>
       </footer>
     </div>
   );

@@ -12,11 +12,15 @@ interface GalaxySettingsProps {
   numNebulae: number;
   binaryFrequency: number;
   trinaryFrequency: number;
+  raymarchingSamples?: number;
+  minimumVisibility?: number;
   onSettingsChange: (settings: {
     numSystems: number;
     numNebulae: number;
     binaryFrequency: number;
     trinaryFrequency: number;
+    raymarchingSamples?: number;
+    minimumVisibility?: number;
   }) => void;
 }
 
@@ -25,13 +29,17 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
   numNebulae,
   binaryFrequency,
   trinaryFrequency,
+  raymarchingSamples = 8,
+  minimumVisibility = 0.1,
   onSettingsChange
 }) => {
   const [localSettings, setLocalSettings] = React.useState({
     numSystems,
     numNebulae,
     binaryFrequency,
-    trinaryFrequency
+    trinaryFrequency,
+    raymarchingSamples,
+    minimumVisibility
   });
 
   const handleApply = () => {
@@ -43,7 +51,9 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
       numSystems: 1000,
       numNebulae: 50,
       binaryFrequency: 0.15,
-      trinaryFrequency: 0.03
+      trinaryFrequency: 0.03,
+      raymarchingSamples: 8,
+      minimumVisibility: 0.1
     };
     setLocalSettings(defaultSettings);
     onSettingsChange(defaultSettings);
@@ -61,7 +71,7 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
         <SheetHeader>
           <SheetTitle>Galaxy Generation Settings</SheetTitle>
           <SheetDescription>
-            Configure parameters for procedural galaxy generation
+            Configure parameters for procedural galaxy generation and cloud rendering
           </SheetDescription>
         </SheetHeader>
         
@@ -146,6 +156,54 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
                   />
                   <span className="text-sm text-gray-400">
                     ({Math.round(localSettings.trinaryFrequency * 100)}%)
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm">Cloud Rendering</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="raymarching">Raymarching Samples</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="raymarching"
+                    type="number"
+                    min="4"
+                    max="32"
+                    value={localSettings.raymarchingSamples}
+                    onChange={(e) => setLocalSettings(prev => ({
+                      ...prev,
+                      raymarchingSamples: parseInt(e.target.value) || 8
+                    }))}
+                  />
+                  <span className="text-sm text-gray-400">
+                    (Higher = better quality, lower performance)
+                  </span>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="visibility">Minimum Visibility</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="visibility"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="1"
+                    value={localSettings.minimumVisibility}
+                    onChange={(e) => setLocalSettings(prev => ({
+                      ...prev,
+                      minimumVisibility: parseFloat(e.target.value) || 0
+                    }))}
+                  />
+                  <span className="text-sm text-gray-400">
+                    (0 = natural, >0 = debug mode)
                   </span>
                 </div>
               </div>

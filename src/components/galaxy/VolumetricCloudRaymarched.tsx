@@ -11,6 +11,8 @@ interface VolumetricCloudRaymarchedProps {
   opacity?: number;
   density?: number;
   cloudType?: 'dust' | 'nebula' | 'cosmic';
+  raymarchingSamples?: number;
+  minimumVisibility?: number;
 }
 
 export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps> = ({ 
@@ -19,7 +21,9 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
   color = '#888888',
   opacity = 0.3,
   density = 0.7,
-  cloudType = 'dust'
+  cloudType = 'dust',
+  raymarchingSamples = 8,
+  minimumVisibility = 0.1
 }) => {
   const materialRef = useRef<ShaderMaterial>(null);
   const meshRef = useRef<THREE.Mesh>(null);
@@ -45,6 +49,8 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
     uniform float density;
     uniform float cloudType;
     uniform float size;
+    uniform int raymarchingSamples;
+    uniform float minimumVisibility;
     
     varying vec3 vWorldPosition;
     varying vec3 vLocalPosition;
@@ -130,11 +136,13 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
       vec3 rayDir = normalize(vLocalPosition);
       float totalDensity = 0.0;
       
-      // Simple raymarching with fewer samples for performance
-      for(int i = 0; i < 8; i++) {
-        vec3 samplePoint = samplePos + rayDir * float(i) * 0.2;
+      // Dynamic raymarching with configurable samples
+      float stepSize = 2.0 / float(raymarchingSamples);
+      for(int i = 0; i < 32; i++) {
+        if(i >= raymarchingSamples) break;
+        vec3 samplePoint = samplePos + rayDir * float(i) * stepSize;
         if(length(samplePoint) > 1.0) break;
-        totalDensity += cloudDensity(samplePoint) * 0.125;
+        totalDensity += cloudDensity(samplePoint) / float(raymarchingSamples);
       }
       
       // Combine samples
@@ -149,8 +157,8 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
       float lighting = 0.6 + 0.4 * max(0.0, dot(normalize(vLocalPosition), lightDir));
       vec3 finalColor = color * lighting;
       
-      // Ensure minimum visibility for debugging - remove this line once working
-      alpha = max(alpha, 0.1);
+      // Apply configurable minimum visibility
+      alpha = max(alpha, minimumVisibility);
       
       gl_FragColor = vec4(finalColor, alpha);
     }
@@ -159,11 +167,13 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
   const uniforms = useMemo(() => ({
     time: { value: 0.0 },
     color: { value: new THREE.Color(color) },
-    opacity: { value: opacity * 3.0 }, // Increase base opacity
-    density: { value: density * 2.0 }, // Increase base density
+    opacity: { value: opacity * 3.0 },
+    density: { value: density * 2.0 },
     size: { value: size },
-    cloudType: { value: cloudType === 'dust' ? 0.0 : cloudType === 'nebula' ? 1.0 : 2.0 }
-  }), [color, opacity, density, size, cloudType]);
+    cloudType: { value: cloudType === 'dust' ? 0.0 : cloudType === 'nebula' ? 1.0 : 2.0 },
+    raymarchingSamples: { value: raymarchingSamples },
+    minimumVisibility: { value: minimumVisibility }
+  }), [color, opacity, density, size, cloudType, raymarchingSamples, minimumVisibility]);
 
   useFrame((state) => {
     if (materialRef.current) {
@@ -171,7 +181,7 @@ export const VolumetricCloudRaymarched: React.FC<VolumetricCloudRaymarchedProps>
     }
   });
 
-  console.log('VolumetricCloudRaymarched created at position:', position, 'size:', size, 'type:', cloudType);
+  console.log('VolumetricCloudRaymarched created at position:', position, 'size:', size, 'type:', cloudType, 'samples:', raymarchingSamples, 'minVis:', minimumVisibility);
 
   return (
     <mesh ref={meshRef} position={position}>
