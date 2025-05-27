@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
@@ -70,16 +71,26 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
 
   return (
     <>
-      <ambientLight intensity={0.6} />
-      <pointLight position={[0, 0, 0]} intensity={3} color="#ffaa00" />
+      <ambientLight intensity={0.4} />
+      <pointLight position={[0, 0, 0]} intensity={2} color="#ffaa00" />
       
-      {/* Galaxy Haze - renders first with higher intensity */}
-      <GalaxyHaze galaxy={galaxy} intensity={1.2} color="#4488ff" />
+      {/* Background Stars - render first */}
+      <Stars 
+        radius={200000} 
+        depth={100000} 
+        count={2000} 
+        factor={8} 
+        saturation={0} 
+        fade 
+      />
       
-      {/* Galactic Center - made less opaque */}
+      {/* Galaxy Haze - render early but after background */}
+      <GalaxyHaze galaxy={galaxy} intensity={3.0} color="#4488ff" />
+      
+      {/* Galactic Center */}
       <mesh position={[0, 0, 0]} onClick={handleBackgroundClick}>
         <sphereGeometry args={[800, 32, 24]} />
-        <meshBasicMaterial color="#ffaa00" transparent opacity={0.8} />
+        <meshBasicMaterial color="#ffaa00" transparent opacity={0.6} />
       </mesh>
       
       {/* Interstellar Material - renders behind stars */}
@@ -106,16 +117,6 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
       {galaxy.nebulae.map((nebula) => (
         <Nebula key={nebula.id} nebula={nebula} />
       ))}
-      
-      {/* Background Stars */}
-      <Stars 
-        radius={200000} 
-        depth={100000} 
-        count={2000} 
-        factor={8} 
-        saturation={0} 
-        fade 
-      />
       
       {/* Background plane for click detection */}
       <mesh 
