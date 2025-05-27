@@ -50,10 +50,13 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
   useFrame((state) => {
     if (coreRef.current && innerGlowRef.current && outerGlowRef.current) {
       // Twinkling effect - vary opacity slightly
-      const twinkle = 0.8 + Math.sin(state.clock.elapsedTime * 3 + system.id * 0.1) * 0.2;
-      coreRef.current.material.opacity = twinkle;
-      innerGlowRef.current.material.opacity = 0.8 * twinkle;
-      outerGlowRef.current.material.opacity = 0.4 * twinkle;
+      const systemIdNum = typeof system.id === 'string' ? parseInt(system.id.replace(/\D/g, ''), 10) || 0 : system.id;
+      const twinkle = 0.8 + Math.sin(state.clock.elapsedTime * 3 + systemIdNum * 0.1) * 0.2;
+      
+      // Cast materials to MeshBasicMaterial to access opacity
+      (coreRef.current.material as MeshBasicMaterial).opacity = twinkle;
+      (innerGlowRef.current.material as MeshBasicMaterial).opacity = 0.8 * twinkle;
+      (outerGlowRef.current.material as MeshBasicMaterial).opacity = 0.4 * twinkle;
     }
   });
 
