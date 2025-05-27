@@ -8,15 +8,19 @@ interface SpiralGalaxyDustLanesProps {
   numParticles?: number;
   particleSize?: number;
   opacity?: number;
+  colorIntensity?: number;
 }
 
 export const SpiralGalaxyDustLanes: React.FC<SpiralGalaxyDustLanesProps> = ({
   galaxy,
   numParticles = 15000,
   particleSize = 100,
-  opacity = 0.4
+  opacity = 0.4,
+  colorIntensity = 1.0
 }) => {
   const { positions, colors, sizes } = useMemo(() => {
+    console.log(`Generating spiral galaxy dust lanes with ${numParticles} particles, color intensity: ${colorIntensity}`);
+    
     const positions = new Float32Array(numParticles * 3);
     const colors = new Float32Array(numParticles * 3);
     const sizes = new Float32Array(numParticles);
@@ -46,8 +50,8 @@ export const SpiralGalaxyDustLanes: React.FC<SpiralGalaxyDustLanesProps> = ({
       const normalizedDistance = distanceFromCenter / (galacticRadius * 0.8);
       
       // Base thickness increases with distance, creating a flared halo
-      const baseThickness = 2000;
-      const haloThickness = baseThickness * (1 + normalizedDistance * 3);
+      const baseThickness = 3000; // Increased from 2000
+      const haloThickness = baseThickness * (1 + normalizedDistance * 4); // Increased multiplier
       
       let y = (Math.random() - 0.5) * haloThickness;
       
@@ -77,18 +81,18 @@ export const SpiralGalaxyDustLanes: React.FC<SpiralGalaxyDustLanesProps> = ({
       
       // Color variations - darker near core, lighter towards edges
       const coreProximity = Math.max(0, 1 - distanceFromCore / (galacticRadius * 0.8));
-      const baseColor = coreProximity * 0.3 + 0.2;
+      const baseColor = (coreProximity * 0.3 + 0.2) * colorIntensity;
       
-      colors[i * 3] = baseColor + Math.random() * 0.2; // Red
-      colors[i * 3 + 1] = baseColor * 0.8 + Math.random() * 0.15; // Green
-      colors[i * 3 + 2] = baseColor * 0.6 + Math.random() * 0.1; // Blue
+      colors[i * 3] = baseColor + Math.random() * 0.2 * colorIntensity; // Red
+      colors[i * 3 + 1] = baseColor * 0.8 + Math.random() * 0.15 * colorIntensity; // Green
+      colors[i * 3 + 2] = baseColor * 0.6 + Math.random() * 0.1 * colorIntensity; // Blue
       
       // Size variations
       sizes[i] = 0.5 + Math.random() * 1.5;
     }
     
     return { positions, colors, sizes };
-  }, [numParticles, galaxy.seed]);
+  }, [numParticles, galaxy.seed, colorIntensity]);
 
   return (
     <DustLaneBase

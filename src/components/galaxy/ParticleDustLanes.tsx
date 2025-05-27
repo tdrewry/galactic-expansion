@@ -2,6 +2,7 @@
 import React from 'react';
 import { SpiralGalaxyDustLanes } from './dust-lanes/SpiralGalaxyDustLanes';
 import { GlobularGalaxyDustLanes } from './dust-lanes/GlobularGalaxyDustLanes';
+import { BarredGalaxyDustLanes } from './dust-lanes/BarredGalaxyDustLanes';
 
 interface ParticleDustLanesProps {
   galaxy: any;
@@ -10,6 +11,7 @@ interface ParticleDustLanesProps {
   opacity?: number;
   showDustLanes?: boolean;
   showCosmicDust?: boolean;
+  colorIntensity?: number;
 }
 
 export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
@@ -18,32 +20,49 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
   particleSize = 100,
   opacity = 0.4,
   showDustLanes = true,
-  showCosmicDust = true
+  showCosmicDust = true,
+  colorIntensity = 1.0
 }) => {
   // Check galaxy type and render appropriate dust lanes
-  const isSpiralGalaxy = galaxy.galaxyType === 'spiral' || galaxy.galaxyType === 'barred-spiral';
+  const isSpiralGalaxy = galaxy.galaxyType === 'spiral';
+  const isBarredSpiralGalaxy = galaxy.galaxyType === 'barred-spiral';
   const isGlobularGalaxy = galaxy.galaxyType === 'globular' || galaxy.galaxyType === 'elliptical';
   
   if (isSpiralGalaxy && showDustLanes) {
-    console.log(`Galaxy ${galaxy.seed}: Rendering spiral galaxy dust lanes`);
+    console.log(`Galaxy ${galaxy.seed}: Rendering spiral galaxy dust lanes with ${numParticles} particles`);
     return (
       <SpiralGalaxyDustLanes
         galaxy={galaxy}
         numParticles={numParticles}
         particleSize={particleSize}
         opacity={opacity}
+        colorIntensity={colorIntensity}
+      />
+    );
+  }
+  
+  if (isBarredSpiralGalaxy && showDustLanes) {
+    console.log(`Galaxy ${galaxy.seed}: Rendering barred spiral galaxy dust lanes with ${numParticles} particles`);
+    return (
+      <BarredGalaxyDustLanes
+        galaxy={galaxy}
+        numParticles={numParticles}
+        particleSize={particleSize}
+        opacity={opacity}
+        colorIntensity={colorIntensity}
       />
     );
   }
   
   if (isGlobularGalaxy && showCosmicDust) {
-    console.log(`Galaxy ${galaxy.seed}: Rendering globular galaxy cosmic dust`);
+    console.log(`Galaxy ${galaxy.seed}: Rendering globular galaxy cosmic dust with ${numParticles} particles`);
     return (
       <GlobularGalaxyDustLanes
         galaxy={galaxy}
         numParticles={numParticles}
         particleSize={particleSize}
         opacity={opacity}
+        colorIntensity={colorIntensity}
       />
     );
   }

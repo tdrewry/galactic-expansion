@@ -17,6 +17,15 @@ interface GalaxyMapProps {
   showDustLanes?: boolean;
   showStarFormingRegions?: boolean;
   showCosmicDust?: boolean;
+  dustLaneParticles?: number;
+  starFormingParticles?: number;
+  cosmicDustParticles?: number;
+  dustLaneOpacity?: number;
+  starFormingOpacity?: number;
+  cosmicDustOpacity?: number;
+  dustLaneColorIntensity?: number;
+  starFormingColorIntensity?: number;
+  cosmicDustColorIntensity?: number;
   onSystemSelect?: (system: StarSystem) => void;
   selectedSystem?: StarSystem | null;
   selectedStar?: 'primary' | 'binary' | 'trinary';
@@ -34,6 +43,15 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
   showDustLanes = true,
   showStarFormingRegions = true,
   showCosmicDust = true,
+  dustLaneParticles = 15000,
+  starFormingParticles = 12000,
+  cosmicDustParticles = 10000,
+  dustLaneOpacity = 0.4,
+  starFormingOpacity = 0.3,
+  cosmicDustOpacity = 0.4,
+  dustLaneColorIntensity = 1.0,
+  starFormingColorIntensity = 1.2,
+  cosmicDustColorIntensity = 0.8,
   onSystemSelect,
   selectedSystem: propSelectedSystem = null,
   selectedStar: propSelectedStar = 'primary',
@@ -92,6 +110,15 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
           showDustLanes={showDustLanes}
           showStarFormingRegions={showStarFormingRegions}
           showCosmicDust={showCosmicDust}
+          dustLaneParticles={dustLaneParticles}
+          starFormingParticles={starFormingParticles}
+          cosmicDustParticles={cosmicDustParticles}
+          dustLaneOpacity={dustLaneOpacity}
+          starFormingOpacity={starFormingOpacity}
+          cosmicDustOpacity={cosmicDustOpacity}
+          dustLaneColorIntensity={dustLaneColorIntensity}
+          starFormingColorIntensity={starFormingColorIntensity}
+          cosmicDustColorIntensity={cosmicDustColorIntensity}
         />
       </Canvas>
       

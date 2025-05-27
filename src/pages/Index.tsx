@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { GalaxyMap } from '../components/GalaxyMap';
 import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
@@ -23,6 +22,18 @@ const Index = () => {
   const [showDustLanes, setShowDustLanes] = useState(true);
   const [showStarFormingRegions, setShowStarFormingRegions] = useState(false);
   const [showCosmicDust, setShowCosmicDust] = useState(true);
+  
+  // Particle system settings
+  const [dustLaneParticles, setDustLaneParticles] = useState(15000);
+  const [starFormingParticles, setStarFormingParticles] = useState(12000);
+  const [cosmicDustParticles, setCosmicDustParticles] = useState(10000);
+  const [dustLaneOpacity, setDustLaneOpacity] = useState(0.4);
+  const [starFormingOpacity, setStarFormingOpacity] = useState(0.3);
+  const [cosmicDustOpacity, setCosmicDustOpacity] = useState(0.4);
+  const [dustLaneColorIntensity, setDustLaneColorIntensity] = useState(1.0);
+  const [starFormingColorIntensity, setStarFormingColorIntensity] = useState(1.2);
+  const [cosmicDustColorIntensity, setCosmicDustColorIntensity] = useState(0.8);
+  
   const [selectedSystem, setSelectedSystem] = useState<StarSystem | null>(null);
   const [selectedStar, setSelectedStar] = useState<'primary' | 'binary' | 'trinary'>('primary');
   const [selectedBody, setSelectedBody] = useState<Planet | Moon | null>(null);
@@ -53,6 +64,15 @@ const Index = () => {
     showStarFormingRegions?: boolean;
     showCosmicDust?: boolean;
     appTitle?: string;
+    dustLaneParticles?: number;
+    starFormingParticles?: number;
+    cosmicDustParticles?: number;
+    dustLaneOpacity?: number;
+    starFormingOpacity?: number;
+    cosmicDustOpacity?: number;
+    dustLaneColorIntensity?: number;
+    starFormingColorIntensity?: number;
+    cosmicDustColorIntensity?: number;
   }) => {
     setNumSystems(settings.numSystems);
     setNumNebulae(settings.numNebulae);
@@ -75,6 +95,35 @@ const Index = () => {
     }
     if (settings.appTitle !== undefined) {
       setAppTitle(settings.appTitle);
+    }
+    
+    // Update particle system settings
+    if (settings.dustLaneParticles !== undefined) {
+      setDustLaneParticles(settings.dustLaneParticles);
+    }
+    if (settings.starFormingParticles !== undefined) {
+      setStarFormingParticles(settings.starFormingParticles);
+    }
+    if (settings.cosmicDustParticles !== undefined) {
+      setCosmicDustParticles(settings.cosmicDustParticles);
+    }
+    if (settings.dustLaneOpacity !== undefined) {
+      setDustLaneOpacity(settings.dustLaneOpacity);
+    }
+    if (settings.starFormingOpacity !== undefined) {
+      setStarFormingOpacity(settings.starFormingOpacity);
+    }
+    if (settings.cosmicDustOpacity !== undefined) {
+      setCosmicDustOpacity(settings.cosmicDustOpacity);
+    }
+    if (settings.dustLaneColorIntensity !== undefined) {
+      setDustLaneColorIntensity(settings.dustLaneColorIntensity);
+    }
+    if (settings.starFormingColorIntensity !== undefined) {
+      setStarFormingColorIntensity(settings.starFormingColorIntensity);
+    }
+    if (settings.cosmicDustColorIntensity !== undefined) {
+      setCosmicDustColorIntensity(settings.cosmicDustColorIntensity);
     }
     
     setSelectedSystem(null);
@@ -141,6 +190,15 @@ const Index = () => {
                 showStarFormingRegions={showStarFormingRegions}
                 showCosmicDust={showCosmicDust}
                 appTitle={appTitle}
+                dustLaneParticles={dustLaneParticles}
+                starFormingParticles={starFormingParticles}
+                cosmicDustParticles={cosmicDustParticles}
+                dustLaneOpacity={dustLaneOpacity}
+                starFormingOpacity={starFormingOpacity}
+                cosmicDustOpacity={cosmicDustOpacity}
+                dustLaneColorIntensity={dustLaneColorIntensity}
+                starFormingColorIntensity={starFormingColorIntensity}
+                cosmicDustColorIntensity={cosmicDustColorIntensity}
                 onSettingsChange={handleSettingsChange}
               />
             </div>
@@ -163,6 +221,15 @@ const Index = () => {
                 showDustLanes={showDustLanes}
                 showStarFormingRegions={showStarFormingRegions}
                 showCosmicDust={showCosmicDust}
+                dustLaneParticles={dustLaneParticles}
+                starFormingParticles={starFormingParticles}
+                cosmicDustParticles={cosmicDustParticles}
+                dustLaneOpacity={dustLaneOpacity}
+                starFormingOpacity={starFormingOpacity}
+                cosmicDustOpacity={cosmicDustOpacity}
+                dustLaneColorIntensity={dustLaneColorIntensity}
+                starFormingColorIntensity={starFormingColorIntensity}
+                cosmicDustColorIntensity={cosmicDustColorIntensity}
                 onSystemSelect={handleSystemSelect}
                 selectedSystem={selectedSystem}
                 selectedStar={selectedStar}

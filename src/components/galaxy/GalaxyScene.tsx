@@ -1,7 +1,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
-import { OrbitControls, Stars } from '@react-three/drei';
+import { OrbitControls, Stars, Billboard } from '@react-three/drei';
 import { Galaxy, StarSystem as StarSystemType } from '../../utils/galaxyGenerator';
 import { StarSystem } from './StarSystem';
 import { Nebula } from './Nebula';
@@ -17,6 +17,15 @@ interface GalaxySceneProps {
   showDustLanes?: boolean;
   showStarFormingRegions?: boolean;
   showCosmicDust?: boolean;
+  dustLaneParticles?: number;
+  starFormingParticles?: number;
+  cosmicDustParticles?: number;
+  dustLaneOpacity?: number;
+  starFormingOpacity?: number;
+  cosmicDustOpacity?: number;
+  dustLaneColorIntensity?: number;
+  starFormingColorIntensity?: number;
+  cosmicDustColorIntensity?: number;
 }
 
 export const GalaxyScene: React.FC<GalaxySceneProps> = ({ 
@@ -27,7 +36,16 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
   minimumVisibility = 0.1,
   showDustLanes = true,
   showStarFormingRegions = true,
-  showCosmicDust = true
+  showCosmicDust = true,
+  dustLaneParticles = 15000,
+  starFormingParticles = 12000,
+  cosmicDustParticles = 10000,
+  dustLaneOpacity = 0.4,
+  starFormingOpacity = 0.3,
+  cosmicDustOpacity = 0.4,
+  dustLaneColorIntensity = 1.0,
+  starFormingColorIntensity = 1.2,
+  cosmicDustColorIntensity = 0.8
 }) => {
   const { camera, gl } = useThree();
   const controlsRef = useRef<any>(null);
@@ -39,11 +57,12 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
     camera.lookAt(0, 0, 0);
     console.log('Camera positioned for galaxy view');
     console.log('Galaxy systems:', galaxy.starSystems.length);
+    console.log('Particle settings - Dust lanes:', dustLaneParticles, 'Star forming:', starFormingParticles, 'Cosmic dust:', cosmicDustParticles);
     
     // Enable pointer events on the canvas
     gl.domElement.style.touchAction = 'none';
     gl.domElement.style.pointerEvents = 'auto';
-  }, [camera, galaxy, gl]);
+  }, [camera, galaxy, gl, dustLaneParticles, starFormingParticles, cosmicDustParticles]);
 
   // Center camera on selected system
   useEffect(() => {
@@ -83,16 +102,18 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
         fade 
       />
       
-      {/* Galactic Center - only show the rim */}
-      <mesh position={[0, 0, 0]} onClick={handleBackgroundClick}>
-        <ringGeometry args={[750, 800, 32]} />
-        <meshBasicMaterial 
-          color="#ffaa00" 
-          transparent 
-          opacity={0.8} 
-          side={THREE.DoubleSide}
-        />
-      </mesh>
+      {/* Galactic Center - billboard ring that faces the camera */}
+      <Billboard>
+        <mesh position={[0, 0, 0]} onClick={handleBackgroundClick}>
+          <ringGeometry args={[750, 800, 32]} />
+          <meshBasicMaterial 
+            color="#ffaa00" 
+            transparent 
+            opacity={0.8} 
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+      </Billboard>
       
       {/* Interstellar Material - renders behind stars */}
       <InterstellarMaterial 
@@ -102,6 +123,15 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
         showDustLanes={showDustLanes}
         showStarFormingRegions={showStarFormingRegions}
         showCosmicDust={showCosmicDust}
+        dustLaneParticles={dustLaneParticles}
+        starFormingParticles={starFormingParticles}
+        cosmicDustParticles={cosmicDustParticles}
+        dustLaneOpacity={dustLaneOpacity}
+        starFormingOpacity={starFormingOpacity}
+        cosmicDustOpacity={cosmicDustOpacity}
+        dustLaneColorIntensity={dustLaneColorIntensity}
+        starFormingColorIntensity={starFormingColorIntensity}
+        cosmicDustColorIntensity={cosmicDustColorIntensity}
       />
       
       {/* Star Systems */}

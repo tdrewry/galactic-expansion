@@ -8,15 +8,19 @@ interface GlobularGalaxyDustLanesProps {
   numParticles?: number;
   particleSize?: number;
   opacity?: number;
+  colorIntensity?: number;
 }
 
 export const GlobularGalaxyDustLanes: React.FC<GlobularGalaxyDustLanesProps> = ({
   galaxy,
   numParticles = 15000,
   particleSize = 100,
-  opacity = 0.4
+  opacity = 0.4,
+  colorIntensity = 1.0
 }) => {
   const { positions, colors, sizes } = useMemo(() => {
+    console.log(`Generating globular galaxy cosmic dust with ${numParticles} particles, color intensity: ${colorIntensity}`);
+    
     const positions = new Float32Array(numParticles * 3);
     const colors = new Float32Array(numParticles * 3);
     const sizes = new Float32Array(numParticles);
@@ -59,18 +63,18 @@ export const GlobularGalaxyDustLanes: React.FC<GlobularGalaxyDustLanesProps> = (
       
       // Color variations - warmer near core, cooler towards edges
       const coreProximity = Math.max(0, 1 - distanceFromCore / (galacticRadius * 0.7));
-      const baseColor = coreProximity * 0.4 + 0.15;
+      const baseColor = (coreProximity * 0.4 + 0.15) * colorIntensity;
       
-      colors[i * 3] = baseColor + Math.random() * 0.15; // Red
-      colors[i * 3 + 1] = baseColor * 0.9 + Math.random() * 0.12; // Green
-      colors[i * 3 + 2] = baseColor * 0.7 + Math.random() * 0.08; // Blue
+      colors[i * 3] = baseColor + Math.random() * 0.15 * colorIntensity; // Red
+      colors[i * 3 + 1] = baseColor * 0.9 + Math.random() * 0.12 * colorIntensity; // Green
+      colors[i * 3 + 2] = baseColor * 0.7 + Math.random() * 0.08 * colorIntensity; // Blue
       
       // Size variations
       sizes[i] = 0.4 + Math.random() * 1.3;
     }
     
     return { positions, colors, sizes };
-  }, [numParticles, galaxy.seed]);
+  }, [numParticles, galaxy.seed, colorIntensity]);
 
   return (
     <DustLaneBase

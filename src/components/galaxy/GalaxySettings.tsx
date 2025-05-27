@@ -20,6 +20,15 @@ interface GalaxySettingsProps {
   showStarFormingRegions?: boolean;
   showCosmicDust?: boolean;
   appTitle?: string;
+  dustLaneParticles?: number;
+  starFormingParticles?: number;
+  cosmicDustParticles?: number;
+  dustLaneOpacity?: number;
+  starFormingOpacity?: number;
+  cosmicDustOpacity?: number;
+  dustLaneColorIntensity?: number;
+  starFormingColorIntensity?: number;
+  cosmicDustColorIntensity?: number;
   onSettingsChange: (settings: {
     numSystems: number;
     numNebulae: number;
@@ -40,9 +49,6 @@ interface GalaxySettingsProps {
     dustLaneColorIntensity?: number;
     starFormingColorIntensity?: number;
     cosmicDustColorIntensity?: number;
-    dustLaneBloom?: number;
-    starFormingBloom?: number;
-    cosmicDustBloom?: number;
   }) => void;
 }
 
@@ -57,6 +63,15 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
   showStarFormingRegions = false,
   showCosmicDust = true,
   appTitle = 'Stardust Voyager',
+  dustLaneParticles = 15000,
+  starFormingParticles = 12000,
+  cosmicDustParticles = 10000,
+  dustLaneOpacity = 0.4,
+  starFormingOpacity = 0.3,
+  cosmicDustOpacity = 0.4,
+  dustLaneColorIntensity = 1.0,
+  starFormingColorIntensity = 1.2,
+  cosmicDustColorIntensity = 0.8,
   onSettingsChange
 }) => {
   const [localSettings, setLocalSettings] = React.useState({
@@ -70,21 +85,44 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
     showStarFormingRegions,
     showCosmicDust,
     appTitle,
-    dustLaneParticles: 15000,
-    starFormingParticles: 12000,
-    cosmicDustParticles: 10000,
-    dustLaneOpacity: 0.4,
-    starFormingOpacity: 0.3,
-    cosmicDustOpacity: 0.4,
-    dustLaneColorIntensity: 1.0,
-    starFormingColorIntensity: 1.2,
-    cosmicDustColorIntensity: 0.8,
-    dustLaneBloom: 1.0,
-    starFormingBloom: 1.5,
-    cosmicDustBloom: 0.8
+    dustLaneParticles,
+    starFormingParticles,
+    cosmicDustParticles,
+    dustLaneOpacity,
+    starFormingOpacity,
+    cosmicDustOpacity,
+    dustLaneColorIntensity,
+    starFormingColorIntensity,
+    cosmicDustColorIntensity
   });
 
+  // Update local settings when props change
+  React.useEffect(() => {
+    setLocalSettings({
+      numSystems,
+      numNebulae,
+      binaryFrequency,
+      trinaryFrequency,
+      raymarchingSamples,
+      minimumVisibility,
+      showDustLanes,
+      showStarFormingRegions,
+      showCosmicDust,
+      appTitle,
+      dustLaneParticles,
+      starFormingParticles,
+      cosmicDustParticles,
+      dustLaneOpacity,
+      starFormingOpacity,
+      cosmicDustOpacity,
+      dustLaneColorIntensity,
+      starFormingColorIntensity,
+      cosmicDustColorIntensity
+    });
+  }, [numSystems, numNebulae, binaryFrequency, trinaryFrequency, raymarchingSamples, minimumVisibility, showDustLanes, showStarFormingRegions, showCosmicDust, appTitle, dustLaneParticles, starFormingParticles, cosmicDustParticles, dustLaneOpacity, starFormingOpacity, cosmicDustOpacity, dustLaneColorIntensity, starFormingColorIntensity, cosmicDustColorIntensity]);
+
   const handleApply = () => {
+    console.log('Applying particle settings:', localSettings);
     onSettingsChange(localSettings);
   };
 
@@ -108,10 +146,7 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
       cosmicDustOpacity: 0.4,
       dustLaneColorIntensity: 1.0,
       starFormingColorIntensity: 1.2,
-      cosmicDustColorIntensity: 0.8,
-      dustLaneBloom: 1.0,
-      starFormingBloom: 1.5,
-      cosmicDustBloom: 0.8
+      cosmicDustColorIntensity: 0.8
     };
     setLocalSettings(defaultSettings);
     onSettingsChange(defaultSettings);
@@ -298,21 +333,6 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
                       className="w-full"
                     />
                   </div>
-                  
-                  <div className="space-y-2">
-                    <Label>Bloom Effect: {localSettings.dustLaneBloom.toFixed(1)}</Label>
-                    <Slider
-                      value={[localSettings.dustLaneBloom]}
-                      onValueChange={([value]) => setLocalSettings(prev => ({
-                        ...prev,
-                        dustLaneBloom: value
-                      }))}
-                      min={0.2}
-                      max={3.0}
-                      step={0.1}
-                      className="w-full"
-                    />
-                  </div>
                 </div>
                 
                 {/* Star-forming Region Particles */}
@@ -364,21 +384,6 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
                       className="w-full"
                     />
                   </div>
-                  
-                  <div className="space-y-2">
-                    <Label>Bloom Effect: {localSettings.starFormingBloom.toFixed(1)}</Label>
-                    <Slider
-                      value={[localSettings.starFormingBloom]}
-                      onValueChange={([value]) => setLocalSettings(prev => ({
-                        ...prev,
-                        starFormingBloom: value
-                      }))}
-                      min={0.2}
-                      max={3.0}
-                      step={0.1}
-                      className="w-full"
-                    />
-                  </div>
                 </div>
                 
                 {/* Cosmic Dust Particles */}
@@ -426,21 +431,6 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
                       }))}
                       min={0.2}
                       max={2.0}
-                      step={0.1}
-                      className="w-full"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label>Bloom Effect: {localSettings.cosmicDustBloom.toFixed(1)}</Label>
-                    <Slider
-                      value={[localSettings.cosmicDustBloom]}
-                      onValueChange={([value]) => setLocalSettings(prev => ({
-                        ...prev,
-                        cosmicDustBloom: value
-                      }))}
-                      min={0.2}
-                      max={3.0}
                       step={0.1}
                       className="w-full"
                     />
