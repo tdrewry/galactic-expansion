@@ -16,7 +16,7 @@ export const SpiralGalaxyDustLanes: React.FC<SpiralGalaxyDustLanesProps> = ({
   particleSize = 100,
   opacity = 0.4
 }) => {
-  // Generate particle positions for spiral galaxy with realistic density distribution
+  // Generate particle positions for spiral galaxy with luminous patterns
   const { positions, colors, sizes } = useMemo(() => {
     const positionsArray = new Float32Array(numParticles * 3);
     const colorsArray = new Float32Array(numParticles * 3);
@@ -29,175 +29,193 @@ export const SpiralGalaxyDustLanes: React.FC<SpiralGalaxyDustLanesProps> = ({
       return seedValue / 233280;
     };
     
-    console.log(`Generating spiral galaxy with realistic coloration for galaxy ${galaxy.seed}`);
+    console.log(`Generating spiral galaxy with luminous patterns for galaxy ${galaxy.seed}`);
     
     const galaxyRadius = 50000;
-    const coreRadius = galaxyRadius * 0.12;  // Central bulge
+    const coreRadius = galaxyRadius * 0.12;
     const numArms = 4;
     
-    // Particle distribution: 15% central bulge, 60% dense arms, 25% inter-arm dust
+    // Create noise function for clustering
+    const noise3D = (x: number, y: number, z: number, scale: number = 1000) => {
+      const nx = x / scale;
+      const ny = y / scale;
+      const nz = z / scale;
+      return (Math.sin(nx * 7.3) * Math.cos(ny * 5.1) * Math.sin(nz * 3.7) + 
+              Math.cos(nx * 4.2) * Math.sin(ny * 8.6) * Math.cos(nz * 6.4) +
+              Math.sin(nx * 12.1) * Math.sin(ny * 3.3) * Math.cos(nz * 9.2)) / 3;
+    };
     
+    // Particle distribution with enhanced luminous regions
     for (let i = 0; i < numParticles; i++) {
       const i3 = i * 3;
       
       const rand = seededRandom();
       let x, z, y;
       let particleType;
-      let densityType; // 'high', 'medium', 'low'
+      let densityFactor = 1.0;
       let armDistanceRatio = 0;
+      let distanceFromArmCenter = 0;
       
-      if (rand < 0.15) {
-        // CENTRAL BULGE - high density core
-        particleType = 'bulge';
-        densityType = 'high';
+      if (rand < 0.12) {
+        // GALACTIC CORE - super bright central region
+        particleType = 'core';
         
-        // Dense spherical bulge with some rotation
-        const bulgeDistance = Math.pow(seededRandom(), 0.6) * coreRadius;
-        const bulgeAngle = seededRandom() * Math.PI * 2;
-        const bulgeHeight = (seededRandom() - 0.5) * coreRadius * 0.3;
+        const coreDistance = Math.pow(seededRandom(), 0.4) * coreRadius;
+        const coreAngle = seededRandom() * Math.PI * 2;
+        const coreHeight = (seededRandom() - 0.5) * coreRadius * 0.2;
         
-        // Add slight rotation to the bulge
-        const rotationAngle = bulgeDistance / coreRadius * 0.5;
-        const finalAngle = bulgeAngle + rotationAngle;
+        const rotationAngle = coreDistance / coreRadius * 0.3;
+        const finalAngle = coreAngle + rotationAngle;
         
-        x = Math.cos(finalAngle) * bulgeDistance;
-        z = Math.sin(finalAngle) * bulgeDistance;
-        y = bulgeHeight;
+        x = Math.cos(finalAngle) * coreDistance;
+        z = Math.sin(finalAngle) * coreDistance;
+        y = coreHeight;
         
-      } else if (rand < 0.75) {
-        // SPIRAL ARMS - very high density (where star systems live)
+        densityFactor = 3.0 - (coreDistance / coreRadius) * 1.5; // Very bright core
+        
+      } else if (rand < 0.65) {
+        // SPIRAL ARMS - primary luminous regions
         particleType = 'arms';
-        densityType = 'high';
         
         const armIndex = Math.floor(seededRandom() * numArms);
-        
-        // Smooth density distribution for arms - more particles toward center
-        const rawDistance = seededRandom();
-        armDistanceRatio = Math.pow(rawDistance, 0.7); // Moderate falloff
-        
+        armDistanceRatio = Math.pow(seededRandom(), 0.6);
         const armDistance = armDistanceRatio * galaxyRadius * 0.9;
         
-        // Start arms from bulge edge
         const baseAngle = armIndex * (2 * Math.PI / numArms);
-        
-        // Spiral calculation with proper logarithmic spiral
-        const spiralTightness = 1.3 + seededRandom() * 0.4;
+        const spiralTightness = 1.2 + seededRandom() * 0.3;
         const spiralCurve = armDistanceRatio * Math.PI * spiralTightness;
-        const finalAngle = baseAngle + spiralCurve;
+        const armCenterAngle = baseAngle + spiralCurve;
         
-        // Dense arm core with realistic width variations
-        const baseArmWidth = 800;
-        const widthGrowth = 1.0 + armDistanceRatio * 1.8; // Arms widen outward
-        const armWidth = baseArmWidth * widthGrowth;
+        // Create luminous arm structure with variable width
+        const baseArmWidth = 600;
+        const armWidth = baseArmWidth * (1.0 + armDistanceRatio * 1.5);
         
-        // Create sub-structure within arms (dense knots and star-forming regions)
-        const subStructure = Math.sin(armDistanceRatio * Math.PI * 12) * 0.25;
-        const effectiveWidth = armWidth * (1.0 + subStructure);
-        const widthOffset = (seededRandom() - 0.5) * effectiveWidth;
-        const widthAngle = finalAngle + Math.PI / 2;
+        // Add density waves for bright regions along arms
+        const waveFrequency = 8;
+        const wavePhase = armDistanceRatio * Math.PI * waveFrequency;
+        const densityWave = 0.5 + 0.5 * Math.sin(wavePhase + armIndex * Math.PI / 2);
         
-        x = Math.cos(finalAngle) * armDistance + Math.cos(widthAngle) * widthOffset;
-        z = Math.sin(finalAngle) * armDistance + Math.sin(widthAngle) * widthOffset;
-        y = (seededRandom() - 0.5) * (400 + armDistanceRatio * 800);
+        // Star formation regions - create bright knots
+        const starFormationNoise = noise3D(armDistance, armCenterAngle * 1000, armIndex * 1000, 2000);
+        const isStarFormingRegion = starFormationNoise > 0.3;
+        
+        const effectiveWidth = armWidth * (0.7 + densityWave * 0.6);
+        distanceFromArmCenter = (seededRandom() - 0.5) * effectiveWidth;
+        const widthAngle = armCenterAngle + Math.PI / 2;
+        
+        x = Math.cos(armCenterAngle) * armDistance + Math.cos(widthAngle) * distanceFromArmCenter;
+        z = Math.sin(armCenterAngle) * armDistance + Math.sin(widthAngle) * distanceFromArmCenter;
+        y = (seededRandom() - 0.5) * (300 + armDistanceRatio * 600);
+        
+        // Calculate density based on distance from arm center and density waves
+        const armCenterDistance = Math.abs(distanceFromArmCenter);
+        const armCenterFactor = Math.exp(-armCenterDistance / (armWidth * 0.3));
+        
+        densityFactor = armCenterFactor * (1.5 + densityWave * 1.0);
+        
+        // Enhance star forming regions
+        if (isStarFormingRegion) {
+          densityFactor *= (1.8 + Math.abs(starFormationNoise) * 0.7);
+          particleType = 'star-forming';
+        }
+        
+        // Distance falloff for spiral arms
+        densityFactor *= (1.2 - armDistanceRatio * 0.4);
         
       } else {
-        // INTER-ARM DUST - lower density background material
+        // INTER-ARM REGIONS - much dimmer background
         particleType = 'inter-arm';
-        densityType = seededRandom() < 0.4 ? 'medium' : 'low';
         
-        // Distribute between arms with some structure
         const interArmDistance = seededRandom() * galaxyRadius * 0.8;
         const interArmAngle = seededRandom() * Math.PI * 2;
         
-        // Add some weak spiral structure to inter-arm material
-        const weakSpiral = (interArmDistance / galaxyRadius) * Math.PI * 0.8;
+        // Weak spiral structure in inter-arm regions
+        const weakSpiral = (interArmDistance / galaxyRadius) * Math.PI * 0.6;
         const finalAngle = interArmAngle + weakSpiral;
         
-        // Wider, more diffuse distribution
-        const interArmWidth = 3000 + (interArmDistance / galaxyRadius) * 2000;
+        // Calculate distance to nearest spiral arm for dimming
+        let minArmDistance = Infinity;
+        for (let arm = 0; arm < numArms; arm++) {
+          const armBaseAngle = arm * (2 * Math.PI / numArms);
+          const armDistRatio = interArmDistance / galaxyRadius;
+          const armSpiralAngle = armBaseAngle + armDistRatio * Math.PI * 1.2;
+          const armAngleDiff = Math.abs(((finalAngle - armSpiralAngle + Math.PI) % (2 * Math.PI)) - Math.PI);
+          minArmDistance = Math.min(minArmDistance, armAngleDiff * interArmDistance);
+        }
+        
+        const interArmWidth = 4000 + (interArmDistance / galaxyRadius) * 3000;
         const widthOffset = (seededRandom() - 0.5) * interArmWidth;
         const widthAngle = finalAngle + Math.PI / 2;
         
         x = Math.cos(finalAngle) * interArmDistance + Math.cos(widthAngle) * widthOffset;
         z = Math.sin(finalAngle) * interArmDistance + Math.sin(widthAngle) * widthOffset;
-        y = (seededRandom() - 0.5) * 1500;
+        y = (seededRandom() - 0.5) * 1200;
+        
+        // Very dim inter-arm regions with some structure
+        const interArmNoise = noise3D(x, y, z, 3000);
+        densityFactor = 0.15 + Math.max(0, interArmNoise) * 0.25;
+        
+        // Further dimming based on distance from spiral arms
+        const armProximityFactor = Math.exp(-minArmDistance / 8000);
+        densityFactor += armProximityFactor * 0.3;
       }
       
       positionsArray[i3] = x;
       positionsArray[i3 + 1] = y;
       positionsArray[i3 + 2] = z;
       
-      // Realistic colors based on astronomical observations
+      // Enhanced colors with luminosity
       const dustColor = new THREE.Color();
       
-      if (particleType === 'bulge') {
-        // Central bulge - warm yellow-orange colors (older stellar population)
-        const colorVariation = seededRandom();
-        if (colorVariation < 0.7) {
-          // Dominant warm yellow-orange
-          dustColor.setRGB(
-            0.9 + seededRandom() * 0.1,   // High red
-            0.7 + seededRandom() * 0.2,   // Medium-high green  
-            0.4 + seededRandom() * 0.3    // Lower blue
-          );
-        } else {
-          // Some warmer orange tones
-          dustColor.setRGB(
-            1.0,                          // Full red
-            0.5 + seededRandom() * 0.3,   // Medium green
-            0.2 + seededRandom() * 0.2    // Low blue
-          );
-        }
+      if (particleType === 'core') {
+        // Bright golden core
+        dustColor.setRGB(
+          1.0,
+          0.8 + seededRandom() * 0.2,
+          0.5 + seededRandom() * 0.3
+        );
+        dustColor.multiplyScalar(densityFactor * 0.8);
+        
+      } else if (particleType === 'star-forming') {
+        // Brilliant blue-white star formation regions
+        const brightness = densityFactor * 0.9;
+        dustColor.setRGB(
+          0.8 + seededRandom() * 0.2,
+          0.9 + seededRandom() * 0.1,
+          1.0
+        );
+        dustColor.multiplyScalar(brightness);
+        
       } else if (particleType === 'arms') {
-        // Spiral arms - bright blue-white star formation regions with some variety
+        // Bright spiral arms with color variation
+        const brightness = densityFactor * 0.7;
         const colorVariation = seededRandom();
-        const brightness = 0.9 - armDistanceRatio * 0.1; // Slight distance falloff
         
-        if (colorVariation < 0.6) {
-          // Dominant bright blue-white (active star formation)
+        if (colorVariation < 0.7) {
+          // Dominant blue-white
           dustColor.setRGB(
-            0.7 + seededRandom() * 0.3,   // High red for white
-            0.8 + seededRandom() * 0.2,   // High green for white
-            1.0                           // Full blue
+            0.7 + seededRandom() * 0.3,
+            0.8 + seededRandom() * 0.2,
+            1.0
           );
-          dustColor.multiplyScalar(brightness);
-        } else if (colorVariation < 0.85) {
-          // Some cyan-blue regions
-          dustColor.setRGB(
-            0.4 + seededRandom() * 0.3,   // Medium red
-            0.8 + seededRandom() * 0.2,   // High green
-            1.0                           // Full blue
-          );
-          dustColor.multiplyScalar(brightness);
         } else {
-          // Occasional reddish dust lanes within arms
+          // Some cyan regions
           dustColor.setRGB(
-            0.8 + seededRandom() * 0.2,   // High red
-            0.3 + seededRandom() * 0.2,   // Low green
-            0.2 + seededRandom() * 0.1    // Very low blue
+            0.5 + seededRandom() * 0.3,
+            0.9 + seededRandom() * 0.1,
+            1.0
           );
-          dustColor.multiplyScalar(brightness * 0.6);
         }
+        dustColor.multiplyScalar(brightness);
+        
       } else {
-        // Inter-arm dust - darker reddish-brown dust lanes
-        const brightness = densityType === 'medium' ? 0.3 : 0.15;
-        const colorVariation = seededRandom();
-        
-        if (colorVariation < 0.8) {
-          // Dominant reddish-brown dust
-          dustColor.setRGB(
-            0.6 + seededRandom() * 0.3,   // Medium-high red
-            0.3 + seededRandom() * 0.2,   // Low green
-            0.1 + seededRandom() * 0.1    // Very low blue
-          );
-        } else {
-          // Some darker brown regions
-          dustColor.setRGB(
-            0.4 + seededRandom() * 0.2,   // Lower red
-            0.2 + seededRandom() * 0.1,   // Very low green
-            0.05 + seededRandom() * 0.05  // Minimal blue
-          );
-        }
+        // Very dim inter-arm dust
+        const brightness = densityFactor * 0.4;
+        dustColor.setRGB(
+          0.5 + seededRandom() * 0.3,
+          0.2 + seededRandom() * 0.2,
+          0.1 + seededRandom() * 0.1
+        );
         dustColor.multiplyScalar(brightness);
       }
       
@@ -205,30 +223,24 @@ export const SpiralGalaxyDustLanes: React.FC<SpiralGalaxyDustLanesProps> = ({
       colorsArray[i3 + 1] = dustColor.g;
       colorsArray[i3 + 2] = dustColor.b;
       
-      // Particle sizes based on density type and location
-      const baseSize = particleSize * 2.5;
+      // Enhanced particle sizes based on luminosity
+      const baseSize = particleSize * 2.0;
       let sizeMultiplier;
       
-      if (densityType === 'high') {
-        if (particleType === 'bulge') {
-          sizeMultiplier = 1.8 + seededRandom() * 0.7; // Large bulge particles
-        } else {
-          sizeMultiplier = 1.5 + seededRandom() * 0.8; // Large arm particles
-        }
-      } else if (densityType === 'medium') {
-        sizeMultiplier = 0.7 + seededRandom() * 0.5; // Medium inter-arm
+      if (particleType === 'core') {
+        sizeMultiplier = 2.0 + seededRandom() * 1.0;
+      } else if (particleType === 'star-forming') {
+        sizeMultiplier = 1.5 + seededRandom() * 1.5 + densityFactor * 0.5;
+      } else if (particleType === 'arms') {
+        sizeMultiplier = (0.8 + seededRandom() * 0.8) * (0.5 + densityFactor * 0.8);
       } else {
-        sizeMultiplier = 0.3 + seededRandom() * 0.4; // Small, faint dust
-      }
-      
-      if (particleType === 'arms') {
-        sizeMultiplier *= (1.0 - armDistanceRatio * 0.15); // Slight size reduction with distance
+        sizeMultiplier = (0.2 + seededRandom() * 0.4) * (0.3 + densityFactor);
       }
       
       sizesArray[i] = baseSize * sizeMultiplier;
     }
     
-    console.log(`Generated ${numParticles} particles with realistic spiral galaxy coloration`);
+    console.log(`Generated ${numParticles} particles with luminous spiral patterns`);
     
     return {
       positions: positionsArray,
