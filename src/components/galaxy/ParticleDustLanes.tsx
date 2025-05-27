@@ -1,3 +1,4 @@
+
 import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -17,6 +18,9 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
 }) => {
   const pointsRef = useRef<THREE.Points>(null);
   
+  // Check if this is a barred galaxy
+  const isBarredGalaxy = galaxy.galaxyType === 'barred-spiral';
+  
   // Generate particle positions for barred galaxy dust lanes
   const { positions, colors, sizes } = useMemo(() => {
     const positionsArray = new Float32Array(numParticles * 3);
@@ -24,7 +28,7 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
     const sizesArray = new Float32Array(numParticles);
     
     // Only generate particles for barred galaxies
-    if (galaxy.galaxyType !== 'barred-spiral') {
+    if (!isBarredGalaxy) {
       console.log(`Galaxy ${galaxy.seed}: Not a barred galaxy (${galaxy.galaxyType}), skipping dust lanes`);
       return {
         positions: positionsArray,
@@ -139,19 +143,19 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
       colors: colorsArray,
       sizes: sizesArray
     };
-  }, [numParticles, particleSize, galaxy.seed, galaxy.galaxyType]);
+  }, [numParticles, particleSize, galaxy.seed, galaxy.galaxyType, isBarredGalaxy]);
   
-  // Only render if this is a barred galaxy
-  if (galaxy.galaxyType !== 'barred-spiral') {
-    return null;
-  }
-  
-  // Slow rotation animation
+  // Always call useFrame hook, but only animate if it's a barred galaxy
   useFrame(() => {
-    if (pointsRef.current) {
+    if (pointsRef.current && isBarredGalaxy) {
       pointsRef.current.rotation.y += 0.0001;
     }
   });
+
+  // Only render if this is a barred galaxy
+  if (!isBarredGalaxy) {
+    return null;
+  }
 
   return (
     <points ref={pointsRef}>
