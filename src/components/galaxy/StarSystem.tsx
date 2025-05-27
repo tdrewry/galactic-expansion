@@ -1,8 +1,14 @@
 
 import React, { useRef, useMemo } from 'react';
 import { useFrame, ThreeEvent } from '@react-three/fiber';
-import { Mesh, MeshBasicMaterial, AdditiveBlending, Group } from 'three';
+import { Mesh, MeshBasicMaterial, Group } from 'three';
 import { StarSystem as StarSystemType } from '../../utils/galaxyGenerator';
+import { getStarColors } from './star-system/StarColors';
+import { getStarSizes } from './star-system/StarSizes';
+import { StarCore } from './star-system/StarCore';
+import { StarGlow } from './star-system/StarGlow';
+import { StarSpikes } from './star-system/StarSpikes';
+import { SelectionRing } from './star-system/SelectionRing';
 
 interface StarSystemProps {
   system: StarSystemType;
@@ -18,42 +24,15 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
   const spikesRef = useRef<Group>(null);
   const selectionRingRef = useRef<Mesh>(null);
   
-  const { color, glowColor } = useMemo(() => {
-    const colorMap = {
-      'main-sequence': { color: '#ffffff', glow: '#ffff88' },
-      'red-giant': { color: '#ff8888', glow: '#ff4444' },
-      'white-dwarf': { color: '#ffffff', glow: '#aaaaff' },
-      'neutron': { color: '#88ccff', glow: '#4499ff' },
-      'magnetar': { color: '#ff88ff', glow: '#ff44ff' },
-      'pulsar': { color: '#88ffff', glow: '#44ffff' },
-      'quasar': { color: '#ffaa00', glow: '#ff8800' }
-    };
-    const colors = colorMap[system.starType] || { color: '#ffffff', glow: '#cccccc' };
-    return { color: colors.color, glowColor: colors.glow };
-  }, [system.starType]);
+  const { color, glowColor } = useMemo(() => getStarColors(system.starType), [system.starType]);
+  const { core, innerGlow, outerGlow, spikeLength } = useMemo(() => getStarSizes(system.starType), [system.starType]);
 
-  // Much smaller sizes for dense galaxy view
-  const { core, innerGlow, outerGlow, spikeLength } = useMemo(() => {
-    const sizeMap = {
-      'main-sequence': { core: 20, innerGlow: 35, outerGlow: 60, spikeLength: 80 },
-      'red-giant': { core: 30, innerGlow: 50, outerGlow: 80, spikeLength: 100 },
-      'white-dwarf': { core: 15, innerGlow: 25, outerGlow: 40, spikeLength: 50 },
-      'neutron': { core: 12, innerGlow: 20, outerGlow: 35, spikeLength: 45 },
-      'magnetar': { core: 18, innerGlow: 30, outerGlow: 50, spikeLength: 65 },
-      'pulsar': { core: 16, innerGlow: 28, outerGlow: 45, spikeLength: 60 },
-      'quasar': { core: 40, innerGlow: 65, outerGlow: 100, spikeLength: 120 }
-    };
-    return sizeMap[system.starType] || { core: 20, innerGlow: 35, outerGlow: 60, spikeLength: 80 };
-  }, [system.starType]);
-
-  // Only twinkling animation enabled for performance
+  // Twinkling animation
   useFrame((state) => {
     if (coreRef.current && innerGlowRef.current && outerGlowRef.current) {
-      // Twinkling effect - vary opacity slightly
       const systemIdNum = typeof system.id === 'string' ? parseInt(system.id.replace(/\D/g, ''), 10) || 0 : system.id;
       const twinkle = 0.8 + Math.sin(state.clock.elapsedTime * 3 + systemIdNum * 0.1) * 0.2;
       
-      // Cast materials to MeshBasicMaterial to access opacity
       (coreRef.current.material as MeshBasicMaterial).opacity = twinkle;
       (innerGlowRef.current.material as MeshBasicMaterial).opacity = 0.8 * twinkle;
       (outerGlowRef.current.material as MeshBasicMaterial).opacity = 0.4 * twinkle;
@@ -99,105 +78,11 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
         <meshBasicMaterial transparent opacity={0} />
       </mesh>
 
-      {/* Outer glow - creates bloom effect */}
-      <mesh ref={outerGlowRef}>
-        <sphereGeometry args={[outerGlow, 16, 12]} />
-        <meshBasicMaterial 
-          color={glowColor}
-          transparent 
-          opacity={0.4}
-          blending={AdditiveBlending}
-          depthWrite={false}
-        />
-      </mesh>
-      
-      {/* Inner glow - brighter middle layer */}
-      <mesh ref={innerGlowRef}>
-        <sphereGeometry args={[innerGlow, 12, 8]} />
-        <meshBasicMaterial 
-          color={color}
-          transparent 
-          opacity={0.8}
-          blending={AdditiveBlending}
-          depthWrite={false}
-        />
-      </mesh>
-      
-      {/* Bright core - the actual star */}
-      <mesh ref={coreRef}>
-        <sphereGeometry args={[core, 8, 6]} />
-        <meshBasicMaterial 
-          color={color} 
-          transparent 
-          opacity={1.0}
-          blending={AdditiveBlending}
-          depthWrite={false}
-        />
-      </mesh>
-      
-      {/* Star spikes for that classic star look */}
-      <group ref={spikesRef}>
-        {/* Main cross spikes */}
-        <mesh>
-          <planeGeometry args={[core * 0.1, spikeLength]} />
-          <meshBasicMaterial 
-            color={color}
-            transparent
-            opacity={0.8}
-            blending={AdditiveBlending}
-            depthWrite={false}
-          />
-        </mesh>
-        
-        <mesh rotation={[0, 0, Math.PI / 2]}>
-          <planeGeometry args={[core * 0.1, spikeLength]} />
-          <meshBasicMaterial 
-            color={color}
-            transparent
-            opacity={0.8}
-            blending={AdditiveBlending}
-            depthWrite={false}
-          />
-        </mesh>
-        
-        {/* Diagonal spikes */}
-        <mesh rotation={[0, 0, Math.PI / 4]}>
-          <planeGeometry args={[core * 0.08, spikeLength * 0.6]} />
-          <meshBasicMaterial 
-            color={color}
-            transparent
-            opacity={0.6}
-            blending={AdditiveBlending}
-            depthWrite={false}
-          />
-        </mesh>
-        
-        <mesh rotation={[0, 0, -Math.PI / 4]}>
-          <planeGeometry args={[core * 0.08, spikeLength * 0.6]} />
-          <meshBasicMaterial 
-            color={color}
-            transparent
-            opacity={0.6}
-            blending={AdditiveBlending}
-            depthWrite={false}
-          />
-        </mesh>
-      </group>
-      
-      {/* Selection ring */}
-      {isSelected && (
-        <mesh ref={selectionRingRef}>
-          <ringGeometry args={[outerGlow * 1.4, outerGlow * 1.6, 32]} />
-          <meshBasicMaterial 
-            color="#00ff88" 
-            transparent 
-            opacity={1.0} 
-            side={2}
-            blending={AdditiveBlending}
-            depthWrite={false}
-          />
-        </mesh>
-      )}
+      <StarGlow ref={outerGlowRef} size={outerGlow} color={glowColor} opacity={0.4} segments={16} />
+      <StarGlow ref={innerGlowRef} size={innerGlow} color={color} opacity={0.8} segments={12} />
+      <StarCore ref={coreRef} core={core} color={color} />
+      <StarSpikes ref={spikesRef} core={core} spikeLength={spikeLength} color={color} />
+      <SelectionRing ref={selectionRingRef} outerGlow={outerGlow} isVisible={isSelected} />
     </group>
   );
 };
