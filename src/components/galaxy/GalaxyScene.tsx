@@ -12,12 +12,16 @@ interface GalaxySceneProps {
   galaxy: Galaxy;
   selectedSystem: StarSystemType | null;
   onSystemSelect: (system: StarSystemType | null) => void;
+  raymarchingSamples?: number;
+  minimumVisibility?: number;
 }
 
 export const GalaxyScene: React.FC<GalaxySceneProps> = ({ 
   galaxy, 
   selectedSystem, 
-  onSystemSelect 
+  onSystemSelect,
+  raymarchingSamples = 8,
+  minimumVisibility = 0.1
 }) => {
   const { camera, gl } = useThree();
   const controlsRef = useRef<any>(null);
@@ -77,7 +81,11 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
       </mesh>
       
       {/* Interstellar Material - renders behind stars */}
-      <InterstellarMaterial galaxy={galaxy} />
+      <InterstellarMaterial 
+        galaxy={galaxy} 
+        raymarchingSamples={raymarchingSamples}
+        minimumVisibility={minimumVisibility}
+      />
       
       {/* Star Systems */}
       {galaxy.starSystems.map((system) => (
