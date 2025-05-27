@@ -1,4 +1,3 @@
-
 import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -20,6 +19,28 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
   
   // Check if this is a barred galaxy
   const isBarredGalaxy = galaxy.galaxyType === 'barred-spiral';
+  
+  // Create a custom blur texture for the particles
+  const blurTexture = useMemo(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d')!;
+    
+    // Create a radial gradient for a soft, blurred effect
+    const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    gradient.addColorStop(0.3, 'rgba(255, 255, 255, 0.7)');
+    gradient.addColorStop(0.7, 'rgba(255, 255, 255, 0.2)');
+    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 64, 64);
+    
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    return texture;
+  }, []);
   
   // Generate particle positions for barred galaxy dust lanes
   const { positions, colors, sizes } = useMemo(() => {
@@ -139,9 +160,10 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
       colorsArray[i3 + 1] = dustColor.g;
       colorsArray[i3 + 2] = dustColor.b;
       
-      // Particle sizes - larger particles in the bar, much smaller at arm ends for thinning effect
+      // Enhanced particle sizes for better blur effect - much larger for hazier look
+      const baseSize = particleSize * 3; // 3x larger base size for better blur coverage
       const sizeMultiplier = isBarParticle ? 1.4 : (1.0 - armDistanceRatio * 0.6); // More size reduction at ends
-      sizesArray[i] = particleSize * sizeMultiplier * (0.4 + seededRandom() * 1.2);
+      sizesArray[i] = baseSize * sizeMultiplier * (0.8 + seededRandom() * 1.5); // Larger size variation
     }
     
     console.log(`Generated ${numParticles} particles for barred galaxy`);
@@ -151,7 +173,7 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
       colors: colorsArray,
       sizes: sizesArray
     };
-  }, [numParticles, particleSize, galaxy.seed, galaxy.galaxyType, isBarredGalaxy]);
+  }, [numParticles, particleSize, galaxy.seed, galaxy.galaxyType, isBarredGalaxy, blurTexture]);
   
   // Always call useFrame hook, but only animate if it's a barred galaxy
   useFrame(() => {
@@ -188,13 +210,15 @@ export const ParticleDustLanes: React.FC<ParticleDustLanesProps> = ({
         />
       </bufferGeometry>
       <pointsMaterial
+        map={blurTexture}
         size={particleSize}
         sizeAttenuation={true}
         vertexColors={true}
         transparent={true}
-        opacity={opacity}
+        opacity={opacity * 0.7} // Slightly reduced opacity for hazier effect
         depthWrite={false}
         blending={THREE.AdditiveBlending}
+        alphaTest={0.001} // Small alpha test to improve performance
       />
     </points>
   );
