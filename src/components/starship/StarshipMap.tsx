@@ -38,12 +38,13 @@ export const StarshipMap: React.FC<StarshipMapProps> = ({ starship }) => {
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="flex h-full w-full gap-2">
+      {/* Ship Map */}
       <div className="flex-1 relative bg-black rounded-lg overflow-hidden">
         <svg 
           viewBox="0 0 400 300" 
           className="w-full h-full"
-          style={{ minHeight: '300px' }}
+          style={{ minHeight: '200px' }}
         >
           {/* Ship Hull Outline */}
           <path
@@ -109,39 +110,39 @@ export const StarshipMap: React.FC<StarshipMapProps> = ({ starship }) => {
         </svg>
       </div>
       
-      {/* Room Legend */}
-      <div className="mt-4 grid grid-cols-4 gap-2 text-xs">
+      {/* Room Legend - Right Side */}
+      <div className="flex flex-col justify-center space-y-2 text-xs min-w-0 flex-shrink-0" style={{ width: '80px' }}>
         <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-blue-600 rounded"></div>
-          <span className="text-gray-300">Bridge</span>
+          <div className="w-2 h-2 bg-blue-600 rounded flex-shrink-0"></div>
+          <span className="text-gray-300 text-xs leading-tight">Bridge</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-red-600 rounded"></div>
-          <span className="text-gray-300">Engine</span>
+          <div className="w-2 h-2 bg-red-600 rounded flex-shrink-0"></div>
+          <span className="text-gray-300 text-xs leading-tight">Engine</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-orange-600 rounded"></div>
-          <span className="text-gray-300">Weapons</span>
+          <div className="w-2 h-2 bg-orange-600 rounded flex-shrink-0"></div>
+          <span className="text-gray-300 text-xs leading-tight">Weapons</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-cyan-600 rounded"></div>
-          <span className="text-gray-300">Shields</span>
+          <div className="w-2 h-2 bg-cyan-600 rounded flex-shrink-0"></div>
+          <span className="text-gray-300 text-xs leading-tight">Shields</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-yellow-600 rounded"></div>
-          <span className="text-gray-300">Cargo</span>
+          <div className="w-2 h-2 bg-yellow-600 rounded flex-shrink-0"></div>
+          <span className="text-gray-300 text-xs leading-tight">Cargo</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-green-600 rounded"></div>
-          <span className="text-gray-300">Quarters</span>
+          <div className="w-2 h-2 bg-green-600 rounded flex-shrink-0"></div>
+          <span className="text-gray-300 text-xs leading-tight">Quarters</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-pink-600 rounded"></div>
-          <span className="text-gray-300">Medical</span>
+          <div className="w-2 h-2 bg-pink-600 rounded flex-shrink-0"></div>
+          <span className="text-gray-300 text-xs leading-tight">Medical</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-purple-600 rounded"></div>
-          <span className="text-gray-300">Science</span>
+          <div className="w-2 h-2 bg-purple-600 rounded flex-shrink-0"></div>
+          <span className="text-gray-300 text-xs leading-tight">Science</span>
         </div>
       </div>
     </div>
