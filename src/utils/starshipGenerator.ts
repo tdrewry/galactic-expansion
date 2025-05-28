@@ -7,6 +7,13 @@ export interface StarshipStats {
   scanners: number;
   cargo: number;
   credits: number;
+  crew: number;
+  maxCrew: number;
+  maxShields: number;
+  maxHull: number;
+  maxCombatPower: number;
+  maxScanners: number;
+  maxCargo: number;
 }
 
 export interface Room {
@@ -60,7 +67,16 @@ function seededRandom(seed: number): number {
 function generateStats(seed: number): StarshipStats {
   let currentSeed = seed;
   
+  // Base stats
   const techLevel = Math.floor(seededRandom(currentSeed++) * 6) + 3; // 3-8
+  const maxShields = 100;
+  const maxHull = 100;
+  const maxCombatPower = 100;
+  const maxScanners = 100;
+  const maxCargo = 1000;
+  const maxCrew = Math.floor(seededRandom(currentSeed++) * 50) + 50; // 50-100 crew capacity
+  
+  // Current values
   const shields = Math.floor(seededRandom(currentSeed++) * 60) + 30; // 30-90
   const hull = Math.floor(seededRandom(currentSeed++) * 60) + 40; // 40-100
   const combatPower = Math.floor(seededRandom(currentSeed++) * 70) + 20; // 20-90
@@ -68,6 +84,7 @@ function generateStats(seed: number): StarshipStats {
   const scanners = Math.floor(seededRandom(currentSeed++) * 70) + 25; // 25-95
   const cargo = Math.floor(seededRandom(currentSeed++) * 600) + 200; // 200-800
   const credits = Math.floor(seededRandom(currentSeed++) * 5000) + 1000; // 1000-6000
+  const crew = Math.floor(maxCrew * 0.8); // Start with 80% of max crew
   
   return {
     techLevel,
@@ -77,7 +94,14 @@ function generateStats(seed: number): StarshipStats {
     diplomacy,
     scanners,
     cargo,
-    credits
+    credits,
+    crew,
+    maxCrew,
+    maxShields,
+    maxHull,
+    maxCombatPower,
+    maxScanners,
+    maxCargo
   };
 }
 
