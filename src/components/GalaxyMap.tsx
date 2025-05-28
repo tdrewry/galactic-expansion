@@ -30,6 +30,7 @@ interface GalaxyMapProps {
   selectedSystem?: StarSystem | null;
   selectedStar?: 'primary' | 'binary' | 'trinary';
   onStarSelect?: (star: 'primary' | 'binary' | 'trinary') => void;
+  exploredSystems?: Set<string>;
 }
 
 export const GalaxyMap: React.FC<GalaxyMapProps> = ({ 
@@ -55,7 +56,8 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
   onSystemSelect,
   selectedSystem: propSelectedSystem = null,
   selectedStar: propSelectedStar = 'primary',
-  onStarSelect
+  onStarSelect,
+  exploredSystems = new Set()
 }) => {
   const [selectedSystem, setSelectedSystem] = useState<StarSystem | null>(null);
   const [selectedStar, setSelectedStar] = useState<'primary' | 'binary' | 'trinary'>('primary');
@@ -70,6 +72,21 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
     console.log('Generated galaxy with', newGalaxy.starSystems.length, 'systems');
     return newGalaxy;
   }, [seed, numSystems, numNebulae, binaryFrequency, trinaryFrequency]);
+
+  // Create enhanced galaxy data with exploration status
+  const enhancedGalaxy = useMemo(() => {
+    const enhancedStarSystems = galaxy.starSystems.map(system => ({
+      ...system,
+      explored: exploredSystems.has(system.id)
+    }));
+
+    console.log('Enhanced galaxy systems with exploration status. Explored systems:', exploredSystems.size);
+    
+    return {
+      ...galaxy,
+      starSystems: enhancedStarSystems
+    };
+  }, [galaxy, exploredSystems]);
   
   const handleSystemSelect = useCallback((system: StarSystem | null) => {
     console.log('Selected system:', system?.id || 'none');
@@ -102,7 +119,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
         }}
       >
         <GalaxyScene 
-          galaxy={galaxy}
+          galaxy={enhancedGalaxy}
           selectedSystem={currentSelectedSystem}
           onSystemSelect={handleSystemSelect}
           raymarchingSamples={raymarchingSamples}
@@ -129,7 +146,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
           selectedStar={currentSelectedStar}
         />
       )}
-      <GalaxyInfo galaxy={galaxy} />
+      <GalaxyInfo galaxy={enhancedGalaxy} />
     </div>
   );
 };

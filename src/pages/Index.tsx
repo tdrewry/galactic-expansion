@@ -3,13 +3,12 @@ import { GalaxyMap } from '../components/GalaxyMap';
 import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
 import { SystemView } from '../components/galaxy/SystemView';
 import { GalaxySettings } from '../components/galaxy/GalaxySettings';
-import { ExplorationDialog, ExplorationEvent } from '../components/galaxy/ExplorationDialog';
-import { generateExplorationEvent } from '../utils/explorationGenerator';
+import { ExplorationDialog } from '../components/galaxy/ExplorationDialog';
+import { ExplorationControls } from '../components/exploration/ExplorationControls';
+import { useExploration } from '../components/exploration/useExploration';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
-import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
   const [galaxySeed, setGalaxySeed] = useState(12345);
@@ -40,20 +39,25 @@ const Index = () => {
   const [selectedStar, setSelectedStar] = useState<'primary' | 'binary' | 'trinary'>('primary');
   const [selectedBody, setSelectedBody] = useState<Planet | Moon | null>(null);
   
-  // Exploration state
-  const [exploredSystems, setExploredSystems] = useState<Set<string>>(new Set());
-  const [explorationEvent, setExplorationEvent] = useState<ExplorationEvent | null>(null);
-  const [isExplorationDialogOpen, setIsExplorationDialogOpen] = useState(false);
-  const [highlightedBodyId, setHighlightedBodyId] = useState<string | null>(null);
-  
-  const { toast } = useToast();
+  // Use exploration hook
+  const {
+    exploredSystems,
+    explorationEvent,
+    isExplorationDialogOpen,
+    highlightedBodyId,
+    isSystemExplored,
+    beginExploration,
+    resetExploration,
+    closeExplorationDialog,
+    resetAllExploration
+  } = useExploration();
 
   const handleSeedChange = () => {
     const newSeed = parseInt(inputSeed) || 12345;
     setGalaxySeed(newSeed);
     setSelectedSystem(null);
     setSelectedBody(null);
-    setExploredSystems(new Set());
+    resetAllExploration();
   };
 
   const generateRandomSeed = () => {
@@ -62,7 +66,7 @@ const Index = () => {
     setGalaxySeed(randomSeed);
     setSelectedSystem(null);
     setSelectedBody(null);
-    setExploredSystems(new Set());
+    resetAllExploration();
   };
 
   const handleSettingsChange = (settings: {
@@ -140,24 +144,22 @@ const Index = () => {
     
     setSelectedSystem(null);
     setSelectedBody(null);
-    setExploredSystems(new Set());
+    resetAllExploration();
   };
 
   const handleSystemSelect = (system: StarSystem) => {
     console.log('Index: System selected:', system.id);
-    // Update the system's explored status
-    const updatedSystem = { ...system, explored: exploredSystems.has(system.id) };
+    // Update the system's explored status when selecting
+    const updatedSystem = { ...system, explored: isSystemExplored(system) };
     setSelectedSystem(updatedSystem);
     setSelectedStar('primary');
     setSelectedBody(null);
-    setHighlightedBodyId(null);
   };
 
   const handleStarSelect = (star: 'primary' | 'binary' | 'trinary') => {
     console.log('Index: Star selected:', star);
     setSelectedStar(star);
     setSelectedBody(null);
-    setHighlightedBodyId(null);
   };
 
   const handleBodySelect = (body: Planet | Moon | null) => {
@@ -168,67 +170,15 @@ const Index = () => {
   const handleBeginExploration = () => {
     if (!selectedSystem) return;
     
-    try {
-      const event = generateExplorationEvent(selectedSystem);
-      setExplorationEvent(event);
-      setHighlightedBodyId(event.body.id);
-      setIsExplorationDialogOpen(true);
-      
-      // Mark system as explored
-      setExploredSystems(prev => new Set([...prev, selectedSystem.id]));
-      
-      // Update the selected system to reflect explored status
-      setSelectedSystem(prev => prev ? { ...prev, explored: true } : null);
-      
-      toast({
-        title: "Exploration Initiated",
-        description: `Beginning exploration of ${selectedSystem.id}...`,
-      });
-    } catch (error) {
-      console.error('Error generating exploration event:', error);
-      toast({
-        title: "Exploration Failed",
-        description: "Unable to initiate exploration. Please try again.",
-        variant: "destructive",
-      });
-    }
+    const updatedSystem = beginExploration(selectedSystem);
+    setSelectedSystem(updatedSystem);
   };
 
   const handleResetExploration = () => {
     if (!selectedSystem) return;
     
-    setExploredSystems(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(selectedSystem.id);
-      return newSet;
-    });
-    
-    // Update the selected system to reflect unexplored status
-    setSelectedSystem(prev => prev ? { ...prev, explored: false } : null);
-    setHighlightedBodyId(null);
-    
-    toast({
-      title: "Exploration Reset",
-      description: `${selectedSystem.id} marked as unexplored.`,
-    });
-  };
-
-  const handleExplorationDialogClose = () => {
-    setIsExplorationDialogOpen(false);
-    setHighlightedBodyId(null);
-    setExplorationEvent(null);
-  };
-
-  const isSystemExplored = (system: StarSystem): boolean => {
-    return exploredSystems.has(system.id);
-  };
-
-  // Create enhanced galaxy data with exploration status
-  const enhancedGalaxyData = (systems: StarSystem[]) => {
-    return systems.map(system => ({
-      ...system,
-      explored: isSystemExplored(system)
-    }));
+    const updatedSystem = resetExploration(selectedSystem);
+    setSelectedSystem(updatedSystem);
   };
 
   return (
@@ -306,6 +256,7 @@ const Index = () => {
                 selectedSystem={selectedSystem}
                 selectedStar={selectedStar}
                 onStarSelect={handleStarSelect}
+                exploredSystems={exploredSystems}
               />
             </div>
           </ResizablePanel>
@@ -316,34 +267,13 @@ const Index = () => {
               
               <ResizablePanel defaultSize={30} minSize={20} maxSize={60}>
                 <div className="h-full bg-gray-900 border-l border-gray-700 flex flex-col">
-                  {/* Actions Panel */}
-                  <div className="flex-shrink-0 p-4 border-b border-gray-600">
-                    <Card className="bg-gray-800 border-gray-600">
-                      <CardHeader>
-                        <CardTitle className="text-white">Actions</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        <Button 
-                          className="w-full" 
-                          disabled={isSystemExplored(selectedSystem)}
-                          onClick={handleBeginExploration}
-                        >
-                          {isSystemExplored(selectedSystem) ? 'Already Explored' : 'Begin Exploration'}
-                        </Button>
-                        
-                        <Button 
-                          className="w-full" 
-                          variant="secondary"
-                          disabled={!isSystemExplored(selectedSystem)}
-                          onClick={handleResetExploration}
-                        >
-                          Reset Exploration
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  </div>
+                  <ExplorationControls
+                    selectedSystem={selectedSystem}
+                    isExplored={isSystemExplored(selectedSystem)}
+                    onBeginExploration={handleBeginExploration}
+                    onResetExploration={handleResetExploration}
+                  />
 
-                  {/* System View */}
                   <div className="flex-1 overflow-y-auto">
                     <div className="p-4">
                       <SystemView 
@@ -365,10 +295,9 @@ const Index = () => {
         <p>Procedurally Generated Galaxy | Seed: {galaxySeed} | Systems: {numSystems} | Nebulae: {numNebulae} | Binary: {Math.round(binaryFrequency * 100)}% | Trinary: {Math.round(trinaryFrequency * 100)}% | Raymarching: {raymarchingSamples} samples | Click and drag to navigate, scroll to zoom</p>
       </footer>
 
-      {/* Exploration Dialog */}
       <ExplorationDialog
         isOpen={isExplorationDialogOpen}
-        onClose={handleExplorationDialogClose}
+        onClose={closeExplorationDialog}
         event={explorationEvent}
       />
     </div>

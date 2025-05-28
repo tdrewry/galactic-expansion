@@ -29,6 +29,9 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
   const { color, glow } = useMemo(() => getStarColors(system.starType), [system.starType]);
   const { core, innerGlow, outerGlow, spikeLength } = useMemo(() => getStarSizes(system.starType), [system.starType]);
 
+  // Log exploration status for debugging
+  console.log(`StarSystem ${system.id} - explored: ${system.explored}, isSelected: ${isSelected}`);
+
   // Twinkling animation
   useFrame((state) => {
     if (coreRef.current && innerGlowRef.current && outerGlowRef.current) {
@@ -84,7 +87,7 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
       <StarGlow ref={innerGlowRef} size={innerGlow} color={color} opacity={0.8} segments={12} />
       <StarCore ref={coreRef} core={core} color={color} />
       <StarSpikes ref={spikesRef} core={core} spikeLength={spikeLength} color={color} />
-      <ExploredHalo ref={exploredHaloRef} outerGlow={outerGlow} isVisible={system.explored} />
+      <ExploredHalo ref={exploredHaloRef} outerGlow={outerGlow} isVisible={!!system.explored} />
       <SelectionRing ref={selectionRingRef} outerGlow={outerGlow} isVisible={isSelected} />
     </group>
   );
