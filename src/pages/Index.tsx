@@ -183,6 +183,8 @@ const Index = () => {
   const handleContinueExploration = () => {
     if (!selectedSystem) return;
     
+    // Complete current exploration first, then start new one
+    completeCurrentExploration(selectedSystem);
     continueExploration(selectedSystem);
   };
 

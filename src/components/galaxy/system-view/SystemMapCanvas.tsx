@@ -1,5 +1,4 @@
-
-import React, { useRef, useCallback, useMemo } from 'react';
+import React, { useRef, useCallback, useMemo, useState } from 'react';
 import { StarSystem, Planet, Moon } from '../../../utils/galaxyGenerator';
 
 interface SystemMapCanvasProps {
@@ -32,6 +31,7 @@ export const SystemMapCanvas: React.FC<SystemMapCanvasProps> = ({
   systemId
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [touchStart, setTouchStart] = useState<{ distance: number; centerX: number; centerY: number } | null>(null);
 
   const getStarColor = (starType: string) => {
     const colors = {
@@ -91,6 +91,48 @@ export const SystemMapCanvas: React.FC<SystemMapCanvasProps> = ({
     transformOrigin: 'center center'
   };
 
+  // Handle touch events for pinch zoom
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const distance = Math.sqrt(
+        Math.pow(touch2.clientX - touch1.clientX, 2) + 
+        Math.pow(touch2.clientY - touch1.clientY, 2)
+      );
+      const centerX = (touch1.clientX + touch2.clientX) / 2;
+      const centerY = (touch1.clientY + touch2.clientY) / 2;
+      
+      setTouchStart({ distance, centerX, centerY });
+      e.preventDefault();
+    }
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2 && touchStart) {
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const distance = Math.sqrt(
+        Math.pow(touch2.clientX - touch1.clientX, 2) + 
+        Math.pow(touch2.clientY - touch1.clientY, 2)
+      );
+      
+      const scale = distance / touchStart.distance;
+      const wheelEvent = {
+        preventDefault: () => {},
+        stopPropagation: () => {},
+        deltaY: scale > 1 ? -100 : 100
+      } as React.WheelEvent;
+      
+      onWheel(wheelEvent);
+      e.preventDefault();
+    }
+  }, [touchStart, onWheel]);
+
+  const handleTouchEnd = useCallback(() => {
+    setTouchStart(null);
+  }, []);
+
   return (
     <div 
       ref={containerRef}
@@ -102,6 +144,9 @@ export const SystemMapCanvas: React.FC<SystemMapCanvasProps> = ({
       onPointerLeave={onPointerUp}
       onWheel={onWheel}
       onWheelCapture={onWheel}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       <div style={transformStyle}>
         <svg width="400" height="400" className="absolute inset-0">
