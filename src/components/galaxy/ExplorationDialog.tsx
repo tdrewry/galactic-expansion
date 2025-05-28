@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { Planet, Moon } from '../../utils/galaxyGenerator';
 
 export interface ExplorationEvent {
@@ -15,12 +16,16 @@ export interface ExplorationEvent {
 interface ExplorationDialogProps {
   isOpen: boolean;
   onClose: () => void;
+  onContinue?: () => void;
+  canContinue?: boolean;
   event: ExplorationEvent | null;
 }
 
 export const ExplorationDialog: React.FC<ExplorationDialogProps> = ({
   isOpen,
   onClose,
+  onContinue,
+  canContinue = false,
   event
 }) => {
   if (!event) return null;
@@ -98,13 +103,22 @@ export const ExplorationDialog: React.FC<ExplorationDialogProps> = ({
             </div>
           )}
           
-          <div className="flex justify-center pt-4">
-            <button
+          <div className="flex gap-3 pt-4">
+            {canContinue && onContinue && (
+              <Button
+                onClick={onContinue}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Continue Exploration
+              </Button>
+            )}
+            <Button
               onClick={onClose}
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              variant="secondary"
+              className={canContinue ? "flex-1" : "w-full"}
             >
-              Continue Exploration
-            </button>
+              Complete Exploration
+            </Button>
           </div>
         </div>
       </DialogContent>

@@ -5,6 +5,7 @@ import { SystemView } from '../components/galaxy/SystemView';
 import { GalaxySettings } from '../components/galaxy/GalaxySettings';
 import { ExplorationDialog } from '../components/galaxy/ExplorationDialog';
 import { ExplorationControls } from '../components/exploration/ExplorationControls';
+import { ExplorationLog } from '../components/exploration/ExplorationLog';
 import { useExploration } from '../components/exploration/useExploration';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,11 +43,17 @@ const Index = () => {
   // Use exploration hook
   const {
     exploredSystems,
+    explorationHistory,
     explorationEvent,
     isExplorationDialogOpen,
     highlightedBodyId,
+    canContinueExploration,
     isSystemExplored,
+    canSystemBeExplored,
+    getSystemExplorationStatus,
     beginExploration,
+    continueExploration,
+    completeCurrentExploration,
     resetExploration,
     closeExplorationDialog,
     resetAllExploration
@@ -149,7 +156,6 @@ const Index = () => {
 
   const handleSystemSelect = (system: StarSystem) => {
     console.log('Index: System selected:', system.id);
-    // Update the system's explored status when selecting
     const updatedSystem = { ...system, explored: isSystemExplored(system) };
     setSelectedSystem(updatedSystem);
     setSelectedStar('primary');
@@ -172,6 +178,19 @@ const Index = () => {
     
     const updatedSystem = beginExploration(selectedSystem);
     setSelectedSystem(updatedSystem);
+  };
+
+  const handleContinueExploration = () => {
+    if (!selectedSystem) return;
+    
+    continueExploration(selectedSystem);
+  };
+
+  const handleCompleteExploration = () => {
+    if (!selectedSystem) return;
+    
+    completeCurrentExploration(selectedSystem);
+    closeExplorationDialog();
   };
 
   const handleResetExploration = () => {
@@ -230,7 +249,16 @@ const Index = () => {
 
       <div className="flex-1 min-h-0">
         <ResizablePanelGroup direction="horizontal" className="h-full">
-          <ResizablePanel defaultSize={70} minSize={30}>
+          {explorationHistory.length > 0 && (
+            <>
+              <ResizablePanel defaultSize={25} minSize={15} maxSize={40}>
+                <ExplorationLog explorationHistory={explorationHistory} />
+              </ResizablePanel>
+              <ResizableHandle withHandle />
+            </>
+          )}
+
+          <ResizablePanel defaultSize={explorationHistory.length > 0 ? 50 : 70} minSize={30}>
             <div className="h-full">
               <GalaxyMap 
                 seed={galaxySeed} 
@@ -265,11 +293,13 @@ const Index = () => {
             <>
               <ResizableHandle withHandle />
               
-              <ResizablePanel defaultSize={30} minSize={20} maxSize={60}>
+              <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
                 <div className="h-full bg-gray-900 border-l border-gray-700 flex flex-col">
                   <ExplorationControls
                     selectedSystem={selectedSystem}
                     isExplored={isSystemExplored(selectedSystem)}
+                    canBeExplored={canSystemBeExplored(selectedSystem)}
+                    explorationStatus={getSystemExplorationStatus(selectedSystem)}
                     onBeginExploration={handleBeginExploration}
                     onResetExploration={handleResetExploration}
                   />
@@ -297,7 +327,9 @@ const Index = () => {
 
       <ExplorationDialog
         isOpen={isExplorationDialogOpen}
-        onClose={closeExplorationDialog}
+        onClose={handleCompleteExploration}
+        onContinue={canContinueExploration ? handleContinueExploration : undefined}
+        canContinue={canContinueExploration}
         event={explorationEvent}
       />
     </div>
