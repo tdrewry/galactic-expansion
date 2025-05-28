@@ -18,7 +18,8 @@ interface StarshipPanelProps {
   };
   onBeginExploration: () => void;
   onResetExploration: () => void;
-  shipStats?: any; // Will be properly typed when ship stats hook is integrated
+  shipStats?: any;
+  onRepairShip?: (cost: number) => void;
 }
 
 export const StarshipPanel: React.FC<StarshipPanelProps> = ({ 
@@ -29,13 +30,25 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
   explorationStatus,
   onBeginExploration,
   onResetExploration,
-  shipStats
+  shipStats,
+  onRepairShip
 }) => {
   const starship = useMemo(() => generateStarship(seed), [seed]);
   const [isShipLayoutOpen, setIsShipLayoutOpen] = useState(false);
 
   // Use shipStats if provided, otherwise use starship stats
   const currentStats = shipStats || starship.stats;
+
+  // Check if system allows repairs (civilizations with tech level >= ship tech level)
+  const canRepairShip = selectedSystem && 
+    selectedSystem.planets.some(planet => 
+      planet.civilization && 
+      planet.civilization.techLevel >= currentStats.techLevel
+    );
+
+  const repairCost = 1000; // Base repair cost
+  const canAffordRepair = currentStats.credits >= repairCost;
+  const needsRepair = currentStats.shields < 100 || currentStats.hull < 100;
 
   const getStatColor = (value: number, max: number = 100) => {
     const percentage = (value / max) * 100;
@@ -56,7 +69,7 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
   return (
     <>
       <div className="h-full bg-gray-900 border-t border-gray-700 flex">
-        {/* Ship Stats - 3/4 width */}
+        {/* Ship Stats - flex to take available space */}
         <div className="flex-1 border-r border-gray-700 p-4">
           <Card className="bg-gray-800 border-gray-600 h-full">
             <CardHeader className="pb-4">
@@ -202,8 +215,8 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
           </Card>
         </div>
 
-        {/* Actions Panel - 1/4 width */}
-        <div className="w-1/4 p-4 flex">
+        {/* Actions Panel - fixed width */}
+        <div className="w-80 p-4 flex">
           <ActionsPanel
             selectedSystem={selectedSystem}
             isExplored={isExplored}
@@ -212,6 +225,11 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
             onBeginExploration={onBeginExploration}
             onResetExploration={onResetExploration}
             onOpenShipLayout={() => setIsShipLayoutOpen(true)}
+            canRepairShip={canRepairShip}
+            repairCost={repairCost}
+            canAffordRepair={canAffordRepair}
+            needsRepair={needsRepair}
+            onRepairShip={onRepairShip}
           />
         </div>
       </div>

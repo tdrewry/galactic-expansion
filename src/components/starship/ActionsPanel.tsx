@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Ship } from 'lucide-react';
+import { Ship, Wrench } from 'lucide-react';
 import { StarSystem } from '../../utils/galaxyGenerator';
 
 interface ActionsPanelProps {
@@ -17,6 +17,11 @@ interface ActionsPanelProps {
   onBeginExploration: () => void;
   onResetExploration: () => void;
   onOpenShipLayout: () => void;
+  canRepairShip?: boolean;
+  repairCost?: number;
+  canAffordRepair?: boolean;
+  needsRepair?: boolean;
+  onRepairShip?: (cost: number) => void;
 }
 
 export const ActionsPanel: React.FC<ActionsPanelProps> = ({
@@ -26,10 +31,21 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
   explorationStatus,
   onBeginExploration,
   onResetExploration,
-  onOpenShipLayout
+  onOpenShipLayout,
+  canRepairShip = false,
+  repairCost = 1000,
+  canAffordRepair = false,
+  needsRepair = false,
+  onRepairShip
 }) => {
+  const handleRepairShip = () => {
+    if (onRepairShip && canAffordRepair && needsRepair) {
+      onRepairShip(repairCost);
+    }
+  };
+
   return (
-    <Card className="bg-gray-800 border-gray-600 h-full">
+    <Card className="bg-gray-800 border-gray-600 h-full w-full">
       <CardHeader className="pb-2">
         <CardTitle className="text-white text-base flex items-center gap-2">
           <Button
@@ -79,6 +95,27 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
                 >
                   Reset Exploration
                 </Button>
+              )}
+
+              {/* Ship Repair Section */}
+              {canRepairShip && needsRepair && (
+                <div className="pt-2 border-t border-gray-600">
+                  <p className="text-gray-300 text-xs mb-2">
+                    Advanced civilization detected - ship repairs available
+                  </p>
+                  <Button
+                    onClick={handleRepairShip}
+                    disabled={!canAffordRepair}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white disabled:bg-gray-600 disabled:text-gray-400"
+                    size="sm"
+                  >
+                    <Wrench className="h-4 w-4 mr-2" />
+                    Repair Ship (₡{repairCost.toLocaleString()})
+                  </Button>
+                  {!canAffordRepair && (
+                    <p className="text-red-400 text-xs mt-1">Insufficient credits</p>
+                  )}
+                </div>
               )}
             </div>
           </>
