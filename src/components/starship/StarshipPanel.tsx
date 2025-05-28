@@ -1,15 +1,41 @@
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { StarshipMap } from './StarshipMap';
 import { generateStarship } from '../../utils/starshipGenerator';
+import { ActionsPanel } from './ActionsPanel';
+import { ShipLayoutDialog } from './ShipLayoutDialog';
+import { StarSystem } from '../../utils/galaxyGenerator';
 
 interface StarshipPanelProps {
   seed: number;
+  selectedSystem: StarSystem | null;
+  isExplored: boolean;
+  canBeExplored: boolean;
+  explorationStatus: {
+    systemId: string;
+    explorationsCompleted: number;
+    maxExplorations: number;
+  };
+  onBeginExploration: () => void;
+  onResetExploration: () => void;
+  shipStats?: any; // Will be properly typed when ship stats hook is integrated
 }
 
-export const StarshipPanel: React.FC<StarshipPanelProps> = ({ seed }) => {
+export const StarshipPanel: React.FC<StarshipPanelProps> = ({ 
+  seed,
+  selectedSystem,
+  isExplored,
+  canBeExplored,
+  explorationStatus,
+  onBeginExploration,
+  onResetExploration,
+  shipStats
+}) => {
   const starship = useMemo(() => generateStarship(seed), [seed]);
+  const [isShipLayoutOpen, setIsShipLayoutOpen] = useState(false);
+
+  // Use shipStats if provided, otherwise use starship stats
+  const currentStats = shipStats || starship.stats;
 
   const getStatColor = (value: number, max: number = 100) => {
     const percentage = (value / max) * 100;
@@ -28,155 +54,173 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({ seed }) => {
   };
 
   return (
-    <div className="h-full bg-gray-900 border-t border-gray-700 flex">
-      {/* Ship Stats Panel - 2/3 width */}
-      <div className="flex-1 border-r border-gray-700 p-4">
-        <Card className="bg-gray-800 border-gray-600 h-full">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-white text-lg">{starship.name}</CardTitle>
-            <p className="text-sm text-gray-400">{starship.class} Class Starship</p>
-          </CardHeader>
-          <CardContent>
-            {/* Stats in 3 columns */}
-            <div className="grid grid-cols-3 gap-6 h-full">
-              {/* Column 1 */}
-              <div className="space-y-4">
-                {/* Tech Level */}
+    <>
+      <div className="h-full bg-gray-900 border-t border-gray-700 flex">
+        {/* Ship Stats - 3/4 width */}
+        <div className="flex-1 border-r border-gray-700 p-4">
+          <Card className="bg-gray-800 border-gray-600 h-full">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-white text-lg flex items-center justify-between">
                 <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm text-gray-300">Tech Level</span>
-                    <span className={`text-sm font-medium ${getStatColor(starship.stats.techLevel, 10)}`}>
-                      {starship.stats.techLevel}/10
-                    </span>
+                  <div>{starship.name}</div>
+                  <p className="text-sm text-gray-400 font-normal">{starship.class} Class Starship</p>
+                </div>
+                <div className="text-right">
+                  <div className="text-yellow-400 text-xl font-bold">₡{currentStats.credits.toLocaleString()}</div>
+                  <p className="text-xs text-gray-400">Credits</p>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {/* Stats in 4 columns */}
+              <div className="grid grid-cols-4 gap-4 h-full">
+                {/* Column 1 */}
+                <div className="space-y-4">
+                  {/* Tech Level */}
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm text-gray-300">Tech Level</span>
+                      <span className={`text-sm font-medium ${getStatColor(currentStats.techLevel, 10)}`}>
+                        {currentStats.techLevel}/10
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full ${getStatBarColor(currentStats.techLevel, 10)}`}
+                        style={{ width: `${(currentStats.techLevel / 10) * 100}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="w-full bg-gray-700 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full ${getStatBarColor(starship.stats.techLevel, 10)}`}
-                      style={{ width: `${(starship.stats.techLevel / 10) * 100}%` }}
-                    />
+
+                  {/* Shields */}
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm text-gray-300">Shields</span>
+                      <span className={`text-sm font-medium ${getStatColor(currentStats.shields)}`}>
+                        {currentStats.shields}/100
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full ${getStatBarColor(currentStats.shields)}`}
+                        style={{ width: `${currentStats.shields}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
 
-                {/* Shields */}
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm text-gray-300">Shields</span>
-                    <span className={`text-sm font-medium ${getStatColor(starship.stats.shields)}`}>
-                      {starship.stats.shields}/100
-                    </span>
+                {/* Column 2 */}
+                <div className="space-y-4">
+                  {/* Hull */}
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm text-gray-300">Hull Integrity</span>
+                      <span className={`text-sm font-medium ${getStatColor(currentStats.hull)}`}>
+                        {currentStats.hull}/100
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full ${getStatBarColor(currentStats.hull)}`}
+                        style={{ width: `${currentStats.hull}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="w-full bg-gray-700 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full ${getStatBarColor(starship.stats.shields)}`}
-                      style={{ width: `${starship.stats.shields}%` }}
-                    />
+
+                  {/* Combat Power */}
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm text-gray-300">Combat Power</span>
+                      <span className={`text-sm font-medium ${getStatColor(currentStats.combatPower)}`}>
+                        {currentStats.combatPower}/100
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full ${getStatBarColor(currentStats.combatPower)}`}
+                        style={{ width: `${currentStats.combatPower}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
 
-                {/* Hull */}
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm text-gray-300">Hull Integrity</span>
-                    <span className={`text-sm font-medium ${getStatColor(starship.stats.hull)}`}>
-                      {starship.stats.hull}/100
-                    </span>
+                {/* Column 3 */}
+                <div className="space-y-4">
+                  {/* Diplomacy */}
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm text-gray-300">Diplomacy</span>
+                      <span className={`text-sm font-medium ${getStatColor(currentStats.diplomacy)}`}>
+                        {currentStats.diplomacy}/100
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full ${getStatBarColor(currentStats.diplomacy)}`}
+                        style={{ width: `${currentStats.diplomacy}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="w-full bg-gray-700 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full ${getStatBarColor(starship.stats.hull)}`}
-                      style={{ width: `${starship.stats.hull}%` }}
-                    />
+
+                  {/* Scanners */}
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm text-gray-300">Scanner Range</span>
+                      <span className={`text-sm font-medium ${getStatColor(currentStats.scanners)}`}>
+                        {currentStats.scanners}/100
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full ${getStatBarColor(currentStats.scanners)}`}
+                        style={{ width: `${currentStats.scanners}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Column 4 */}
+                <div className="space-y-4">
+                  {/* Cargo */}
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm text-gray-300">Cargo Capacity</span>
+                      <span className={`text-sm font-medium ${getStatColor(currentStats.cargo, 1000)}`}>
+                        {currentStats.cargo}/1000
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full ${getStatBarColor(currentStats.cargo, 1000)}`}
+                        style={{ width: `${(currentStats.cargo / 1000) * 100}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </div>
 
-              {/* Column 2 */}
-              <div className="space-y-4">
-                {/* Combat Power */}
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm text-gray-300">Combat Power</span>
-                    <span className={`text-sm font-medium ${getStatColor(starship.stats.combatPower)}`}>
-                      {starship.stats.combatPower}/100
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-700 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full ${getStatBarColor(starship.stats.combatPower)}`}
-                      style={{ width: `${starship.stats.combatPower}%` }}
-                    />
-                  </div>
-                </div>
-
-                {/* Diplomacy */}
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm text-gray-300">Diplomacy</span>
-                    <span className={`text-sm font-medium ${getStatColor(starship.stats.diplomacy)}`}>
-                      {starship.stats.diplomacy}/100
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-700 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full ${getStatBarColor(starship.stats.diplomacy)}`}
-                      style={{ width: `${starship.stats.diplomacy}%` }}
-                    />
-                  </div>
-                </div>
-
-                {/* Scanners */}
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm text-gray-300">Scanner Range</span>
-                    <span className={`text-sm font-medium ${getStatColor(starship.stats.scanners)}`}>
-                      {starship.stats.scanners}/100
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-700 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full ${getStatBarColor(starship.stats.scanners)}`}
-                      style={{ width: `${starship.stats.scanners}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Column 3 */}
-              <div className="space-y-4">
-                {/* Cargo */}
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm text-gray-300">Cargo Capacity</span>
-                    <span className={`text-sm font-medium ${getStatColor(starship.stats.cargo, 1000)}`}>
-                      {starship.stats.cargo}/1000
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-700 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full ${getStatBarColor(starship.stats.cargo, 1000)}`}
-                      style={{ width: `${(starship.stats.cargo / 1000) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Actions Panel - 1/4 width */}
+        <div className="w-1/4 p-4 flex">
+          <ActionsPanel
+            selectedSystem={selectedSystem}
+            isExplored={isExplored}
+            canBeExplored={canBeExplored}
+            explorationStatus={explorationStatus}
+            onBeginExploration={onBeginExploration}
+            onResetExploration={onResetExploration}
+            onOpenShipLayout={() => setIsShipLayoutOpen(true)}
+          />
+        </div>
       </div>
 
-      {/* Ship Layout Map - 1/3 width */}
-      <div className="w-1/3 p-4 flex">
-        <Card className="bg-gray-800 border-gray-600 flex-1 flex flex-col">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-white text-base">Ship Layout</CardTitle>
-          </CardHeader>
-          <CardContent className="flex-1 flex">
-            <div className="flex-1 flex">
-              <StarshipMap starship={starship} />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+      <ShipLayoutDialog
+        isOpen={isShipLayoutOpen}
+        onClose={() => setIsShipLayoutOpen(false)}
+        starship={starship}
+      />
+    </>
   );
 };

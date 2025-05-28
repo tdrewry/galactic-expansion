@@ -1,4 +1,3 @@
-
 export interface StarshipStats {
   techLevel: number;
   shields: number;
@@ -7,6 +6,7 @@ export interface StarshipStats {
   diplomacy: number;
   scanners: number;
   cargo: number;
+  credits: number;
 }
 
 export interface Room {
@@ -67,6 +67,7 @@ function generateStats(seed: number): StarshipStats {
   const diplomacy = Math.floor(seededRandom(currentSeed++) * 80) + 10; // 10-90
   const scanners = Math.floor(seededRandom(currentSeed++) * 70) + 25; // 25-95
   const cargo = Math.floor(seededRandom(currentSeed++) * 600) + 200; // 200-800
+  const credits = Math.floor(seededRandom(currentSeed++) * 5000) + 1000; // 1000-6000
   
   return {
     techLevel,
@@ -75,7 +76,8 @@ function generateStats(seed: number): StarshipStats {
     combatPower,
     diplomacy,
     scanners,
-    cargo
+    cargo,
+    credits
   };
 }
 

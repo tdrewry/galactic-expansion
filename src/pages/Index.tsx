@@ -4,10 +4,11 @@ import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
 import { SystemView } from '../components/galaxy/SystemView';
 import { GalaxySettings } from '../components/galaxy/GalaxySettings';
 import { ExplorationDialog } from '../components/galaxy/ExplorationDialog';
-import { ExplorationControls } from '../components/exploration/ExplorationControls';
 import { ExplorationLog } from '../components/exploration/ExplorationLog';
 import { useExploration } from '../components/exploration/useExploration';
 import { StarshipPanel } from '../components/starship/StarshipPanel';
+import { generateStarship } from '../utils/starshipGenerator';
+import { useShipStats } from '../hooks/useShipStats';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
@@ -41,6 +42,17 @@ const Index = () => {
   const [selectedStar, setSelectedStar] = useState<'primary' | 'binary' | 'trinary'>('primary');
   const [selectedBody, setSelectedBody] = useState<Planet | Moon | null>(null);
   
+  // Initialize ship stats
+  const initialStarship = React.useMemo(() => generateStarship(galaxySeed), [galaxySeed]);
+  const {
+    stats: shipStats,
+    isGameOver,
+    updateStatsFromExploration,
+    repairShip,
+    upgradeSystem,
+    resetStats
+  } = useShipStats(initialStarship.stats);
+  
   // Use exploration hook
   const {
     exploredSystems,
@@ -66,6 +78,9 @@ const Index = () => {
     setSelectedSystem(null);
     setSelectedBody(null);
     resetAllExploration();
+    // Reset ship stats to new ship
+    const newStarship = generateStarship(newSeed);
+    resetStats(newStarship.stats);
   };
 
   const generateRandomSeed = () => {
@@ -75,6 +90,9 @@ const Index = () => {
     setSelectedSystem(null);
     setSelectedBody(null);
     resetAllExploration();
+    // Reset ship stats to new ship
+    const newStarship = generateStarship(randomSeed);
+    resetStats(newStarship.stats);
   };
 
   const handleSettingsChange = (settings: {
@@ -185,6 +203,9 @@ const Index = () => {
     if (!selectedSystem) return;
     
     // Complete current exploration first, then start new one
+    if (explorationEvent) {
+      updateStatsFromExploration(explorationEvent);
+    }
     completeCurrentExploration(selectedSystem);
     continueExploration(selectedSystem);
   };
@@ -192,6 +213,9 @@ const Index = () => {
   const handleCompleteExploration = () => {
     if (!selectedSystem) return;
     
+    if (explorationEvent) {
+      updateStatsFromExploration(explorationEvent);
+    }
     completeCurrentExploration(selectedSystem);
     closeExplorationDialog();
   };
@@ -202,6 +226,20 @@ const Index = () => {
     const updatedSystem = resetExploration(selectedSystem);
     setSelectedSystem(updatedSystem);
   };
+
+  if (isGameOver) {
+    return (
+      <div className="h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-red-400 mb-4">GAME OVER</h1>
+          <p className="text-xl text-gray-300 mb-8">Your ship has been destroyed</p>
+          <Button onClick={generateRandomSeed} className="bg-blue-600 hover:bg-blue-700">
+            Start New Game
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen bg-black text-white flex flex-col overflow-hidden">
@@ -299,25 +337,14 @@ const Index = () => {
                   <ResizableHandle withHandle />
                   
                   <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
-                    <div className="h-full bg-gray-900 border-l border-gray-700 flex flex-col">
-                      <ExplorationControls
-                        selectedSystem={selectedSystem}
-                        isExplored={isSystemExplored(selectedSystem)}
-                        canBeExplored={canSystemBeExplored(selectedSystem)}
-                        explorationStatus={getSystemExplorationStatus(selectedSystem)}
-                        onBeginExploration={handleBeginExploration}
-                        onResetExploration={handleResetExploration}
-                      />
-
-                      <div className="flex-1 overflow-y-auto">
-                        <div className="p-4">
-                          <SystemView 
-                            system={selectedSystem} 
-                            selectedStar={selectedStar}
-                            onBodySelect={handleBodySelect}
-                            highlightedBodyId={highlightedBodyId}
-                          />
-                        </div>
+                    <div className="h-full bg-gray-900 border-l border-gray-700 flex flex-col overflow-y-auto">
+                      <div className="p-4">
+                        <SystemView 
+                          system={selectedSystem} 
+                          selectedStar={selectedStar}
+                          onBodySelect={handleBodySelect}
+                          highlightedBodyId={highlightedBodyId}
+                        />
                       </div>
                     </div>
                   </ResizablePanel>
@@ -329,7 +356,16 @@ const Index = () => {
           <ResizableHandle withHandle />
           
           <ResizablePanel defaultSize={25} minSize={15} maxSize={40}>
-            <StarshipPanel seed={galaxySeed} />
+            <StarshipPanel 
+              seed={galaxySeed}
+              selectedSystem={selectedSystem}
+              isExplored={selectedSystem ? isSystemExplored(selectedSystem) : false}
+              canBeExplored={selectedSystem ? canSystemBeExplored(selectedSystem) : false}
+              explorationStatus={selectedSystem ? getSystemExplorationStatus(selectedSystem) : { systemId: '', explorationsCompleted: 0, maxExplorations: 0 }}
+              onBeginExploration={handleBeginExploration}
+              onResetExploration={handleResetExploration}
+              shipStats={shipStats}
+            />
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
