@@ -11,7 +11,7 @@ import { generateStarship } from '../utils/starshipGenerator';
 import { useShipStats } from '../hooks/useShipStats';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const Index = () => {
   const [galaxySeed, setGalaxySeed] = useState(12345);
@@ -42,6 +42,10 @@ const Index = () => {
   const [selectedStar, setSelectedStar] = useState<'primary' | 'binary' | 'trinary'>('primary');
   const [selectedBody, setSelectedBody] = useState<Planet | Moon | null>(null);
   
+  // Panel collapse states
+  const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(false);
+  const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useState(false);
+  
   // Initialize ship stats
   const initialStarship = React.useMemo(() => generateStarship(galaxySeed), [galaxySeed]);
   const {
@@ -53,7 +57,6 @@ const Index = () => {
     resetStats
   } = useShipStats(initialStarship.stats);
   
-  // Use exploration hook
   const {
     exploredSystems,
     explorationHistory,
@@ -288,86 +291,112 @@ const Index = () => {
         </div>
       </header>
 
-      <div className="flex-1 min-h-0">
-        <ResizablePanelGroup direction="vertical" className="h-full">
-          <ResizablePanel defaultSize={75} minSize={60}>
-            <ResizablePanelGroup direction="horizontal" className="h-full">
-              {explorationHistory.length > 0 && (
-                <>
-                  <ResizablePanel defaultSize={25} minSize={15} maxSize={40}>
-                    <ExplorationLog explorationHistory={explorationHistory} />
-                  </ResizablePanel>
-                  <ResizableHandle withHandle />
-                </>
-              )}
+      <div className="flex-1 min-h-0 flex flex-col">
+        <div className="flex-1 flex relative">
+          {/* Left Panel - Exploration Log */}
+          {explorationHistory.length > 0 && (
+            <>
+              <div 
+                className={`bg-gray-900 border-r border-gray-700 transition-all duration-300 ${
+                  isLeftPanelCollapsed ? 'w-0' : 'w-80'
+                } overflow-hidden`}
+              >
+                <ExplorationLog explorationHistory={explorationHistory} />
+              </div>
+              
+              {/* Left Panel Toggle Button */}
+              <div className="relative">
+                <Button
+                  onClick={() => setIsLeftPanelCollapsed(!isLeftPanelCollapsed)}
+                  variant="ghost"
+                  size="sm"
+                  className="absolute top-1/2 -translate-y-1/2 z-10 h-12 w-6 p-0 bg-gray-700 hover:bg-gray-600 border border-gray-600"
+                >
+                  {isLeftPanelCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+                </Button>
+              </div>
+            </>
+          )}
 
-              <ResizablePanel defaultSize={explorationHistory.length > 0 ? 50 : 70} minSize={30}>
-                <div className="h-full">
-                  <GalaxyMap 
-                    seed={galaxySeed} 
-                    numSystems={numSystems}
-                    numNebulae={numNebulae}
-                    binaryFrequency={binaryFrequency}
-                    trinaryFrequency={trinaryFrequency}
-                    raymarchingSamples={raymarchingSamples}
-                    minimumVisibility={minimumVisibility}
-                    showDustLanes={showDustLanes}
-                    showStarFormingRegions={showStarFormingRegions}
-                    showCosmicDust={showCosmicDust}
-                    dustLaneParticles={dustLaneParticles}
-                    starFormingParticles={starFormingParticles}
-                    cosmicDustParticles={cosmicDustParticles}
-                    dustLaneOpacity={dustLaneOpacity}
-                    starFormingOpacity={starFormingOpacity}
-                    cosmicDustOpacity={cosmicDustOpacity}
-                    dustLaneColorIntensity={dustLaneColorIntensity}
-                    starFormingColorIntensity={starFormingColorIntensity}
-                    cosmicDustColorIntensity={cosmicDustColorIntensity}
-                    onSystemSelect={handleSystemSelect}
-                    selectedSystem={selectedSystem}
-                    selectedStar={selectedStar}
-                    onStarSelect={handleStarSelect}
-                    exploredSystems={exploredSystems}
-                  />
-                </div>
-              </ResizablePanel>
-
-              {selectedSystem && (
-                <>
-                  <ResizableHandle withHandle />
-                  
-                  <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
-                    <div className="h-full bg-gray-900 border-l border-gray-700 flex flex-col overflow-y-auto">
-                      <div className="p-4">
-                        <SystemView 
-                          system={selectedSystem} 
-                          selectedStar={selectedStar}
-                          onBodySelect={handleBodySelect}
-                          highlightedBodyId={highlightedBodyId}
-                        />
-                      </div>
-                    </div>
-                  </ResizablePanel>
-                </>
-              )}
-            </ResizablePanelGroup>
-          </ResizablePanel>
-          
-          <ResizableHandle withHandle />
-          
-          <ResizablePanel defaultSize={25} minSize={15} maxSize={40}>
-            <StarshipPanel 
-              seed={galaxySeed}
+          {/* Center Panel - Galaxy Map */}
+          <div className="flex-1 min-w-0">
+            <GalaxyMap 
+              seed={galaxySeed} 
+              numSystems={numSystems}
+              numNebulae={numNebulae}
+              binaryFrequency={binaryFrequency}
+              trinaryFrequency={trinaryFrequency}
+              raymarchingSamples={raymarchingSamples}
+              minimumVisibility={minimumVisibility}
+              showDustLanes={showDustLanes}
+              showStarFormingRegions={showStarFormingRegions}
+              showCosmicDust={showCosmicDust}
+              dustLaneParticles={dustLaneParticles}
+              starFormingParticles={starFormingParticles}
+              cosmicDustParticles={cosmicDustParticles}
+              dustLaneOpacity={dustLaneOpacity}
+              starFormingOpacity={starFormingOpacity}
+              cosmicDustOpacity={cosmicDustOpacity}
+              dustLaneColorIntensity={dustLaneColorIntensity}
+              starFormingColorIntensity={starFormingColorIntensity}
+              cosmicDustColorIntensity={cosmicDustColorIntensity}
+              onSystemSelect={handleSystemSelect}
               selectedSystem={selectedSystem}
-              isExplored={selectedSystem ? isSystemExplored(selectedSystem) : false}
-              canBeExplored={selectedSystem ? canSystemBeExplored(selectedSystem) : false}
-              explorationStatus={selectedSystem ? getSystemExplorationStatus(selectedSystem) : { systemId: '', explorationsCompleted: 0, maxExplorations: 0 }}
-              onBeginExploration={handleBeginExploration}
-              onResetExploration={handleResetExploration}
-              shipStats={shipStats}
+              selectedStar={selectedStar}
+              onStarSelect={handleStarSelect}
+              exploredSystems={exploredSystems}
             />
-          </ResizablePanel>
-        </ResizablePanelGroup>
+          </div>
+
+          {/* Right Panel - System View */}
+          {selectedSystem && (
+            <>
+              {/* Right Panel Toggle Button */}
+              <div className="relative">
+                <Button
+                  onClick={() => setIsRightPanelCollapsed(!isRightPanelCollapsed)}
+                  variant="ghost"
+                  size="sm"
+                  className="absolute top-1/2 -translate-y-1/2 z-10 h-12 w-6 p-0 bg-gray-700 hover:bg-gray-600 border border-gray-600"
+                >
+                  {isRightPanelCollapsed ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                </Button>
+              </div>
+              
+              <div 
+                className={`bg-gray-900 border-l border-gray-700 transition-all duration-300 ${
+                  isRightPanelCollapsed ? 'w-0' : 'w-80'
+                } overflow-hidden`}
+              >
+                <div className="h-full flex flex-col overflow-y-auto">
+                  <div className="p-4">
+                    <SystemView 
+                      system={selectedSystem} 
+                      selectedStar={selectedStar}
+                      onBodySelect={handleBodySelect}
+                      highlightedBodyId={highlightedBodyId}
+                    />
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+        
+        {/* Bottom Panel - Starship */}
+        <div className="border-t border-gray-700 h-48 flex-shrink-0">
+          <StarshipPanel 
+            seed={galaxySeed}
+            selectedSystem={selectedSystem}
+            isExplored={selectedSystem ? isSystemExplored(selectedSystem) : false}
+            canBeExplored={selectedSystem ? canSystemBeExplored(selectedSystem) : false}
+            explorationStatus={selectedSystem ? getSystemExplorationStatus(selectedSystem) : { systemId: '', explorationsCompleted: 0, maxExplorations: 0 }}
+            onBeginExploration={handleBeginExploration}
+            onResetExploration={handleResetExploration}
+            shipStats={shipStats}
+            onRepairShip={repairShip}
+          />
+        </div>
       </div>
 
       <footer className="bg-gray-900 p-2 border-t border-gray-700 text-center text-sm text-gray-400 flex-shrink-0">
