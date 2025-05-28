@@ -7,6 +7,7 @@ import { ExplorationDialog } from '../components/galaxy/ExplorationDialog';
 import { ExplorationControls } from '../components/exploration/ExplorationControls';
 import { ExplorationLog } from '../components/exploration/ExplorationLog';
 import { useExploration } from '../components/exploration/useExploration';
+import { StarshipPanel } from '../components/starship/StarshipPanel';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
@@ -250,76 +251,86 @@ const Index = () => {
       </header>
 
       <div className="flex-1 min-h-0">
-        <ResizablePanelGroup direction="horizontal" className="h-full">
-          {explorationHistory.length > 0 && (
-            <>
-              <ResizablePanel defaultSize={25} minSize={15} maxSize={40}>
-                <ExplorationLog explorationHistory={explorationHistory} />
-              </ResizablePanel>
-              <ResizableHandle withHandle />
-            </>
-          )}
+        <ResizablePanelGroup direction="vertical" className="h-full">
+          <ResizablePanel defaultSize={75} minSize={60}>
+            <ResizablePanelGroup direction="horizontal" className="h-full">
+              {explorationHistory.length > 0 && (
+                <>
+                  <ResizablePanel defaultSize={25} minSize={15} maxSize={40}>
+                    <ExplorationLog explorationHistory={explorationHistory} />
+                  </ResizablePanel>
+                  <ResizableHandle withHandle />
+                </>
+              )}
 
-          <ResizablePanel defaultSize={explorationHistory.length > 0 ? 50 : 70} minSize={30}>
-            <div className="h-full">
-              <GalaxyMap 
-                seed={galaxySeed} 
-                numSystems={numSystems}
-                numNebulae={numNebulae}
-                binaryFrequency={binaryFrequency}
-                trinaryFrequency={trinaryFrequency}
-                raymarchingSamples={raymarchingSamples}
-                minimumVisibility={minimumVisibility}
-                showDustLanes={showDustLanes}
-                showStarFormingRegions={showStarFormingRegions}
-                showCosmicDust={showCosmicDust}
-                dustLaneParticles={dustLaneParticles}
-                starFormingParticles={starFormingParticles}
-                cosmicDustParticles={cosmicDustParticles}
-                dustLaneOpacity={dustLaneOpacity}
-                starFormingOpacity={starFormingOpacity}
-                cosmicDustOpacity={cosmicDustOpacity}
-                dustLaneColorIntensity={dustLaneColorIntensity}
-                starFormingColorIntensity={starFormingColorIntensity}
-                cosmicDustColorIntensity={cosmicDustColorIntensity}
-                onSystemSelect={handleSystemSelect}
-                selectedSystem={selectedSystem}
-                selectedStar={selectedStar}
-                onStarSelect={handleStarSelect}
-                exploredSystems={exploredSystems}
-              />
-            </div>
-          </ResizablePanel>
-
-          {selectedSystem && (
-            <>
-              <ResizableHandle withHandle />
-              
-              <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
-                <div className="h-full bg-gray-900 border-l border-gray-700 flex flex-col">
-                  <ExplorationControls
+              <ResizablePanel defaultSize={explorationHistory.length > 0 ? 50 : 70} minSize={30}>
+                <div className="h-full">
+                  <GalaxyMap 
+                    seed={galaxySeed} 
+                    numSystems={numSystems}
+                    numNebulae={numNebulae}
+                    binaryFrequency={binaryFrequency}
+                    trinaryFrequency={trinaryFrequency}
+                    raymarchingSamples={raymarchingSamples}
+                    minimumVisibility={minimumVisibility}
+                    showDustLanes={showDustLanes}
+                    showStarFormingRegions={showStarFormingRegions}
+                    showCosmicDust={showCosmicDust}
+                    dustLaneParticles={dustLaneParticles}
+                    starFormingParticles={starFormingParticles}
+                    cosmicDustParticles={cosmicDustParticles}
+                    dustLaneOpacity={dustLaneOpacity}
+                    starFormingOpacity={starFormingOpacity}
+                    cosmicDustOpacity={cosmicDustOpacity}
+                    dustLaneColorIntensity={dustLaneColorIntensity}
+                    starFormingColorIntensity={starFormingColorIntensity}
+                    cosmicDustColorIntensity={cosmicDustColorIntensity}
+                    onSystemSelect={handleSystemSelect}
                     selectedSystem={selectedSystem}
-                    isExplored={isSystemExplored(selectedSystem)}
-                    canBeExplored={canSystemBeExplored(selectedSystem)}
-                    explorationStatus={getSystemExplorationStatus(selectedSystem)}
-                    onBeginExploration={handleBeginExploration}
-                    onResetExploration={handleResetExploration}
+                    selectedStar={selectedStar}
+                    onStarSelect={handleStarSelect}
+                    exploredSystems={exploredSystems}
                   />
-
-                  <div className="flex-1 overflow-y-auto">
-                    <div className="p-4">
-                      <SystemView 
-                        system={selectedSystem} 
-                        selectedStar={selectedStar}
-                        onBodySelect={handleBodySelect}
-                        highlightedBodyId={highlightedBodyId}
-                      />
-                    </div>
-                  </div>
                 </div>
               </ResizablePanel>
-            </>
-          )}
+
+              {selectedSystem && (
+                <>
+                  <ResizableHandle withHandle />
+                  
+                  <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
+                    <div className="h-full bg-gray-900 border-l border-gray-700 flex flex-col">
+                      <ExplorationControls
+                        selectedSystem={selectedSystem}
+                        isExplored={isSystemExplored(selectedSystem)}
+                        canBeExplored={canSystemBeExplored(selectedSystem)}
+                        explorationStatus={getSystemExplorationStatus(selectedSystem)}
+                        onBeginExploration={handleBeginExploration}
+                        onResetExploration={handleResetExploration}
+                      />
+
+                      <div className="flex-1 overflow-y-auto">
+                        <div className="p-4">
+                          <SystemView 
+                            system={selectedSystem} 
+                            selectedStar={selectedStar}
+                            onBodySelect={handleBodySelect}
+                            highlightedBodyId={highlightedBodyId}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </ResizablePanel>
+                </>
+              )}
+            </ResizablePanelGroup>
+          </ResizablePanel>
+          
+          <ResizableHandle withHandle />
+          
+          <ResizablePanel defaultSize={25} minSize={15} maxSize={40}>
+            <StarshipPanel seed={galaxySeed} />
+          </ResizablePanel>
         </ResizablePanelGroup>
       </div>
 

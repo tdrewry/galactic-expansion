@@ -1,7 +1,8 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
+import { Trash2 } from 'lucide-react';
 import { ExplorationEvent } from '../galaxy/ExplorationDialog';
 
 interface ExplorationLogEntry {
@@ -13,10 +14,12 @@ interface ExplorationLogEntry {
 
 interface ExplorationLogProps {
   explorationHistory: ExplorationLogEntry[];
+  onClearLog?: () => void;
 }
 
 export const ExplorationLog: React.FC<ExplorationLogProps> = ({
-  explorationHistory
+  explorationHistory,
+  onClearLog
 }) => {
   const getEventIcon = (type: string) => {
     switch (type) {
@@ -47,7 +50,20 @@ export const ExplorationLog: React.FC<ExplorationLogProps> = ({
       <div className="flex-shrink-0 p-4 border-b border-gray-600">
         <Card className="bg-gray-800 border-gray-600">
           <CardHeader>
-            <CardTitle className="text-white">Exploration Log</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-white">Exploration Log</CardTitle>
+              {explorationHistory.length > 0 && onClearLog && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onClearLog}
+                  className="text-gray-400 hover:text-red-400 hover:bg-red-900/20"
+                  title="Clear exploration log"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-gray-400">
