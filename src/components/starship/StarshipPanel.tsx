@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { generateStarship } from '../../utils/starshipGenerator';
@@ -36,19 +35,17 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
   const starship = useMemo(() => generateStarship(seed), [seed]);
   const [isShipLayoutOpen, setIsShipLayoutOpen] = useState(false);
 
-  // Use shipStats if provided, otherwise use starship stats
   const currentStats = shipStats || starship.stats;
 
-  // Check if system allows repairs (civilizations with tech level >= ship tech level)
   const canRepairShip = selectedSystem && 
     selectedSystem.planets.some(planet => 
       planet.civilization && 
       planet.civilization.techLevel >= currentStats.techLevel
     );
 
-  const repairCost = 1000; // Base repair cost
+  const repairCost = 1000;
   const canAffordRepair = currentStats.credits >= repairCost;
-  const needsRepair = currentStats.shields < 100 || currentStats.hull < 100;
+  const needsRepair = currentStats.shields < currentStats.maxShields || currentStats.hull < currentStats.maxHull;
 
   const getStatColor = (value: number, max: number = 100) => {
     const percentage = (value / max) * 100;
@@ -109,14 +106,14 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
                   <div>
                     <div className="flex justify-between items-center mb-1">
                       <span className="text-sm text-gray-300">Shields</span>
-                      <span className={`text-sm font-medium ${getStatColor(currentStats.shields)}`}>
-                        {currentStats.shields}/100
+                      <span className={`text-sm font-medium ${getStatColor(currentStats.shields, currentStats.maxShields)}`}>
+                        {currentStats.shields}/{currentStats.maxShields}
                       </span>
                     </div>
                     <div className="w-full bg-gray-700 rounded-full h-2">
                       <div 
-                        className={`h-2 rounded-full ${getStatBarColor(currentStats.shields)}`}
-                        style={{ width: `${currentStats.shields}%` }}
+                        className={`h-2 rounded-full ${getStatBarColor(currentStats.shields, currentStats.maxShields)}`}
+                        style={{ width: `${(currentStats.shields / currentStats.maxShields) * 100}%` }}
                       />
                     </div>
                   </div>
@@ -128,14 +125,14 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
                   <div>
                     <div className="flex justify-between items-center mb-1">
                       <span className="text-sm text-gray-300">Hull Integrity</span>
-                      <span className={`text-sm font-medium ${getStatColor(currentStats.hull)}`}>
-                        {currentStats.hull}/100
+                      <span className={`text-sm font-medium ${getStatColor(currentStats.hull, currentStats.maxHull)}`}>
+                        {currentStats.hull}/{currentStats.maxHull}
                       </span>
                     </div>
                     <div className="w-full bg-gray-700 rounded-full h-2">
                       <div 
-                        className={`h-2 rounded-full ${getStatBarColor(currentStats.hull)}`}
-                        style={{ width: `${currentStats.hull}%` }}
+                        className={`h-2 rounded-full ${getStatBarColor(currentStats.hull, currentStats.maxHull)}`}
+                        style={{ width: `${(currentStats.hull / currentStats.maxHull) * 100}%` }}
                       />
                     </div>
                   </div>
@@ -144,14 +141,14 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
                   <div>
                     <div className="flex justify-between items-center mb-1">
                       <span className="text-sm text-gray-300">Combat Power</span>
-                      <span className={`text-sm font-medium ${getStatColor(currentStats.combatPower)}`}>
-                        {currentStats.combatPower}/100
+                      <span className={`text-sm font-medium ${getStatColor(currentStats.combatPower, currentStats.maxCombatPower)}`}>
+                        {currentStats.combatPower}/{currentStats.maxCombatPower}
                       </span>
                     </div>
                     <div className="w-full bg-gray-700 rounded-full h-2">
                       <div 
-                        className={`h-2 rounded-full ${getStatBarColor(currentStats.combatPower)}`}
-                        style={{ width: `${currentStats.combatPower}%` }}
+                        className={`h-2 rounded-full ${getStatBarColor(currentStats.combatPower, currentStats.maxCombatPower)}`}
+                        style={{ width: `${(currentStats.combatPower / currentStats.maxCombatPower) * 100}%` }}
                       />
                     </div>
                   </div>
@@ -159,6 +156,57 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
 
                 {/* Column 3 */}
                 <div className="space-y-4">
+                  {/* Crew */}
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm text-gray-300">Crew</span>
+                      <span className={`text-sm font-medium ${getStatColor(currentStats.crew, currentStats.maxCrew)}`}>
+                        {currentStats.crew}/{currentStats.maxCrew}
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full ${getStatBarColor(currentStats.crew, currentStats.maxCrew)}`}
+                        style={{ width: `${(currentStats.crew / currentStats.maxCrew) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Scanners */}
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm text-gray-300">Scanner Range</span>
+                      <span className={`text-sm font-medium ${getStatColor(currentStats.scanners, currentStats.maxScanners)}`}>
+                        {currentStats.scanners}/{currentStats.maxScanners}
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full ${getStatBarColor(currentStats.scanners, currentStats.maxScanners)}`}
+                        style={{ width: `${(currentStats.scanners / currentStats.maxScanners) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Column 4 */}
+                <div className="space-y-4">
+                  {/* Cargo */}
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm text-gray-300">Cargo Capacity</span>
+                      <span className={`text-sm font-medium ${getStatColor(currentStats.cargo, currentStats.maxCargo)}`}>
+                        {currentStats.cargo}/{currentStats.maxCargo}
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full ${getStatBarColor(currentStats.cargo, currentStats.maxCargo)}`}
+                        style={{ width: `${(currentStats.cargo / currentStats.maxCargo) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+
                   {/* Diplomacy */}
                   <div>
                     <div className="flex justify-between items-center mb-1">
@@ -171,41 +219,6 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
                       <div 
                         className={`h-2 rounded-full ${getStatBarColor(currentStats.diplomacy)}`}
                         style={{ width: `${currentStats.diplomacy}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Scanners */}
-                  <div>
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-sm text-gray-300">Scanner Range</span>
-                      <span className={`text-sm font-medium ${getStatColor(currentStats.scanners)}`}>
-                        {currentStats.scanners}/100
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-700 rounded-full h-2">
-                      <div 
-                        className={`h-2 rounded-full ${getStatBarColor(currentStats.scanners)}`}
-                        style={{ width: `${currentStats.scanners}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Column 4 */}
-                <div className="space-y-4">
-                  {/* Cargo */}
-                  <div>
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-sm text-gray-300">Cargo Capacity</span>
-                      <span className={`text-sm font-medium ${getStatColor(currentStats.cargo, 1000)}`}>
-                        {currentStats.cargo}/1000
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-700 rounded-full h-2">
-                      <div 
-                        className={`h-2 rounded-full ${getStatBarColor(currentStats.cargo, 1000)}`}
-                        style={{ width: `${(currentStats.cargo / 1000) * 100}%` }}
                       />
                     </div>
                   </div>
