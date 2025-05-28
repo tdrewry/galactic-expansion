@@ -34,27 +34,32 @@ export const SystemView: React.FC<SystemViewProps> = ({
           starType: system.binaryCompanion.starType,
           temperature: system.binaryCompanion.temperature,
           mass: system.binaryCompanion.mass,
-          planets: system.binaryCompanion.planets
+          planets: system.binaryCompanion.planets || []
         } : null;
       case 'trinary':
         return system.trinaryCompanion ? {
           starType: system.trinaryCompanion.starType,
           temperature: system.trinaryCompanion.temperature,
           mass: system.trinaryCompanion.mass,
-          planets: system.trinaryCompanion.planets
+          planets: system.trinaryCompanion.planets || []
         } : null;
       default:
         return {
           starType: system.starType,
           temperature: system.temperature,
           mass: system.mass,
-          planets: system.planets
+          planets: system.planets || []
         };
     }
   };
 
   const currentStarData = getCurrentStarData();
-  const planetsToShow = currentStarData?.planets || [];
+  
+  // Filter out planets with undefined moons and ensure moons is always an array
+  const planetsToShow = currentStarData?.planets.map(planet => ({
+    ...planet,
+    moons: Array.isArray(planet.moons) ? planet.moons : []
+  })) || [];
 
   console.log('Current star data:', currentStarData, 'Planets to show:', planetsToShow.length);
 

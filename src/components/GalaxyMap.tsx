@@ -1,10 +1,8 @@
-
 import React, { useState, useCallback, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { generateGalaxy, Galaxy, StarSystem } from '../utils/galaxyGenerator';
 import { GalaxyScene } from './galaxy/GalaxyScene';
 import { SystemInfoPanel } from './galaxy/SystemInfoPanel';
-import { GalaxyInfo } from './galaxy/GalaxyInfo';
 
 interface GalaxyMapProps {
   seed?: number;
@@ -146,7 +144,6 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
           selectedStar={currentSelectedStar}
         />
       )}
-      <GalaxyInfo galaxy={enhancedGalaxy} />
     </div>
   );
 };
