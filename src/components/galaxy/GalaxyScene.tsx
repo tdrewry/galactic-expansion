@@ -52,6 +52,7 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
   const targetPosition = useRef(new THREE.Vector3());
   const isMoving = useRef(false);
   const preserveCameraPosition = useRef(false);
+  const hasInitiallyZoomed = useRef(false);
   
   useEffect(() => {
     // Only set initial camera position on first mount, don't reset during exploration
@@ -70,7 +71,7 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
     gl.domElement.style.pointerEvents = 'auto';
   }, [camera, galaxy, gl, dustLaneParticles, starFormingParticles, cosmicDustParticles]);
 
-  // Center camera on selected system - but only when user manually selects it
+  // Center camera on selected system with initial zoom for first selection
   useEffect(() => {
     if (selectedSystem && controlsRef.current) {
       console.log('Centering camera on system:', selectedSystem.id);
@@ -78,17 +79,23 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
       targetPosition.current.set(x, y, z);
       controlsRef.current.target.copy(targetPosition.current);
       
-      // Move camera to a good viewing distance - preserve current zoom level
-      const currentDistance = camera.position.distanceTo(targetPosition.current);
-      const targetDistance = Math.max(5000, currentDistance); // Don't get too close
+      // For the first system selection, zoom in closer for a better initial view
+      let targetDistance;
+      if (!hasInitiallyZoomed.current) {
+        targetDistance = 8000; // Zoom in closer for initial view
+        hasInitiallyZoomed.current = true;
+        console.log('Initial zoom to system at closer distance:', targetDistance);
+      } else {
+        // For subsequent selections, preserve current zoom level
+        const currentDistance = camera.position.distanceTo(targetPosition.current);
+        targetDistance = Math.max(5000, currentDistance);
+      }
+      
       const direction = camera.position.clone().sub(targetPosition.current).normalize();
       camera.position.copy(targetPosition.current).add(direction.multiplyScalar(targetDistance));
       isMoving.current = true;
     }
   }, [selectedSystem, camera]);
-
-  // CAMERA ANIMATIONS DISABLED FOR PERFORMANCE AND TO PREVENT ZOOM RESET
-  console.log('GalaxyScene camera animations disabled to preserve zoom level during exploration');
 
   const handleBackgroundClick = (event: any) => {
     console.log('Background clicked - deselecting system');
