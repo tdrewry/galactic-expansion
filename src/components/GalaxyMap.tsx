@@ -62,7 +62,13 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
   selectedSystem: propSelectedSystem = null,
   selectedStar: propSelectedStar = 'primary',
   onStarSelect,
-  exploredSystems = new Set()
+  exploredSystems = new Set(),
+  shipStats,
+  currentSystemId,
+  exploredSystemIds = new Set(),
+  getJumpableSystemIds,
+  getScannerRangeSystemIds,
+  onJumpToSystem
 }) => {
   const [selectedSystem, setSelectedSystem] = useState<StarSystem | null>(null);
   const [selectedStar, setSelectedStar] = useState<'primary' | 'binary' | 'trinary'>('primary');
@@ -141,6 +147,10 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
           dustLaneColorIntensity={dustLaneColorIntensity}
           starFormingColorIntensity={starFormingColorIntensity}
           cosmicDustColorIntensity={cosmicDustColorIntensity}
+          shipStats={shipStats}
+          exploredSystemIds={exploredSystemIds}
+          getJumpableSystemIds={getJumpableSystemIds}
+          getScannerRangeSystemIds={getScannerRangeSystemIds}
         />
       </Canvas>
       
