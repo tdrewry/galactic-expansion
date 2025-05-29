@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { generateStarship } from '../../utils/starshipGenerator';
@@ -20,6 +21,7 @@ interface StarshipPanelProps {
   shipStats?: any;
   onRepairShip?: (cost: number) => void;
   onOpenMarket?: () => void;
+  hideActions?: boolean;
 }
 
 export const StarshipPanel: React.FC<StarshipPanelProps> = ({ 
@@ -32,7 +34,8 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
   onResetExploration,
   shipStats,
   onRepairShip,
-  onOpenMarket
+  onOpenMarket,
+  hideActions = false
 }) => {
   const starship = useMemo(() => generateStarship(seed), [seed]);
   const [isShipLayoutOpen, setIsShipLayoutOpen] = useState(false);
@@ -67,9 +70,9 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
 
   return (
     <>
-      <div className="h-full bg-gray-900 border-t border-gray-700 flex">
-        {/* Ship Stats - flex to take available space */}
-        <div className="flex-1 border-r border-gray-700 p-4">
+      <div className={`h-full bg-gray-900 border-t border-gray-700 ${hideActions ? '' : 'flex'}`}>
+        {/* Ship Stats - flex to take available space or full width when actions are hidden */}
+        <div className={hideActions ? 'w-full p-4' : 'flex-1 border-r border-gray-700 p-4'}>
           <Card className="bg-gray-800 border-gray-600 h-full">
             <CardHeader className="pb-4">
               <CardTitle className="text-white text-lg flex items-center justify-between">
@@ -230,24 +233,26 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
           </Card>
         </div>
 
-        {/* Actions Panel - fixed width */}
-        <div className="w-80 p-4 flex">
-          <ActionsPanel
-            selectedSystem={selectedSystem}
-            isExplored={isExplored}
-            canBeExplored={canBeExplored}
-            explorationStatus={explorationStatus}
-            onBeginExploration={onBeginExploration}
-            onResetExploration={onResetExploration}
-            onOpenShipLayout={() => setIsShipLayoutOpen(true)}
-            canRepairShip={canRepairShip}
-            repairCost={repairCost}
-            canAffordRepair={canAffordRepair}
-            needsRepair={needsRepair}
-            onRepairShip={onRepairShip}
-            onOpenMarket={onOpenMarket}
-          />
-        </div>
+        {/* Actions Panel - only show when not hidden */}
+        {!hideActions && (
+          <div className="w-80 p-4 flex">
+            <ActionsPanel
+              selectedSystem={selectedSystem}
+              isExplored={isExplored}
+              canBeExplored={canBeExplored}
+              explorationStatus={explorationStatus}
+              onBeginExploration={onBeginExploration}
+              onResetExploration={onResetExploration}
+              onOpenShipLayout={() => setIsShipLayoutOpen(true)}
+              canRepairShip={canRepairShip}
+              repairCost={repairCost}
+              canAffordRepair={canAffordRepair}
+              needsRepair={needsRepair}
+              onRepairShip={onRepairShip}
+              onOpenMarket={onOpenMarket}
+            />
+          </div>
+        )}
       </div>
 
       <ShipLayoutDialog
