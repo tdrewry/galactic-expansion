@@ -22,6 +22,7 @@ interface ActionsPanelProps {
   canAffordRepair?: boolean;
   needsRepair?: boolean;
   onRepairShip?: (cost: number) => void;
+  onOpenMarket?: () => void;
 }
 
 export const ActionsPanel: React.FC<ActionsPanelProps> = ({
@@ -36,7 +37,8 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
   repairCost = 1000,
   canAffordRepair = false,
   needsRepair = false,
-  onRepairShip
+  onRepairShip,
+  onOpenMarket
 }) => {
   const handleRepairShip = () => {
     if (onRepairShip && canAffordRepair && needsRepair) {
