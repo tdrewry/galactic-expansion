@@ -1,16 +1,28 @@
-
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Planet, Moon } from '../../utils/galaxyGenerator';
 
+export type ExplorationEventType = 'discovery' | 'resources' | 'civilization' | 'artifact' | 'danger' | 'empty' | 'combat' | 'market';
+
 export interface ExplorationEvent {
-  type: 'discovery' | 'resources' | 'civilization' | 'artifact' | 'danger' | 'empty';
+  type: ExplorationEventType;
   title: string;
   description: string;
-  body: Planet | Moon;
+  body: Planet | Moon | { id: string; name: string; type: string; radius: number };
   rewards?: string[];
   consequences?: string[];
+  marketInfo?: {
+    type: 'civilization' | 'station' | 'merchant';
+    techLevel: number;
+    hasRepair: boolean;
+    hasMarket: boolean;
+  };
 }
 
 interface ExplorationDialogProps {
@@ -21,105 +33,58 @@ interface ExplorationDialogProps {
   event: ExplorationEvent | null;
 }
 
-export const ExplorationDialog: React.FC<ExplorationDialogProps> = ({
-  isOpen,
-  onClose,
-  onContinue,
-  canContinue = false,
-  event
-}) => {
+export const ExplorationDialog: React.FC<ExplorationDialogProps> = ({ isOpen, onClose, onContinue, canContinue, event }) => {
   if (!event) return null;
-
-  const getEventIcon = (type: string) => {
-    switch (type) {
-      case 'discovery': return '🔍';
-      case 'resources': return '⛏️';
-      case 'civilization': return '🏛️';
-      case 'artifact': return '🗿';
-      case 'danger': return '⚠️';
-      case 'empty': return '🌌';
-      default: return '❓';
-    }
-  };
-
-  const getEventColor = (type: string) => {
-    switch (type) {
-      case 'discovery': return 'text-blue-400';
-      case 'resources': return 'text-green-400';
-      case 'civilization': return 'text-purple-400';
-      case 'artifact': return 'text-yellow-400';
-      case 'danger': return 'text-red-400';
-      case 'empty': return 'text-gray-400';
-      default: return 'text-white';
-    }
-  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-gray-900 border-gray-700 text-white max-w-md">
+      <DialogContent className="sm:max-w-[425px] bg-gray-900 border-gray-700">
         <DialogHeader>
-          <DialogTitle className={`flex items-center gap-2 text-xl ${getEventColor(event.type)}`}>
-            <span className="text-2xl">{getEventIcon(event.type)}</span>
-            {event.title}
-          </DialogTitle>
+          <DialogTitle className="text-white">{event.title}</DialogTitle>
+          <DialogDescription className="text-gray-400">{event.description}</DialogDescription>
         </DialogHeader>
-        
-        <div className="space-y-4">
-          <div className="text-center">
-            <p className="text-sm text-gray-400 mb-2">Explored celestial body:</p>
-            <p className="text-lg font-medium text-blue-300">{event.body.name}</p>
-            <p className="text-sm text-gray-400 capitalize">{event.body.type}</p>
+        <div className="grid gap-4 py-4">
+          <div className="flex items-center space-x-2">
+            <p className="text-sm font-medium text-gray-300">
+              Body: {event.body.name} ({event.body.type})
+            </p>
           </div>
-          
-          <div className="bg-gray-800 rounded-lg p-4">
-            <p className="text-gray-300 leading-relaxed">{event.description}</p>
-          </div>
-          
           {event.rewards && event.rewards.length > 0 && (
-            <div className="bg-green-900/30 border border-green-700 rounded-lg p-3">
-              <h4 className="text-green-400 font-medium mb-2">Rewards Gained:</h4>
-              <ul className="text-sm text-green-300 space-y-1">
+            <div>
+              <p className="text-sm font-medium text-green-400">Rewards:</p>
+              <ul className="list-disc pl-5">
                 {event.rewards.map((reward, index) => (
-                  <li key={index} className="flex items-center gap-2">
-                    <span className="text-green-400">+</span>
-                    {reward}
-                  </li>
+                  <li key={index} className="text-xs text-gray-300">{reward}</li>
                 ))}
               </ul>
             </div>
           )}
-          
           {event.consequences && event.consequences.length > 0 && (
-            <div className="bg-red-900/30 border border-red-700 rounded-lg p-3">
-              <h4 className="text-red-400 font-medium mb-2">Consequences:</h4>
-              <ul className="text-sm text-red-300 space-y-1">
+            <div>
+              <p className="text-sm font-medium text-red-400">Consequences:</p>
+              <ul className="list-disc pl-5">
                 {event.consequences.map((consequence, index) => (
-                  <li key={index} className="flex items-center gap-2">
-                    <span className="text-red-400">-</span>
-                    {consequence}
-                  </li>
+                  <li key={index} className="text-xs text-gray-300">{consequence}</li>
                 ))}
               </ul>
             </div>
           )}
-          
-          <div className="flex gap-3 pt-4">
-            {canContinue && onContinue && (
-              <Button
-                onClick={onContinue}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                Continue Exploration
-              </Button>
-            )}
-            <Button
-              onClick={onClose}
-              variant="secondary"
-              className={canContinue ? "flex-1" : "w-full"}
+        </div>
+        <div className="flex justify-end space-x-2">
+          {onContinue && canContinue && (
+            <button
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-blue-600 text-gray-100 hover:bg-blue-700 h-9 px-4 py-2"
+              onClick={onContinue}
             >
-              Complete Exploration
-            </Button>
-          </div>
+              Continue Exploration
+            </button>
+          )}
+          <button
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-gray-700 text-gray-100 hover:bg-gray-600 h-9 px-4 py-2"
+            onClick={onClose}
+          >
+            Complete Exploration
+          </button>
         </div>
       </DialogContent>
     </Dialog>

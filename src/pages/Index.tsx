@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
 import { ExplorationDialog } from '../components/galaxy/ExplorationDialog';
@@ -9,6 +8,10 @@ import { Button } from '@/components/ui/button';
 import { useGalaxyState } from '../hooks/useGalaxyState';
 import { GalaxyControls } from '../components/galaxy/GalaxyControls';
 import { GalaxyLayout } from '../components/galaxy/GalaxyLayout';
+import { generateGalaxy } from '../utils/galaxyGenerator';
+import { selectStartingSystem } from '../utils/startingSystemSelector';
+import { MarketDialog } from '../components/starship/MarketDialog';
+import { getSystemMarketInfo, MarketLocation } from '../utils/explorationGenerator';
 
 const Index = () => {
   const {
@@ -49,11 +52,21 @@ const Index = () => {
   const {
     stats: shipStats,
     isGameOver,
+    currentSystemId,
+    exploredSystemIds,
     updateStatsFromExploration,
     repairShip,
     upgradeSystem,
+    sellCargo,
+    getJumpableSystemIds,
+    getScannerRangeSystemIds,
+    jumpToSystem,
     resetStats
   } = useShipStats(initialStarship.stats);
+
+  // Market dialog state
+  const [isMarketDialogOpen, setIsMarketDialogOpen] = useState(false);
+  const [currentMarketInfo, setCurrentMarketInfo] = useState<MarketLocation | null>(null);
   
   const {
     exploredSystems,
@@ -73,13 +86,27 @@ const Index = () => {
     resetAllExploration
   } = useExploration();
 
+  // Initialize starting system
+  React.useEffect(() => {
+    if (!currentSystemId && numSystems > 0) {
+      // Generate systems and find a suitable starting system
+      const tempGalaxy = generateGalaxy(galaxySeed, numSystems, numNebulae, binaryFrequency, trinaryFrequency);
+      const startingSystem = selectStartingSystem(tempGalaxy.starSystems);
+      
+      if (startingSystem) {
+        jumpToSystem(startingSystem.id);
+        setSelectedSystem(startingSystem);
+      }
+    }
+  }, [galaxySeed, numSystems, numNebulae, binaryFrequency, trinaryFrequency, currentSystemId, jumpToSystem]);
+
   const handleSeedChange = () => {
     const newSeed = parseInt(inputSeed) || 12345;
     setGalaxySeed(newSeed);
     setSelectedSystem(null);
     setSelectedBody(null);
     resetAllExploration();
-    // Reset ship stats to new ship
+    // Reset ship stats to new ship with new starting system
     const newStarship = generateStarship(newSeed);
     resetStats(newStarship.stats);
   };
@@ -91,7 +118,7 @@ const Index = () => {
     setSelectedSystem(null);
     setSelectedBody(null);
     resetAllExploration();
-    // Reset ship stats to new ship
+    // Reset ship stats to new ship with new starting system
     const newStarship = generateStarship(randomSeed);
     resetStats(newStarship.stats);
   };
@@ -148,6 +175,23 @@ const Index = () => {
     
     const updatedSystem = resetExploration(selectedSystem);
     setSelectedSystem(updatedSystem);
+  };
+
+  const handleOpenMarket = () => {
+    if (selectedSystem) {
+      const marketInfo = getSystemMarketInfo(selectedSystem);
+      if (marketInfo) {
+        setCurrentMarketInfo(marketInfo);
+        setIsMarketDialogOpen(true);
+      }
+    }
+  };
+
+  const handleJumpToSystem = (systemId: string) => {
+    // Find the system and jump to it
+    jumpToSystem(systemId);
+    // Update selected system
+    // This will be handled by the galaxy state
   };
 
   if (isGameOver) {
@@ -227,15 +271,21 @@ const Index = () => {
         explorationEvent={explorationEvent}
         canContinueExploration={canContinueExploration}
         shipStats={shipStats}
+        currentSystemId={currentSystemId}
+        exploredSystemIds={exploredSystemIds}
         isSystemExplored={isSystemExplored}
         canSystemBeExplored={canSystemBeExplored}
         getSystemExplorationStatus={getSystemExplorationStatus}
+        getJumpableSystemIds={getJumpableSystemIds}
+        getScannerRangeSystemIds={getScannerRangeSystemIds}
         onSystemSelect={handleSystemSelect}
         onStarSelect={handleStarSelect}
         onBodySelect={handleBodySelect}
         onBeginExploration={handleBeginExploration}
         onResetExploration={handleResetExploration}
         onRepairShip={repairShip}
+        onOpenMarket={handleOpenMarket}
+        onJumpToSystem={handleJumpToSystem}
         handleCompleteExploration={handleCompleteExploration}
         handleContinueExploration={handleContinueExploration}
       />
@@ -243,6 +293,18 @@ const Index = () => {
       <footer className="bg-gray-900 p-2 border-t border-gray-700 text-center text-sm text-gray-400 flex-shrink-0">
         <p>Procedurally Generated Galaxy | Seed: {galaxySeed} | Systems: {numSystems} | Nebulae: {numNebulae} | Binary: {Math.round(binaryFrequency * 100)}% | Trinary: {Math.round(trinaryFrequency * 100)}% | Raymarching: {raymarchingSamples} samples | Click and drag to navigate, scroll to zoom</p>
       </footer>
+
+      {currentMarketInfo && (
+        <MarketDialog
+          isOpen={isMarketDialogOpen}
+          onClose={() => setIsMarketDialogOpen(false)}
+          marketInfo={currentMarketInfo}
+          shipStats={shipStats}
+          onSellCargo={(amount) => sellCargo(amount, true)}
+          onUpgradeSystem={upgradeSystem}
+          onRepairShip={repairShip}
+        />
+      )}
     </div>
   );
 };
