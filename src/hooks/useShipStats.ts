@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { StarshipStats } from '../utils/starshipGenerator';
 import { ExplorationEvent } from '../components/galaxy/ExplorationDialog';
@@ -184,9 +183,9 @@ export const useShipStats = (initialStats: StarshipStats) => {
     const maxJumpDistance = (stats.techLevel / 10) * (galaxyWidth / 16);
     
     // Calculate distance between systems
-    const dx = fromSystem.position.x - toSystem.position.x;
-    const dy = fromSystem.position.y - toSystem.position.y;
-    const dz = fromSystem.position.z - toSystem.position.z;
+    const dx = fromSystem.position[0] - toSystem.position[0];
+    const dy = fromSystem.position[1] - toSystem.position[1];
+    const dz = fromSystem.position[2] - toSystem.position[2];
     const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
     
     return distance <= maxJumpDistance;
@@ -205,9 +204,9 @@ export const useShipStats = (initialStats: StarshipStats) => {
     return allSystems.filter(system => {
       if (system.id === fromSystem.id) return false;
       
-      const dx = fromSystem.position.x - system.position.x;
-      const dy = fromSystem.position.y - system.position.y;
-      const dz = fromSystem.position.z - system.position.z;
+      const dx = fromSystem.position[0] - system.position[0];
+      const dy = fromSystem.position[1] - system.position[1];
+      const dz = fromSystem.position[2] - system.position[2];
       const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
       
       return distance <= scannerRange;

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StarshipStats } from '../../utils/starshipGenerator';
 import { MarketLocation } from '../../utils/explorationGenerator';
-import { Wrench, Currency, Building, Wheel } from 'lucide-react';
+import { Wrench, Currency, Building, Settings } from 'lucide-react';
 
 interface MarketDialogProps {
   isOpen: boolean;
@@ -32,7 +31,7 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
   const getMarketIcon = () => {
     switch (marketInfo.type) {
       case 'civilization': return <Building className="w-5 h-5" />;
-      case 'station': return <Wheel className="w-5 h-5" />;
+      case 'station': return <Settings className="w-5 h-5" />;
       case 'merchant': return <Currency className="w-5 h-5" />;
     }
   };

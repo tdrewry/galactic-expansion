@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
 import { ExplorationDialog } from '../components/galaxy/ExplorationDialog';
 import { useExploration } from '../components/exploration/useExploration';
@@ -194,6 +194,11 @@ const Index = () => {
     // This will be handled by the galaxy state
   };
 
+  const handleRepairShip = () => {
+    const repairCost = 1000;
+    repairShip(repairCost);
+  };
+
   if (isGameOver) {
     return (
       <div className="h-screen bg-black text-white flex items-center justify-center">
@@ -283,7 +288,7 @@ const Index = () => {
         onBodySelect={handleBodySelect}
         onBeginExploration={handleBeginExploration}
         onResetExploration={handleResetExploration}
-        onRepairShip={repairShip}
+        onRepairShip={handleRepairShip}
         onOpenMarket={handleOpenMarket}
         onJumpToSystem={handleJumpToSystem}
         handleCompleteExploration={handleCompleteExploration}
