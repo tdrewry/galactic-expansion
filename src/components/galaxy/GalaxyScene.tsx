@@ -6,6 +6,7 @@ import { Galaxy, StarSystem as StarSystemType } from '../../utils/galaxyGenerato
 import { StarSystem } from './StarSystem';
 import { Nebula } from './Nebula';
 import { InterstellarMaterial } from './InterstellarMaterial';
+import { JumpRangeVisualizer } from './JumpRangeVisualizer';
 import * as THREE from 'three';
 
 interface GalaxySceneProps {
@@ -26,6 +27,10 @@ interface GalaxySceneProps {
   dustLaneColorIntensity?: number;
   starFormingColorIntensity?: number;
   cosmicDustColorIntensity?: number;
+  shipStats?: any;
+  exploredSystemIds?: Set<string>;
+  getJumpableSystemIds?: (fromSystem: StarSystemType, allSystems: StarSystemType[]) => string[];
+  getScannerRangeSystemIds?: (fromSystem: StarSystemType, allSystems: StarSystemType[]) => string[];
 }
 
 export const GalaxyScene: React.FC<GalaxySceneProps> = ({ 
@@ -45,7 +50,11 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
   cosmicDustOpacity = 0.4,
   dustLaneColorIntensity = 1.0,
   starFormingColorIntensity = 1.2,
-  cosmicDustColorIntensity = 0.8
+  cosmicDustColorIntensity = 0.8,
+  shipStats,
+  exploredSystemIds = new Set(),
+  getJumpableSystemIds,
+  getScannerRangeSystemIds
 }) => {
   const { camera, gl } = useThree();
   const controlsRef = useRef<any>(null);
@@ -148,6 +157,18 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
         starFormingColorIntensity={starFormingColorIntensity}
         cosmicDustColorIntensity={cosmicDustColorIntensity}
       />
+      
+      {/* Jump Range Visualizer - show travel connections */}
+      {selectedSystem && shipStats && getJumpableSystemIds && getScannerRangeSystemIds && (
+        <JumpRangeVisualizer
+          currentSystem={selectedSystem}
+          allSystems={galaxy.starSystems}
+          shipStats={shipStats}
+          exploredSystemIds={exploredSystemIds}
+          scannerRangeSystemIds={getScannerRangeSystemIds(selectedSystem, galaxy.starSystems)}
+          jumpableSystemIds={getJumpableSystemIds(selectedSystem, galaxy.starSystems)}
+        />
+      )}
       
       {/* Star Systems */}
       {galaxy.starSystems.map((system) => (
