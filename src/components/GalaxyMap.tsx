@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { generateGalaxy, Galaxy, StarSystem } from '../utils/galaxyGenerator';
@@ -29,6 +30,12 @@ interface GalaxyMapProps {
   selectedStar?: 'primary' | 'binary' | 'trinary';
   onStarSelect?: (star: 'primary' | 'binary' | 'trinary') => void;
   exploredSystems?: Set<string>;
+  shipStats?: any;
+  currentSystemId?: string | null;
+  exploredSystemIds?: Set<string>;
+  getJumpableSystemIds?: (fromSystem: StarSystem, allSystems: StarSystem[]) => string[];
+  getScannerRangeSystemIds?: (fromSystem: StarSystem, allSystems: StarSystem[]) => string[];
+  onJumpToSystem?: (systemId: string) => void;
 }
 
 export const GalaxyMap: React.FC<GalaxyMapProps> = ({ 

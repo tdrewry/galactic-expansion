@@ -19,6 +19,7 @@ interface StarshipPanelProps {
   onResetExploration: () => void;
   shipStats?: any;
   onRepairShip?: (cost: number) => void;
+  onOpenMarket?: () => void;
 }
 
 export const StarshipPanel: React.FC<StarshipPanelProps> = ({ 
@@ -30,7 +31,8 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
   onBeginExploration,
   onResetExploration,
   shipStats,
-  onRepairShip
+  onRepairShip,
+  onOpenMarket
 }) => {
   const starship = useMemo(() => generateStarship(seed), [seed]);
   const [isShipLayoutOpen, setIsShipLayoutOpen] = useState(false);
@@ -243,6 +245,7 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
             canAffordRepair={canAffordRepair}
             needsRepair={needsRepair}
             onRepairShip={onRepairShip}
+            onOpenMarket={onOpenMarket}
           />
         </div>
       </div>
