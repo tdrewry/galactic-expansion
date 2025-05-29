@@ -33,8 +33,8 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
       
       return {
         points: [
-          [currentSystem.position[0], currentSystem.position[1], currentSystem.position[2]],
-          [targetSystem.position[0], targetSystem.position[1], targetSystem.position[2]]
+          [currentSystem.position[0], currentSystem.position[1], currentSystem.position[2]] as [number, number, number],
+          [targetSystem.position[0], targetSystem.position[1], targetSystem.position[2]] as [number, number, number]
         ],
         color
       };

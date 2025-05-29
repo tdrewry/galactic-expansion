@@ -50,6 +50,10 @@ interface GalaxyLayoutProps {
   explorationEvent: any;
   canContinueExploration: boolean;
   shipStats: any;
+  currentSystemId: string | null;
+  exploredSystemIds: Set<string>;
+  getJumpableSystemIds: (fromSystem: StarSystem, allSystems: StarSystem[]) => string[];
+  getScannerRangeSystemIds: (fromSystem: StarSystem, allSystems: StarSystem[]) => string[];
   isSystemExplored: (system: StarSystem) => boolean;
   canSystemBeExplored: (system: StarSystem) => boolean;
   getSystemExplorationStatus: (system: StarSystem) => SystemExplorationStatus;
@@ -59,6 +63,8 @@ interface GalaxyLayoutProps {
   onBeginExploration: () => void;
   onResetExploration: () => void;
   onRepairShip: () => void;
+  onOpenMarket: () => void;
+  onJumpToSystem: (systemId: string) => void;
   handleCompleteExploration: () => void;
   handleContinueExploration: () => void;
 }
@@ -92,6 +98,10 @@ export const GalaxyLayout: React.FC<GalaxyLayoutProps> = ({
   explorationEvent,
   canContinueExploration,
   shipStats,
+  currentSystemId,
+  exploredSystemIds,
+  getJumpableSystemIds,
+  getScannerRangeSystemIds,
   isSystemExplored,
   canSystemBeExplored,
   getSystemExplorationStatus,
@@ -101,6 +111,8 @@ export const GalaxyLayout: React.FC<GalaxyLayoutProps> = ({
   onBeginExploration,
   onResetExploration,
   onRepairShip,
+  onOpenMarket,
+  onJumpToSystem,
   handleCompleteExploration,
   handleContinueExploration
 }) => {
@@ -149,6 +161,12 @@ export const GalaxyLayout: React.FC<GalaxyLayoutProps> = ({
                 selectedStar={selectedStar}
                 onStarSelect={onStarSelect}
                 exploredSystems={exploredSystems}
+                shipStats={shipStats}
+                currentSystemId={currentSystemId}
+                exploredSystemIds={exploredSystemIds}
+                getJumpableSystemIds={getJumpableSystemIds}
+                getScannerRangeSystemIds={getScannerRangeSystemIds}
+                onJumpToSystem={onJumpToSystem}
               />
             </ResizablePanel>
 
@@ -188,6 +206,7 @@ export const GalaxyLayout: React.FC<GalaxyLayoutProps> = ({
               onResetExploration={onResetExploration}
               shipStats={shipStats}
               onRepairShip={onRepairShip}
+              onOpenMarket={onOpenMarket}
             />
           </div>
         </ResizablePanel>
