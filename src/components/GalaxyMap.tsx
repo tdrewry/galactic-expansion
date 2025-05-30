@@ -161,7 +161,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
         }}
         onError={(error) => {
           console.error('Canvas error:', error);
-          setCanvasError(`Canvas rendering failed: ${error.message}`);
+          setCanvasError(`Canvas rendering failed: ${String(error)}`);
         }}
       >
         <GalaxyScene 
