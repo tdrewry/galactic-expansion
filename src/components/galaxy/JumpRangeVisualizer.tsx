@@ -52,7 +52,7 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
           color={line.color}
           lineWidth={1}
           transparent
-          opacity={0.6}
+          opacity={0.3}
         />
       ))}
     </group>

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Ship, Wrench } from 'lucide-react';
+import { Ship, Wrench, Currency } from 'lucide-react';
 import { StarSystem } from '../../utils/galaxyGenerator';
 
 interface ActionsPanelProps {
@@ -45,6 +45,17 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
       onRepairShip(repairCost);
     }
   };
+
+  // Check if system has repair capabilities (civilizations with tech level >= 3 OR stations)
+  const systemHasRepairShop = selectedSystem?.planets.some(planet => 
+    (planet.civilization && planet.civilization.techLevel >= 3) ||
+    planet.features?.some(feature => feature.type === 'station')
+  );
+
+  // Check if system has market (civilizations with tech level >= 2)
+  const systemHasMarket = selectedSystem?.planets.some(planet => 
+    planet.civilization && planet.civilization.techLevel >= 2
+  );
 
   return (
     <Card className="bg-gray-800 border-gray-600 h-full w-full">
@@ -100,10 +111,10 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
               )}
 
               {/* Ship Repair Section */}
-              {canRepairShip && needsRepair && (
+              {systemHasRepairShop && needsRepair && (
                 <div className="pt-2 border-t border-gray-600">
                   <p className="text-gray-300 text-xs mb-2">
-                    Advanced civilization detected - ship repairs available
+                    Repair facilities available
                   </p>
                   <Button
                     onClick={handleRepairShip}
@@ -117,6 +128,23 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
                   {!canAffordRepair && (
                     <p className="text-red-400 text-xs mt-1">Insufficient credits</p>
                   )}
+                </div>
+              )}
+
+              {/* Market Section */}
+              {systemHasMarket && onOpenMarket && (
+                <div className="pt-2 border-t border-gray-600">
+                  <p className="text-gray-300 text-xs mb-2">
+                    Trading market available
+                  </p>
+                  <Button
+                    onClick={onOpenMarket}
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                    size="sm"
+                  >
+                    <Currency className="h-4 w-4 mr-2" />
+                    Open Market
+                  </Button>
                 </div>
               )}
             </div>

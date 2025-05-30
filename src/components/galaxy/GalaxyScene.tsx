@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stars, Billboard } from '@react-three/drei';
@@ -7,6 +6,7 @@ import { StarSystem } from './StarSystem';
 import { Nebula } from './Nebula';
 import { InterstellarMaterial } from './InterstellarMaterial';
 import { JumpRangeVisualizer } from './JumpRangeVisualizer';
+import { ScannerRangeIcons } from './ScannerRangeIcons';
 import * as THREE from 'three';
 
 interface GalaxySceneProps {
@@ -179,6 +179,19 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
           onSelect={onSystemSelect}
         />
       ))}
+      
+      {/* Scanner Range Icons */}
+      {selectedSystem && getScannerRangeSystemIds && (
+        <>
+          {galaxy.starSystems.map((system) => (
+            <ScannerRangeIcons
+              key={`scanner-${system.id}`}
+              system={system}
+              scannerRangeSystemIds={getScannerRangeSystemIds(selectedSystem, galaxy.starSystems)}
+            />
+          ))}
+        </>
+      )}
       
       {/* Nebulae - only render when star-forming regions are enabled */}
       {showStarFormingRegions && galaxy.nebulae.map((nebula) => (
