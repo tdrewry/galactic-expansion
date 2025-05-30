@@ -1,8 +1,9 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { Canvas } from '@react-three/fiber';
 import { generateGalaxy, Galaxy, StarSystem } from '../utils/galaxyGenerator';
-import { GalaxyScene } from './galaxy/GalaxyScene';
+import { GalaxyMapCanvas } from './galaxy/GalaxyMapCanvas';
+import { GalaxyMapError } from './galaxy/GalaxyMapError';
+import { GalaxyMapLoading } from './galaxy/GalaxyMapLoading';
 import { SystemInfoPanel } from './galaxy/SystemInfoPanel';
 
 interface GalaxyMapProps {
@@ -44,31 +45,15 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
   numNebulae = 50,
   binaryFrequency = 0.15,
   trinaryFrequency = 0.03,
-  raymarchingSamples = 8,
-  minimumVisibility = 0.1,
-  showDustLanes = true,
-  showStarFormingRegions = true,
-  showCosmicDust = true,
-  dustLaneParticles = 15000,
-  starFormingParticles = 12000,
-  cosmicDustParticles = 10000,
-  dustLaneOpacity = 0.4,
-  starFormingOpacity = 0.3,
-  cosmicDustOpacity = 0.4,
-  dustLaneColorIntensity = 1.0,
-  starFormingColorIntensity = 1.2,
-  cosmicDustColorIntensity = 0.8,
   onSystemSelect,
   selectedSystem: propSelectedSystem = null,
   selectedStar: propSelectedStar = 'primary',
   onStarSelect,
   exploredSystems = new Set(),
-  shipStats,
-  currentSystemId,
   exploredSystemIds = new Set(),
   getJumpableSystemIds,
   getScannerRangeSystemIds,
-  onJumpToSystem
+  ...canvasProps
 }) => {
   const [selectedSystem, setSelectedSystem] = useState<StarSystem | null>(null);
   const [selectedStar, setSelectedStar] = useState<'primary' | 'binary' | 'trinary'>('primary');
@@ -79,7 +64,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
   const currentSelectedStar = propSelectedStar || selectedStar;
   
   const galaxy = useMemo(() => {
-    console.log('Generating galaxy with seed:', seed, 'systems:', numSystems, 'nebulae:', numNebulae, 'binary:', binaryFrequency, 'trinary:', trinaryFrequency);
+    console.log('Generating galaxy with seed:', seed, 'systems:', numSystems, 'nebulae:', numNebulae);
     try {
       const newGalaxy = generateGalaxy(seed, numSystems, numNebulae, binaryFrequency, trinaryFrequency);
       console.log('Generated galaxy with', newGalaxy.starSystems.length, 'systems');
@@ -124,70 +109,25 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
   }, [onStarSelect]);
 
   if (canvasError) {
-    return (
-      <div className="w-full h-full relative bg-black flex items-center justify-center">
-        <div className="text-red-400 text-center">
-          <h3 className="text-xl font-bold mb-2">Rendering Error</h3>
-          <p>{canvasError}</p>
-        </div>
-      </div>
-    );
+    return <GalaxyMapError error={canvasError} />;
   }
 
   if (!galaxy || !enhancedGalaxy) {
-    return (
-      <div className="w-full h-full relative bg-black flex items-center justify-center">
-        <div className="text-white text-center">
-          <h3 className="text-xl font-bold mb-2">Loading Galaxy...</h3>
-          <p>Generating {numSystems} star systems...</p>
-        </div>
-      </div>
-    );
+    return <GalaxyMapLoading numSystems={numSystems} />;
   }
 
   return (
     <div className="w-full h-full relative bg-black">
-      <Canvas 
-        camera={{ 
-          position: [0, 20000, 40000], 
-          fov: 60,
-          near: 10,
-          far: 1000000
-        }}
-        gl={{ antialias: true }}
-        onCreated={({ gl }) => {
-          console.log('Canvas created successfully, enabling pointer events');
-          gl.domElement.style.touchAction = 'none';
-        }}
-        onError={(error) => {
-          console.error('Canvas error:', error);
-          setCanvasError(`Canvas rendering failed: ${String(error)}`);
-        }}
-      >
-        <GalaxyScene 
-          galaxy={enhancedGalaxy}
-          selectedSystem={currentSelectedSystem}
-          onSystemSelect={handleSystemSelect}
-          raymarchingSamples={raymarchingSamples}
-          minimumVisibility={minimumVisibility}
-          showDustLanes={showDustLanes}
-          showStarFormingRegions={showStarFormingRegions}
-          showCosmicDust={showCosmicDust}
-          dustLaneParticles={dustLaneParticles}
-          starFormingParticles={starFormingParticles}
-          cosmicDustParticles={cosmicDustParticles}
-          dustLaneOpacity={dustLaneOpacity}
-          starFormingOpacity={starFormingOpacity}
-          cosmicDustOpacity={cosmicDustOpacity}
-          dustLaneColorIntensity={dustLaneColorIntensity}
-          starFormingColorIntensity={starFormingColorIntensity}
-          cosmicDustColorIntensity={cosmicDustColorIntensity}
-          shipStats={shipStats}
-          exploredSystemIds={exploredSystemIds}
-          getJumpableSystemIds={getJumpableSystemIds}
-          getScannerRangeSystemIds={getScannerRangeSystemIds}
-        />
-      </Canvas>
+      <GalaxyMapCanvas
+        galaxy={enhancedGalaxy}
+        selectedSystem={currentSelectedSystem}
+        onSystemSelect={handleSystemSelect}
+        exploredSystemIds={exploredSystemIds}
+        getJumpableSystemIds={getJumpableSystemIds}
+        getScannerRangeSystemIds={getScannerRangeSystemIds}
+        onCanvasError={setCanvasError}
+        {...canvasProps}
+      />
       
       {currentSelectedSystem && (
         <SystemInfoPanel 
