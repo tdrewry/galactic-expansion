@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Billboard } from '@react-three/drei';
-import { Wrench, Currency, Building, Wheel } from 'lucide-react';
+import { Wrench, Currency, Building, Settings } from 'lucide-react';
 import { StarSystem } from '../../utils/galaxyGenerator';
 
 interface ScannerRangeIconsProps {
@@ -23,7 +23,7 @@ export const ScannerRangeIcons: React.FC<ScannerRangeIconsProps> = ({
   // Check for repair shops (civilizations with tech level >= 3 or stations)
   const hasRepairShop = system.planets.some(planet => 
     (planet.civilization && planet.civilization.techLevel >= 3) ||
-    planet.features?.some(feature => feature.type === 'station')
+    (planet as any).features?.some((feature: any) => feature.type === 'station')
   );
   
   // Check for markets (civilizations with tech level >= 2)
@@ -36,18 +36,18 @@ export const ScannerRangeIcons: React.FC<ScannerRangeIconsProps> = ({
   
   // Check for stations
   const hasStation = system.planets.some(planet => 
-    planet.features?.some(feature => feature.type === 'station')
+    (planet as any).features?.some((feature: any) => feature.type === 'station')
   );
   
   // Check for ruins
   const hasRuins = system.planets.some(planet => 
-    planet.features?.some(feature => feature.type === 'ruins')
+    (planet as any).features?.some((feature: any) => feature.type === 'ruins')
   );
 
   if (hasRepairShop) icons.push({ icon: 'wrench', color: '#10b981' });
   if (hasMarket) icons.push({ icon: 'currency', color: '#f59e0b' });
   if (hasCivilization) icons.push({ icon: 'building', color: '#3b82f6' });
-  if (hasStation) icons.push({ icon: 'wheel', color: '#8b5cf6' });
+  if (hasStation) icons.push({ icon: 'settings', color: '#8b5cf6' });
   if (hasRuins) icons.push({ icon: 'building', color: '#6b7280' }); // Ruined building
 
   if (icons.length === 0) return null;
@@ -92,7 +92,7 @@ export const ScannerRangeIcons: React.FC<ScannerRangeIconsProps> = ({
                         ctx.fillRect(24, 32, 4, 4);
                         ctx.fillRect(36, 32, 4, 4);
                         break;
-                      case 'wheel':
+                      case 'settings':
                         ctx.beginPath();
                         ctx.arc(32, 32, 14, 0, 2 * Math.PI);
                         ctx.stroke();

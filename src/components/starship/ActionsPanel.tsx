@@ -49,7 +49,7 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
   // Check if system has repair capabilities (civilizations with tech level >= 3 OR stations)
   const systemHasRepairShop = selectedSystem?.planets.some(planet => 
     (planet.civilization && planet.civilization.techLevel >= 3) ||
-    planet.features?.some(feature => feature.type === 'station')
+    (planet as any).features?.some((feature: any) => feature.type === 'station')
   );
 
   // Check if system has market (civilizations with tech level >= 2)
