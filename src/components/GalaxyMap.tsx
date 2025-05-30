@@ -72,6 +72,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
 }) => {
   const [selectedSystem, setSelectedSystem] = useState<StarSystem | null>(null);
   const [selectedStar, setSelectedStar] = useState<'primary' | 'binary' | 'trinary'>('primary');
+  const [canvasError, setCanvasError] = useState<string | null>(null);
   
   // Use props if provided, otherwise use internal state
   const currentSelectedSystem = propSelectedSystem || selectedSystem;
@@ -79,13 +80,21 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
   
   const galaxy = useMemo(() => {
     console.log('Generating galaxy with seed:', seed, 'systems:', numSystems, 'nebulae:', numNebulae, 'binary:', binaryFrequency, 'trinary:', trinaryFrequency);
-    const newGalaxy = generateGalaxy(seed, numSystems, numNebulae, binaryFrequency, trinaryFrequency);
-    console.log('Generated galaxy with', newGalaxy.starSystems.length, 'systems');
-    return newGalaxy;
+    try {
+      const newGalaxy = generateGalaxy(seed, numSystems, numNebulae, binaryFrequency, trinaryFrequency);
+      console.log('Generated galaxy with', newGalaxy.starSystems.length, 'systems');
+      return newGalaxy;
+    } catch (error) {
+      console.error('Error generating galaxy:', error);
+      setCanvasError(`Galaxy generation failed: ${error}`);
+      return null;
+    }
   }, [seed, numSystems, numNebulae, binaryFrequency, trinaryFrequency]);
 
   // Create enhanced galaxy data with exploration status
   const enhancedGalaxy = useMemo(() => {
+    if (!galaxy) return null;
+    
     const enhancedStarSystems = galaxy.starSystems.map(system => ({
       ...system,
       explored: exploredSystems.has(system.id)
@@ -114,6 +123,28 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
     }
   }, [onStarSelect]);
 
+  if (canvasError) {
+    return (
+      <div className="w-full h-full relative bg-black flex items-center justify-center">
+        <div className="text-red-400 text-center">
+          <h3 className="text-xl font-bold mb-2">Rendering Error</h3>
+          <p>{canvasError}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!galaxy || !enhancedGalaxy) {
+    return (
+      <div className="w-full h-full relative bg-black flex items-center justify-center">
+        <div className="text-white text-center">
+          <h3 className="text-xl font-bold mb-2">Loading Galaxy...</h3>
+          <p>Generating {numSystems} star systems...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full h-full relative bg-black">
       <Canvas 
@@ -125,8 +156,12 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
         }}
         gl={{ antialias: true }}
         onCreated={({ gl }) => {
-          console.log('Canvas created, enabling pointer events');
+          console.log('Canvas created successfully, enabling pointer events');
           gl.domElement.style.touchAction = 'none';
+        }}
+        onError={(error) => {
+          console.error('Canvas error:', error);
+          setCanvasError(`Canvas rendering failed: ${error.message}`);
         }}
       >
         <GalaxyScene 
