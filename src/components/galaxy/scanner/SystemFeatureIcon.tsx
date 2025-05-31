@@ -25,7 +25,7 @@ export const SystemFeatureIcon: React.FC<SystemFeatureIconProps> = ({
   };
 
   return (
-    <Billboard position={[position[0], position[1] + 400 + offset, position[2]]}>
+    <Billboard position={[position[0], position[1] + 800 + offset, position[2]]}>
       <mesh position={[0, 0, 1]}>
         <planeGeometry args={[300, 300]} />
         <meshBasicMaterial transparent>
