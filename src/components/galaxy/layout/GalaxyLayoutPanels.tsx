@@ -124,15 +124,17 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
     <ResizablePanelGroup direction="horizontal" className="flex-1">
       {/* Left Panel - Always visible with System Info and Exploration Log */}
       <ResizablePanel defaultSize={25} minSize={20} maxSize={35}>
-        <div className="h-full bg-gray-900 border-r border-gray-700 p-4">
-          <SystemInfoCard
-            system={selectedSystem}
-            selectedStar={selectedStar}
-            onStarSelect={onStarSelect}
-          />
+        <div className="h-full bg-gray-900 border-r border-gray-700 flex flex-col">
+          <div className="flex-shrink-0 p-4">
+            <SystemInfoCard
+              system={selectedSystem}
+              selectedStar={selectedStar}
+              onStarSelect={onStarSelect}
+            />
+          </div>
           
           {explorationHistory.length > 0 && (
-            <div className="flex-1">
+            <div className="flex-1 min-h-0">
               <ExplorationLog explorationHistory={explorationHistory} />
             </div>
           )}
