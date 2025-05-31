@@ -33,14 +33,14 @@ export const SystemFeatureIcon: React.FC<SystemFeatureIconProps> = ({
             attach="map" 
             image={(() => {
               const canvas = document.createElement('canvas');
-              canvas.width = 256;
-              canvas.height = 256;
+              canvas.width = 128;
+              canvas.height = 128;
               const ctx = canvas.getContext('2d');
               if (ctx) {
                 ctx.font = '80px Arial';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(getEmoji(), 128, 128);
+                ctx.fillText(getEmoji(), 64, 64);
               }
               return canvas;
             })()} 
