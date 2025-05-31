@@ -61,6 +61,7 @@ interface GalaxyLayoutPanelsProps {
   onRepairShip: () => void;
   onOpenMarket: () => void;
   onJumpToSystem: (systemId: string) => void;
+  canJumpToSelected?: boolean;
 }
 
 export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
@@ -100,7 +101,8 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
   onResetExploration,
   onRepairShip,
   onOpenMarket,
-  onJumpToSystem
+  onJumpToSystem,
+  canJumpToSelected = false
 }) => {
   const [isScanning, setIsScanning] = useState(false);
 
@@ -158,6 +160,7 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
               cosmicDustColorIntensity={cosmicDustColorIntensity}
               jumpLaneOpacity={jumpLaneOpacity}
               greenPathOpacity={greenPathOpacity}
+              travelHistory={travelHistory}
               onSystemSelect={onSystemSelect}
               selectedSystem={selectedSystem}
               selectedStar={selectedStar}
@@ -166,7 +169,6 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
               shipStats={shipStats}
               currentSystemId={currentSystemId}
               exploredSystemIds={exploredSystemIds}
-              travelHistory={travelHistory}
               getJumpableSystemIds={getJumpableSystemIds}
               getScannerRangeSystemIds={getScannerRangeSystemIds}
               onJumpToSystem={onJumpToSystem}
@@ -183,6 +185,7 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
               <StarshipPanel 
                 seed={galaxySeed}
                 selectedSystem={selectedSystem}
+                currentSystemId={currentSystemId}
                 isExplored={selectedSystem ? isSystemExplored(selectedSystem) : false}
                 canBeExplored={selectedSystem ? canSystemBeExplored(selectedSystem) : false}
                 explorationStatus={selectedSystem ? getSystemExplorationStatus(selectedSystem) : { systemId: '', explorationsCompleted: 0, maxExplorations: 0 }}
@@ -225,6 +228,7 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
                 <div className="h-full bg-gray-900 border-l border-gray-700 p-4">
                   <ActionsPanel
                     selectedSystem={selectedSystem}
+                    currentSystemId={currentSystemId}
                     isExplored={selectedSystem ? isSystemExplored(selectedSystem) : false}
                     canBeExplored={selectedSystem ? canSystemBeExplored(selectedSystem) : false}
                     explorationStatus={selectedSystem ? getSystemExplorationStatus(selectedSystem) : { systemId: '', explorationsCompleted: 0, maxExplorations: 0 }}
@@ -242,6 +246,8 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
                     onOpenMarket={onOpenMarket}
                     onTriggerScan={handleTriggerScan}
                     isScanning={isScanning}
+                    canJumpToSelected={canJumpToSelected}
+                    onJumpToSystem={onJumpToSystem}
                   />
                 </div>
               </ResizablePanel>

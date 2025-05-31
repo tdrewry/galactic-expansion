@@ -108,14 +108,14 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
                 size="sm"
               >
                 <Zap className="h-4 w-4 mr-2" />
-                Jump to: {selectedSystem.name}
+                Jump to: {selectedSystem.id}
               </Button>
             )}
 
             {/* Show system info when not in current system */}
             {!isCurrentSystem && (
               <div className="text-center text-gray-400 text-sm border-b border-gray-600 pb-2">
-                Viewing: {selectedSystem.name}
+                Viewing: {selectedSystem.id}
                 <br />
                 Current Location: {currentSystemId || 'Unknown'}
               </div>

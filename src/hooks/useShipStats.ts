@@ -245,7 +245,7 @@ export const useShipStats = (initialStats: StarshipStats) => {
         const gameData: GameSaveData = JSON.parse(savedData);
         setStats(gameData.stats);
         setCurrentSystemId(gameData.currentSystemId);
-        setSelectedSystemId(gameData.selectedSystemId);
+        setSelectedSystemId(gameData.currentSystemId); // Fix: use currentSystemId instead of selectedSystemId
         setExploredSystemIds(new Set(gameData.exploredSystemIds));
         setTravelHistory(gameData.travelHistory || []);
         setIsGameOver(false);
@@ -320,17 +320,6 @@ export const useShipStats = (initialStats: StarshipStats) => {
       return distance <= scannerRange;
     }).map(system => system.id);
   }, [stats.scanners, stats.techLevel]);
-
-  const jumpToSystem = useCallback((systemId: string) => {
-    setCurrentSystemId(systemId);
-    setExploredSystemIds(prev => new Set([...prev, systemId]));
-    setTravelHistory(prev => {
-      if (!prev.includes(systemId)) {
-        return [...prev, systemId];
-      }
-      return prev;
-    });
-  }, []);
 
   const resetStats = useCallback((newStats: StarshipStats, startingSystemId?: string) => {
     setStats(newStats);

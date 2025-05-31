@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState } from 'react';
 import { generateStarship } from '../../utils/starshipGenerator';
 import { ActionsPanel } from './ActionsPanel';
@@ -47,6 +48,7 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
   isScanning = false
 }) => {
   const starship = useMemo(() => generateStarship(seed), [seed]);
+  const [isShipLayoutOpen, setIsShipLayoutOpen] = useState(false);
 
   const currentStats = shipStats || starship.stats;
 
