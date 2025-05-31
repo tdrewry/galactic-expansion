@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Billboard } from '@react-three/drei';
-import { Wrench, Currency, Building, Wheel, RuinedBuilding } from 'lucide-react';
+import { Wrench, DollarSign, Building, Settings, Ruins } from 'lucide-react';
 
 interface SystemFeatureIconProps {
   type: 'repair' | 'market' | 'civilization' | 'station' | 'ruins';
@@ -17,10 +17,10 @@ export const SystemFeatureIcon: React.FC<SystemFeatureIconProps> = ({
   const getIconComponent = () => {
     switch (type) {
       case 'repair': return Wrench;
-      case 'market': return Currency;
+      case 'market': return DollarSign;
       case 'civilization': return Building;
-      case 'station': return Wheel;
-      case 'ruins': return RuinedBuilding;
+      case 'station': return Settings;
+      case 'ruins': return Ruins;
       default: return Building;
     }
   };
