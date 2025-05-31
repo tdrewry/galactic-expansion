@@ -17,10 +17,10 @@ export const SystemFeatureIcon: React.FC<SystemFeatureIconProps> = ({
     switch (type) {
       case 'repair': return '🛠️';
       case 'market': return '🏛️';
-      case 'civilization': return '🏘️';
+      case 'civilization': return '🌇';
       case 'station': return '🛰️';
       case 'ruins': return '🗿';
-      default: return '🏘️';
+      default: return '';
     }
   };
 
