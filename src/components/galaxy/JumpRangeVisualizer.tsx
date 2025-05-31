@@ -35,35 +35,6 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
     const jumpableLines = [];
     const visitedLines = [];
     
-    // Find all explored systems
-    const exploredSystems = allSystems.filter(system => exploredSystemIds.has(system.id) && system.id !== currentSystem.id);
-    
-    for (const targetSystem of exploredSystems) {
-      // Check if this explored system is actually within jump range
-      const isInJumpRange = jumpableSystemIds.includes(targetSystem.id);
-      
-      // Skip if not in jump range - we'll handle it as a visited line
-      if (isInJumpRange) {
-        // ;visitedLines.push({
-        //   points: [
-        //     [currentSystem.position[0], currentSystem.position[1], currentSystem.position[2]] as [number, number, number],
-        //     [targetSystem.position[0], targetSystem.position[1], targetSystem.position[2]] as [number, number, number]
-        //   ],
-        //   color: '#4ade80' // Green for explored systems
-        // });
-        continue;
-      }
-      
-      // System is explored AND within jump range - draw as jumpable
-      // jumpableLines.push({
-      //   points: [
-      //     [currentSystem.position[0], currentSystem.position[1], currentSystem.position[2]] as [number, number, number],
-      //     [targetSystem.position[0], targetSystem.position[1], targetSystem.position[2]] as [number, number, number]
-      //   ],
-      //   color: '#4ade80' // Green for explored systems
-      // });
-    }
-    
     // Add unexplored systems that are within jump range
     for (const systemId of jumpableSystemIds) {
       if (!exploredSystemIds.has(systemId)) {
