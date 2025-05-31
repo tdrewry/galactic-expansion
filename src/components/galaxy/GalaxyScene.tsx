@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stars, Billboard } from '@react-three/drei';
@@ -25,6 +24,7 @@ interface GalaxySceneProps {
   cosmicDustColorIntensity?: number;
   jumpLaneOpacity?: number;
   greenPathOpacity?: number;
+  visitedJumpLaneOpacity?: number;
   shipStats?: any;
   exploredSystemIds?: Set<string>;
   travelHistory?: string[];
@@ -49,6 +49,7 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
   cosmicDustColorIntensity = 0.4,
   jumpLaneOpacity = 0.3,
   greenPathOpacity = 0.6,
+  visitedJumpLaneOpacity = 0.1,
   shipStats,
   exploredSystemIds = new Set(),
   travelHistory = [],
@@ -217,6 +218,7 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
           jumpableSystemIds={getJumpableSystemIds(currentSystem, galaxy.starSystems)}
           jumpLaneOpacity={jumpLaneOpacity}
           greenPathOpacity={greenPathOpacity}
+          visitedJumpLaneOpacity={visitedJumpLaneOpacity}
         />
       )}
       

@@ -18,6 +18,7 @@ interface GalaxyControlsProps {
   cosmicDustColorIntensity: number;
   jumpLaneOpacity: number;
   greenPathOpacity: number;
+  visitedJumpLaneOpacity: number;
   defaultShipStats: any;
   inputSeed: string;
   setInputSeed: (seed: string) => void;
@@ -42,6 +43,7 @@ export const GalaxyControls: React.FC<GalaxyControlsProps> = ({
   cosmicDustColorIntensity,
   jumpLaneOpacity,
   greenPathOpacity,
+  visitedJumpLaneOpacity,
   defaultShipStats,
   inputSeed,
   setInputSeed,
@@ -67,6 +69,7 @@ export const GalaxyControls: React.FC<GalaxyControlsProps> = ({
         cosmicDustColorIntensity={cosmicDustColorIntensity}
         jumpLaneOpacity={jumpLaneOpacity}
         greenPathOpacity={greenPathOpacity}
+        visitedJumpLaneOpacity={visitedJumpLaneOpacity}
         defaultShipStats={defaultShipStats}
         inputSeed={inputSeed}
         setInputSeed={setInputSeed}

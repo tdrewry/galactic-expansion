@@ -14,6 +14,7 @@ interface JumpRangeVisualizerProps {
   jumpableSystemIds: string[];
   jumpLaneOpacity: number;
   greenPathOpacity: number;
+  visitedJumpLaneOpacity?: number;
 }
 
 export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
@@ -25,28 +26,54 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
   scannerRangeSystemIds,
   jumpableSystemIds,
   jumpLaneOpacity,
-  greenPathOpacity
+  greenPathOpacity,
+  visitedJumpLaneOpacity = 0.1
 }) => {
-  const jumpLines = useMemo(() => {
-    if (!currentSystem) return [];
+  const { jumpableLines, visitedLines } = useMemo(() => {
+    if (!currentSystem) return { jumpableLines: [], visitedLines: [] };
     
-    // Only show jump lanes to systems that are actually jumpable (within range)
-    // This excludes visited systems that are now out of range
-    return jumpableSystemIds.map(systemId => {
-      const targetSystem = allSystems.find(s => s.id === systemId);
-      if (!targetSystem) return null;
+    const jumpableLines = [];
+    const visitedLines = [];
+    
+    // Find all explored systems
+    const exploredSystems = allSystems.filter(system => exploredSystemIds.has(system.id) && system.id !== currentSystem.id);
+    
+    for (const targetSystem of exploredSystems) {
+      const isJumpable = jumpableSystemIds.includes(targetSystem.id);
+      const color = '#4ade80'; // Green for explored systems
       
-      const isExplored = exploredSystemIds.has(systemId);
-      const color = isExplored ? '#4ade80' : '#fbbf24'; // Green for explored, yellow for unexplored
-      
-      return {
+      const lineData = {
         points: [
           [currentSystem.position[0], currentSystem.position[1], currentSystem.position[2]] as [number, number, number],
           [targetSystem.position[0], targetSystem.position[1], targetSystem.position[2]] as [number, number, number]
         ],
         color
       };
-    }).filter(Boolean);
+      
+      if (isJumpable) {
+        jumpableLines.push(lineData);
+      } else {
+        visitedLines.push(lineData);
+      }
+    }
+    
+    // Add unexplored jumpable systems
+    for (const systemId of jumpableSystemIds) {
+      if (!exploredSystemIds.has(systemId)) {
+        const targetSystem = allSystems.find(s => s.id === systemId);
+        if (targetSystem) {
+          jumpableLines.push({
+            points: [
+              [currentSystem.position[0], currentSystem.position[1], currentSystem.position[2]] as [number, number, number],
+              [targetSystem.position[0], targetSystem.position[1], targetSystem.position[2]] as [number, number, number]
+            ],
+            color: '#fbbf24' // Yellow for unexplored
+          });
+        }
+      }
+    }
+    
+    return { jumpableLines, visitedLines };
   }, [currentSystem, allSystems, jumpableSystemIds, exploredSystemIds]);
 
   const greenPathLines = useMemo(() => {
@@ -76,8 +103,8 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
 
   return (
     <group>
-      {/* Jump range lines (dashed) - only to systems within jump range, no lines to out-of-range visited systems */}
-      {jumpLines.map((line, index) => (
+      {/* Jump range lines (dashed) - to systems within jump range */}
+      {jumpableLines.map((line, index) => (
         <Line
           key={`jump-${index}`}
           points={line.points}
@@ -85,6 +112,21 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
           lineWidth={1}
           transparent
           opacity={jumpLaneOpacity}
+          dashed
+          dashSize={100}
+          gapSize={50}
+        />
+      ))}
+      
+      {/* Visited system lines (dashed) - to explored systems out of jump range */}
+      {visitedLines.map((line, index) => (
+        <Line
+          key={`visited-${index}`}
+          points={line.points}
+          color={line.color}
+          lineWidth={1}
+          transparent
+          opacity={visitedJumpLaneOpacity}
           dashed
           dashSize={100}
           gapSize={50}

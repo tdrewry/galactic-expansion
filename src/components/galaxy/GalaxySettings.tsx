@@ -25,6 +25,7 @@ interface GalaxySettingsProps {
   cosmicDustColorIntensity?: number;
   jumpLaneOpacity?: number;
   greenPathOpacity?: number;
+  visitedJumpLaneOpacity?: number;
   defaultShipStats?: any;
   inputSeed: string;
   setInputSeed: (seed: string) => void;
@@ -49,6 +50,7 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
   cosmicDustColorIntensity = 0.4,
   jumpLaneOpacity = 0.3,
   greenPathOpacity = 0.6,
+  visitedJumpLaneOpacity = 0.1,
   defaultShipStats = {},
   inputSeed,
   setInputSeed,
@@ -72,6 +74,7 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
     cosmicDustColorIntensity,
     jumpLaneOpacity,
     greenPathOpacity,
+    visitedJumpLaneOpacity,
     defaultShipStats
   });
 
@@ -93,9 +96,10 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
       cosmicDustColorIntensity,
       jumpLaneOpacity,
       greenPathOpacity,
+      visitedJumpLaneOpacity,
       defaultShipStats
     });
-  }, [numSystems, numNebulae, binaryFrequency, trinaryFrequency, showDustLanes, showCosmicDust, appTitle, dustLaneParticles, cosmicDustParticles, dustLaneOpacity, cosmicDustOpacity, dustLaneColorIntensity, cosmicDustColorIntensity, jumpLaneOpacity, greenPathOpacity, defaultShipStats]);
+  }, [numSystems, numNebulae, binaryFrequency, trinaryFrequency, showDustLanes, showCosmicDust, appTitle, dustLaneParticles, cosmicDustParticles, dustLaneOpacity, cosmicDustOpacity, dustLaneColorIntensity, cosmicDustColorIntensity, jumpLaneOpacity, greenPathOpacity, visitedJumpLaneOpacity, defaultShipStats]);
 
   const handleSeedChange = () => {
     const newSeed = parseInt(inputSeed) || 12345;
@@ -124,6 +128,7 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
       cosmicDustColorIntensity: 0.4,
       jumpLaneOpacity: 0.3,
       greenPathOpacity: 0.6,
+      visitedJumpLaneOpacity: 0.1,
       defaultShipStats: {
         techLevel: 3,
         shields: 75,
@@ -306,6 +311,21 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
                       jumpLaneOpacity: value
                     }))}
                     min={0.1}
+                    max={1.0}
+                    step={0.05}
+                    className="w-full"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Visited Jump Lane Opacity: {localSettings.visitedJumpLaneOpacity.toFixed(2)}</Label>
+                  <Slider
+                    value={[localSettings.visitedJumpLaneOpacity]}
+                    onValueChange={([value]) => setLocalSettings(prev => ({
+                      ...prev,
+                      visitedJumpLaneOpacity: value
+                    }))}
+                    min={0.0}
                     max={1.0}
                     step={0.05}
                     className="w-full"
@@ -508,8 +528,8 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm">Star System Types</CardTitle>
-              </CardHeader>
+                <CardTitle className="text-sm">Star System Types</CardHeader>
+              </CardContent>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="binary">Binary System Frequency</Label>
