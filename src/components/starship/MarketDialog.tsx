@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -5,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StarshipStats } from '../../utils/starshipGenerator';
 import { MarketLocation } from '../../utils/explorationGenerator';
-import { Wrench, Currency, Building, Settings } from 'lucide-react';
+import { Wrench, Currency, Building, Settings, Users, Package } from 'lucide-react';
 
 interface MarketDialogProps {
   isOpen: boolean;
@@ -68,8 +69,27 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
     return shipStats.credits >= getUpgradeCost(system, currentValue);
   };
 
+  const handleSellAll = () => {
+    if (shipStats.cargo > 0) {
+      onSellCargo(shipStats.cargo);
+      setCargoToSell(0);
+    }
+  };
+
+  const handleUpgrade = (system: keyof StarshipStats, cost: number, maxIncrease: number, currentIncrease?: number) => {
+    onUpgradeSystem(system, cost, maxIncrease);
+    // Also upgrade current value for most systems
+    if (currentIncrease && system !== 'maxCargo' && system !== 'maxCrew') {
+      const currentSystem = system.replace('max', '').toLowerCase() as keyof StarshipStats;
+      if (currentSystem !== system) {
+        onUpgradeSystem(currentSystem, 0, currentIncrease);
+      }
+    }
+  };
+
   const needsRepair = shipStats.shields < shipStats.maxShields || shipStats.hull < shipStats.maxHull;
   const repairCost = 1000;
+  const isSpaceStation = marketInfo.type === 'station';
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -83,9 +103,10 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
         </DialogHeader>
 
         <Tabs defaultValue="trade" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-gray-800">
+          <TabsList className="grid w-full grid-cols-4 bg-gray-800">
             <TabsTrigger value="trade" disabled={!marketInfo.hasMarket}>Trade</TabsTrigger>
             <TabsTrigger value="upgrades" disabled={!marketInfo.hasMarket}>Upgrades</TabsTrigger>
+            <TabsTrigger value="services" disabled={!isSpaceStation}>Services</TabsTrigger>
             <TabsTrigger value="repair" disabled={!marketInfo.hasRepair}>Repair</TabsTrigger>
           </TabsList>
 
@@ -114,16 +135,25 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                     <span className="text-yellow-400">₡{getCargoValue(cargoToSell).toLocaleString()}</span>
                   </div>
                   
-                  <Button
-                    onClick={() => {
-                      onSellCargo(cargoToSell);
-                      setCargoToSell(0);
-                    }}
-                    disabled={cargoToSell === 0}
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
-                    Sell Cargo
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => {
+                        onSellCargo(cargoToSell);
+                        setCargoToSell(0);
+                      }}
+                      disabled={cargoToSell === 0}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      Sell Cargo
+                    </Button>
+                    <Button
+                      onClick={handleSellAll}
+                      disabled={shipStats.cargo === 0}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      Sell All
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -144,7 +174,7 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                         <span className="text-yellow-400">₡{Math.floor(getUpgradeCost('combatPower', shipStats.combatPower)).toLocaleString()}</span>
                       </div>
                       <Button
-                        onClick={() => onUpgradeSystem('maxCombatPower', getUpgradeCost('combatPower', shipStats.combatPower), 10)}
+                        onClick={() => handleUpgrade('maxCombatPower', getUpgradeCost('combatPower', shipStats.combatPower), 10, 10)}
                         disabled={!canAffordUpgrade('combatPower', shipStats.combatPower) || shipStats.maxCombatPower >= 200}
                         className="w-full bg-red-600 hover:bg-red-700"
                         size="sm"
@@ -167,7 +197,7 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                         <span className="text-yellow-400">₡{Math.floor(getUpgradeCost('scanners', shipStats.scanners)).toLocaleString()}</span>
                       </div>
                       <Button
-                        onClick={() => onUpgradeSystem('maxScanners', getUpgradeCost('scanners', shipStats.scanners), 10)}
+                        onClick={() => handleUpgrade('maxScanners', getUpgradeCost('scanners', shipStats.scanners), 10, 10)}
                         disabled={!canAffordUpgrade('scanners', shipStats.scanners) || shipStats.maxScanners >= 200}
                         className="w-full bg-cyan-600 hover:bg-cyan-700"
                         size="sm"
@@ -219,6 +249,111 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                         size="sm"
                       >
                         Upgrade Quarters (+5)
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+          )}
+
+          {/* Services tab for Space Stations */}
+          {isSpaceStation && (
+            <TabsContent value="services" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Hire Crew */}
+                <Card className="bg-gray-800 border-gray-600">
+                  <CardHeader>
+                    <CardTitle className="text-white text-sm flex items-center gap-2">
+                      <Users className="w-4 h-4" />
+                      Hire Crew
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Crew: {shipStats.crew}/{shipStats.maxCrew}</span>
+                        <span className="text-yellow-400">₡500 per crew</span>
+                      </div>
+                      <Button
+                        onClick={() => onUpgradeSystem('crew', 500, 1)}
+                        disabled={shipStats.credits < 500 || shipStats.crew >= shipStats.maxCrew}
+                        className="w-full bg-purple-600 hover:bg-purple-700"
+                        size="sm"
+                      >
+                        Hire Crew Member
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Buy Cargo */}
+                <Card className="bg-gray-800 border-gray-600">
+                  <CardHeader>
+                    <CardTitle className="text-white text-sm flex items-center gap-2">
+                      <Package className="w-4 h-4" />
+                      Buy Cargo
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Cargo: {shipStats.cargo}/{shipStats.maxCargo}</span>
+                        <span className="text-yellow-400">₡15 per unit</span>
+                      </div>
+                      <Button
+                        onClick={() => onUpgradeSystem('cargo', 15, 10)}
+                        disabled={shipStats.credits < 15 || shipStats.cargo >= shipStats.maxCargo}
+                        className="w-full bg-orange-600 hover:bg-orange-700"
+                        size="sm"
+                      >
+                        Buy Cargo (10 units)
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Repair Scanner */}
+                <Card className="bg-gray-800 border-gray-600">
+                  <CardHeader>
+                    <CardTitle className="text-white text-sm">Repair Scanner</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Scanner: {shipStats.scanners}/{shipStats.maxScanners}</span>
+                        <span className="text-yellow-400">₡200</span>
+                      </div>
+                      <Button
+                        onClick={() => onUpgradeSystem('scanners', 200, Math.min(10, shipStats.maxScanners - shipStats.scanners))}
+                        disabled={shipStats.credits < 200 || shipStats.scanners >= shipStats.maxScanners}
+                        className="w-full bg-cyan-600 hover:bg-cyan-700"
+                        size="sm"
+                      >
+                        Repair Scanner
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Repair Weapons */}
+                <Card className="bg-gray-800 border-gray-600">
+                  <CardHeader>
+                    <CardTitle className="text-white text-sm">Repair Weapons</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Weapons: {shipStats.combatPower}/{shipStats.maxCombatPower}</span>
+                        <span className="text-yellow-400">₡300</span>
+                      </div>
+                      <Button
+                        onClick={() => onUpgradeSystem('combatPower', 300, Math.min(10, shipStats.maxCombatPower - shipStats.combatPower))}
+                        disabled={shipStats.credits < 300 || shipStats.combatPower >= shipStats.maxCombatPower}
+                        className="w-full bg-red-600 hover:bg-red-700"
+                        size="sm"
+                      >
+                        Repair Weapons
                       </Button>
                     </div>
                   </CardContent>

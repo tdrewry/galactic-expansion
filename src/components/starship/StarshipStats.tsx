@@ -27,22 +27,33 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({ starship, currentS
     return 'bg-red-500';
   };
 
-  const StatBar = ({ label, value, max, showMax = true }: { label: string; value: number; max: number; showMax?: boolean }) => (
-    <div>
-      <div className="flex justify-between items-center mb-1">
-        <span className="text-sm text-gray-300">{label}</span>
-        <span className={`text-sm font-medium ${getStatColor(value, max)}`}>
-          {showMax ? `${value}/${max}` : `${value}/100`}
-        </span>
+  const StatBar = ({ label, value, max, showMax = true, allowOverflow = false }: { 
+    label: string; 
+    value: number; 
+    max: number; 
+    showMax?: boolean; 
+    allowOverflow?: boolean;
+  }) => {
+    const displayMax = allowOverflow && value > max ? value : max;
+    const barWidth = allowOverflow ? Math.min(100, (value / displayMax) * 100) : (value / max) * 100;
+    
+    return (
+      <div>
+        <div className="flex justify-between items-center mb-1">
+          <span className="text-sm text-gray-300">{label}</span>
+          <span className={`text-sm font-medium ${getStatColor(value, max)}`}>
+            {showMax ? `${value}/${displayMax}` : `${value}/100`}
+          </span>
+        </div>
+        <div className="w-full bg-gray-700 rounded-full h-2">
+          <div 
+            className={`h-2 rounded-full ${getStatBarColor(value, max)}`}
+            style={{ width: `${barWidth}%` }}
+          />
+        </div>
       </div>
-      <div className="w-full bg-gray-700 rounded-full h-2">
-        <div 
-          className={`h-2 rounded-full ${getStatBarColor(value, max)}`}
-          style={{ width: `${(value / max) * 100}%` }}
-        />
-      </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <Card className="bg-gray-800 border-gray-600 h-full">
@@ -74,7 +85,13 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({ starship, currentS
           </div>
           <div className="space-y-4">
             <StatBar label="Cargo" value={currentStats.cargo} max={currentStats.maxCargo} />
-            <StatBar label="Diplomacy" value={currentStats.diplomacy} max={100} showMax={false} />
+            <StatBar 
+              label="Diplomacy" 
+              value={currentStats.diplomacy} 
+              max={100} 
+              showMax={false} 
+              allowOverflow={true}
+            />
           </div>
         </div>
       </CardContent>

@@ -61,7 +61,9 @@ const Index = () => {
     getJumpableSystemIds,
     getScannerRangeSystemIds,
     jumpToSystem,
-    resetStats
+    resetStats,
+    saveGame,
+    loadGame
   } = useShipStats(initialStarship.stats);
 
   // Market dialog state
@@ -121,6 +123,21 @@ const Index = () => {
     // Reset ship stats to new ship with new starting system
     const newStarship = generateStarship(randomSeed);
     resetStats(newStarship.stats);
+  };
+
+  const handleSaveGame = () => {
+    saveGame(galaxySeed);
+  };
+
+  const handleLoadGame = () => {
+    const gameData = loadGame();
+    if (gameData) {
+      setGalaxySeed(gameData.galaxySeed);
+      setInputSeed(gameData.galaxySeed.toString());
+      setSelectedSystem(null);
+      setSelectedBody(null);
+      resetAllExploration();
+    }
   };
 
   const handleSystemSelect = (system: StarSystem) => {
@@ -217,7 +234,17 @@ const Index = () => {
     <div className="h-screen bg-black text-white flex flex-col overflow-hidden">
       <header className="bg-gray-900 p-4 border-b border-gray-700 flex-shrink-0">
         <div className="container mx-auto flex items-center justify-between">
-          <h1 className="text-2xl font-bold">{appTitle}</h1>
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-bold">{appTitle}</h1>
+            <div className="flex gap-2">
+              <Button onClick={handleSaveGame} size="sm" className="bg-green-600 hover:bg-green-700">
+                Save Game
+              </Button>
+              <Button onClick={handleLoadGame} size="sm" className="bg-blue-600 hover:bg-blue-700">
+                Load Game
+              </Button>
+            </div>
+          </div>
           <GalaxyControls
             inputSeed={inputSeed}
             setInputSeed={setInputSeed}

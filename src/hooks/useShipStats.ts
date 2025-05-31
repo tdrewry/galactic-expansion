@@ -1,8 +1,17 @@
+
 import { useState, useCallback } from 'react';
 import { StarshipStats } from '../utils/starshipGenerator';
 import { ExplorationEvent } from '../components/galaxy/ExplorationDialog';
 import { useToast } from '@/hooks/use-toast';
 import { StarSystem } from '../utils/galaxyGenerator';
+
+export interface GameSaveData {
+  stats: StarshipStats;
+  currentSystemId: string | null;
+  exploredSystemIds: string[];
+  galaxySeed: number;
+  timestamp: number;
+}
 
 export const useShipStats = (initialStats: StarshipStats) => {
   const [stats, setStats] = useState<StarshipStats>(initialStats);
@@ -39,7 +48,9 @@ export const useShipStats = (initialStats: StarshipStats) => {
           // Diplomacy affects first contact success
           const diplomacySuccess = newStats.diplomacy > 60 ? Math.random() > 0.1 : Math.random() > 0.4;
           if (diplomacySuccess) {
-            newStats.diplomacy = Math.min(100, newStats.diplomacy + 10);
+            // Allow diplomacy to go above 100 if already at max
+            const diplomacyIncrease = newStats.diplomacy >= 100 ? 5 : 10;
+            newStats.diplomacy = newStats.diplomacy + diplomacyIncrease;
             newStats.credits += 750;
             newStats.crew = Math.min(newStats.maxCrew, newStats.crew + 2);
           } else {
@@ -127,7 +138,7 @@ export const useShipStats = (initialStats: StarshipStats) => {
           shields: prevStats.maxShields,
           hull: prevStats.maxHull,
           combatPower: prevStats.maxCombatPower,
-          diplomacy: 100,
+          diplomacy: 999, // Allow diplomacy to go very high
           scanners: prevStats.maxScanners,
           cargo: prevStats.maxCargo,
           credits: 999999,
@@ -171,6 +182,55 @@ export const useShipStats = (initialStats: StarshipStats) => {
       return prevStats;
     });
   }, []);
+
+  const saveGame = useCallback((galaxySeed: number) => {
+    const saveData: GameSaveData = {
+      stats,
+      currentSystemId,
+      exploredSystemIds: Array.from(exploredSystemIds),
+      galaxySeed,
+      timestamp: Date.now()
+    };
+    
+    localStorage.setItem('galaxyExplorerSave', JSON.stringify(saveData));
+    toast({
+      title: "Game Saved",
+      description: "Your progress has been saved successfully.",
+    });
+  }, [stats, currentSystemId, exploredSystemIds, toast]);
+
+  const loadGame = useCallback(() => {
+    const savedData = localStorage.getItem('galaxyExplorerSave');
+    if (savedData) {
+      try {
+        const gameData: GameSaveData = JSON.parse(savedData);
+        setStats(gameData.stats);
+        setCurrentSystemId(gameData.currentSystemId);
+        setExploredSystemIds(new Set(gameData.exploredSystemIds));
+        setIsGameOver(false);
+        
+        toast({
+          title: "Game Loaded",
+          description: "Your saved progress has been restored.",
+        });
+        
+        return gameData;
+      } catch (error) {
+        toast({
+          title: "Load Failed",
+          description: "Could not load saved game data.",
+          variant: "destructive",
+        });
+      }
+    } else {
+      toast({
+        title: "No Save Found",
+        description: "No saved game data found.",
+        variant: "destructive",
+      });
+    }
+    return null;
+  }, [toast]);
 
   const canJumpToSystem = useCallback((fromSystem: StarSystem, toSystem: StarSystem, allSystems: StarSystem[]) => {
     // Can always jump to explored systems
@@ -238,6 +298,8 @@ export const useShipStats = (initialStats: StarshipStats) => {
     getJumpableSystemIds,
     getScannerRangeSystemIds,
     jumpToSystem,
-    resetStats
+    resetStats,
+    saveGame,
+    loadGame
   };
 };
