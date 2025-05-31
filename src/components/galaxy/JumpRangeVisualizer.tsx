@@ -43,14 +43,14 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
       const isInJumpRange = jumpableSystemIds.includes(targetSystem.id);
       
       // Skip if not in jump range - we'll handle it as a visited line
-      if (!isInJumpRange) {
-        /*;visitedLines.push({
+      if (isInJumpRange) {
+        ;visitedLines.push({
           points: [
             [currentSystem.position[0], currentSystem.position[1], currentSystem.position[2]] as [number, number, number],
             [targetSystem.position[0], targetSystem.position[1], targetSystem.position[2]] as [number, number, number]
           ],
           color: '#4ade80' // Green for explored systems
-        });*/
+        });
         continue;
       }
       
