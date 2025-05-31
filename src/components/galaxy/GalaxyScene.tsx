@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stars, Billboard } from '@react-three/drei';
 import { Galaxy, StarSystem as StarSystemType } from '../../utils/galaxyGenerator';
@@ -7,6 +7,7 @@ import { Nebula } from './Nebula';
 import { InterstellarMaterial } from './InterstellarMaterial';
 import { JumpRangeVisualizer } from './JumpRangeVisualizer';
 import { ScannerRangeIcons } from './ScannerRangeIcons';
+import { ScannerPing } from './scanner/ScannerPing';
 import * as THREE from 'three';
 
 interface GalaxySceneProps {
@@ -31,6 +32,8 @@ interface GalaxySceneProps {
   exploredSystemIds?: Set<string>;
   getJumpableSystemIds?: (fromSystem: StarSystemType, allSystems: StarSystemType[]) => string[];
   getScannerRangeSystemIds?: (fromSystem: StarSystemType, allSystems: StarSystemType[]) => string[];
+  isScanning?: boolean;
+  onScanComplete?: () => void;
 }
 
 export const GalaxyScene: React.FC<GalaxySceneProps> = ({ 
@@ -54,7 +57,9 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
   shipStats,
   exploredSystemIds = new Set(),
   getJumpableSystemIds,
-  getScannerRangeSystemIds
+  getScannerRangeSystemIds,
+  isScanning = false,
+  onScanComplete
 }) => {
   const { camera, gl } = useThree();
   const controlsRef = useRef<any>(null);
@@ -62,6 +67,9 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
   const isMoving = useRef(false);
   const preserveCameraPosition = useRef(false);
   const hasInitiallyZoomed = useRef(false);
+  
+  // Calculate scanner range for ping visualization
+  const scannerRange = shipStats ? (shipStats.scanners / 100) * 50000 : 25000;
   
   useEffect(() => {
     // Only set initial camera position on first mount, don't reset during exploration
@@ -75,12 +83,10 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
     console.log('Galaxy systems:', galaxy.starSystems.length);
     console.log('Particle settings - Dust lanes:', dustLaneParticles, 'Star forming:', starFormingParticles, 'Cosmic dust:', cosmicDustParticles);
     
-    // Enable pointer events on the canvas
     gl.domElement.style.touchAction = 'none';
     gl.domElement.style.pointerEvents = 'auto';
   }, [camera, galaxy, gl, dustLaneParticles, starFormingParticles, cosmicDustParticles]);
 
-  // Center camera on selected system with initial zoom for first selection
   useEffect(() => {
     if (selectedSystem && controlsRef.current) {
       console.log('Centering camera on system:', selectedSystem.id);
@@ -88,14 +94,12 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
       targetPosition.current.set(x, y, z);
       controlsRef.current.target.copy(targetPosition.current);
       
-      // For the first system selection, zoom in closer for a better initial view
       let targetDistance;
       if (!hasInitiallyZoomed.current) {
-        targetDistance = 8000; // Zoom in closer for initial view
+        targetDistance = 8000;
         hasInitiallyZoomed.current = true;
         console.log('Initial zoom to system at closer distance:', targetDistance);
       } else {
-        // For subsequent selections, preserve current zoom level
         const currentDistance = camera.position.distanceTo(targetPosition.current);
         targetDistance = Math.max(5000, currentDistance);
       }
@@ -116,7 +120,6 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
       <ambientLight intensity={0.4} />
       <pointLight position={[0, 0, 0]} intensity={2} color="#ffaa00" />
       
-      {/* Background Stars - render first */}
       <Stars 
         radius={200000} 
         depth={100000} 
@@ -126,7 +129,6 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
         fade 
       />
       
-      {/* Galactic Center - billboard ring that faces the camera */}
       <Billboard>
         <mesh position={[0, 0, 0]} onClick={handleBackgroundClick}>
           <ringGeometry args={[750, 800, 32]} />
@@ -139,7 +141,6 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
         </mesh>
       </Billboard>
       
-      {/* Interstellar Material - renders behind stars */}
       <InterstellarMaterial 
         galaxy={galaxy} 
         raymarchingSamples={raymarchingSamples}
@@ -158,7 +159,16 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
         cosmicDustColorIntensity={cosmicDustColorIntensity}
       />
       
-      {/* Jump Range Visualizer - show travel connections */}
+      {/* Scanner Ping */}
+      {selectedSystem && (
+        <ScannerPing
+          system={selectedSystem}
+          isActive={isScanning}
+          scannerRange={scannerRange}
+          onPingComplete={onScanComplete}
+        />
+      )}
+      
       {selectedSystem && shipStats && getJumpableSystemIds && getScannerRangeSystemIds && (
         <JumpRangeVisualizer
           currentSystem={selectedSystem}
@@ -170,7 +180,6 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
         />
       )}
       
-      {/* Star Systems */}
       {galaxy.starSystems.map((system) => (
         <StarSystem
           key={system.id}
@@ -180,7 +189,6 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
         />
       ))}
       
-      {/* Scanner Range Icons */}
       {selectedSystem && getScannerRangeSystemIds && (
         <>
           {galaxy.starSystems.map((system) => (
@@ -193,12 +201,10 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
         </>
       )}
       
-      {/* Nebulae - only render when star-forming regions are enabled */}
       {showStarFormingRegions && galaxy.nebulae.map((nebula) => (
         <Nebula key={nebula.id} nebula={nebula} />
       ))}
       
-      {/* Background plane for click detection */}
       <mesh 
         position={[0, 0, -50000]} 
         onClick={handleBackgroundClick}

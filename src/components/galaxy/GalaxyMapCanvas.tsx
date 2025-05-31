@@ -26,6 +26,8 @@ interface GalaxyMapCanvasProps {
   exploredSystemIds?: Set<string>;
   getJumpableSystemIds?: (fromSystem: StarSystem, allSystems: StarSystem[]) => string[];
   getScannerRangeSystemIds?: (fromSystem: StarSystem, allSystems: StarSystem[]) => string[];
+  isScanning?: boolean;
+  onScanComplete?: () => void;
   onCanvasError: (error: string) => void;
 }
 
@@ -34,6 +36,8 @@ export const GalaxyMapCanvas: React.FC<GalaxyMapCanvasProps> = ({
   selectedSystem,
   onSystemSelect,
   onCanvasError,
+  isScanning,
+  onScanComplete,
   ...sceneProps
 }) => {
   return (
@@ -58,6 +62,8 @@ export const GalaxyMapCanvas: React.FC<GalaxyMapCanvasProps> = ({
         galaxy={galaxy}
         selectedSystem={selectedSystem}
         onSystemSelect={onSystemSelect}
+        isScanning={isScanning}
+        onScanComplete={onScanComplete}
         {...sceneProps}
       />
     </Canvas>

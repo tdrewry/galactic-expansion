@@ -4,7 +4,6 @@ import { generateGalaxy, Galaxy, StarSystem } from '../utils/galaxyGenerator';
 import { GalaxyMapCanvas } from './galaxy/GalaxyMapCanvas';
 import { GalaxyMapError } from './galaxy/GalaxyMapError';
 import { GalaxyMapLoading } from './galaxy/GalaxyMapLoading';
-import { SystemInfoPanel } from './galaxy/SystemInfoPanel';
 
 interface GalaxyMapProps {
   seed?: number;
@@ -37,6 +36,8 @@ interface GalaxyMapProps {
   getJumpableSystemIds?: (fromSystem: StarSystem, allSystems: StarSystem[]) => string[];
   getScannerRangeSystemIds?: (fromSystem: StarSystem, allSystems: StarSystem[]) => string[];
   onJumpToSystem?: (systemId: string) => void;
+  isScanning?: boolean;
+  onScanComplete?: () => void;
 }
 
 export const GalaxyMap: React.FC<GalaxyMapProps> = ({ 
@@ -53,6 +54,8 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
   exploredSystemIds = new Set(),
   getJumpableSystemIds,
   getScannerRangeSystemIds,
+  isScanning = false,
+  onScanComplete,
   ...canvasProps
 }) => {
   const [selectedSystem, setSelectedSystem] = useState<StarSystem | null>(null);
@@ -125,17 +128,11 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
         exploredSystemIds={exploredSystemIds}
         getJumpableSystemIds={getJumpableSystemIds}
         getScannerRangeSystemIds={getScannerRangeSystemIds}
+        isScanning={isScanning}
+        onScanComplete={onScanComplete}
         onCanvasError={setCanvasError}
         {...canvasProps}
       />
-      
-      {currentSelectedSystem && (
-        <SystemInfoPanel 
-          system={currentSelectedSystem} 
-          onStarSelect={handleStarSelect}
-          selectedStar={currentSelectedStar}
-        />
-      )}
     </div>
   );
 };

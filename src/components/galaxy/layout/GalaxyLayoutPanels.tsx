@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { StarSystem, Planet, Moon } from '../../../utils/galaxyGenerator';
 import { ExplorationLog } from '../../exploration/ExplorationLog';
@@ -7,6 +7,7 @@ import { GalaxyMap } from '../../GalaxyMap';
 import { StarshipPanel } from '../../starship/StarshipPanel';
 import { SystemView } from '../SystemView';
 import { ActionsPanel } from '../../starship/ActionsPanel';
+import { SystemInfoCard } from '../SystemInfoCard';
 
 interface ExplorationLogEntry {
   id: string;
@@ -42,8 +43,6 @@ interface GalaxyLayoutPanelsProps {
   dustLaneColorIntensity: number;
   starFormingColorIntensity: number;
   cosmicDustColorIntensity: number;
-  
-  // State props
   selectedSystem: StarSystem | null;
   selectedStar: 'primary' | 'binary' | 'trinary';
   exploredSystems: Set<string>;
@@ -52,8 +51,6 @@ interface GalaxyLayoutPanelsProps {
   shipStats: any;
   currentSystemId: string | null;
   exploredSystemIds: Set<string>;
-  
-  // Function props
   getJumpableSystemIds: (fromSystem: StarSystem, allSystems: StarSystem[]) => string[];
   getScannerRangeSystemIds: (fromSystem: StarSystem, allSystems: StarSystem[]) => string[];
   isSystemExplored: (system: StarSystem) => boolean;
@@ -111,22 +108,41 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
   onOpenMarket,
   onJumpToSystem
 }) => {
+  const [isScanning, setIsScanning] = useState(false);
+
+  const handleTriggerScan = () => {
+    if (selectedSystem) {
+      setIsScanning(true);
+    }
+  };
+
+  const handleScanComplete = () => {
+    setIsScanning(false);
+  };
+
   return (
     <ResizablePanelGroup direction="horizontal" className="flex-1">
-      {/* Left Panel - Exploration Log */}
-      {explorationHistory.length > 0 && (
-        <>
-          <ResizablePanel defaultSize={20} minSize={15} maxSize={35}>
-            <div className="h-full bg-gray-900 border-r border-gray-700">
+      {/* Left Panel - Always visible with System Info and Exploration Log */}
+      <ResizablePanel defaultSize={25} minSize={20} maxSize={35}>
+        <div className="h-full bg-gray-900 border-r border-gray-700 p-4">
+          <SystemInfoCard
+            system={selectedSystem}
+            selectedStar={selectedStar}
+            onStarSelect={onStarSelect}
+          />
+          
+          {explorationHistory.length > 0 && (
+            <div className="flex-1">
               <ExplorationLog explorationHistory={explorationHistory} />
             </div>
-          </ResizablePanel>
-          <ResizableHandle withHandle />
-        </>
-      )}
+          )}
+        </div>
+      </ResizablePanel>
+      
+      <ResizableHandle withHandle />
 
       {/* Center Panel - Galaxy Map and Ship Stats */}
-      <ResizablePanel defaultSize={explorationHistory.length > 0 ? 50 : 70} minSize={40}>
+      <ResizablePanel defaultSize={45} minSize={40}>
         <ResizablePanelGroup direction="vertical" className="h-full">
           {/* Galaxy Map */}
           <ResizablePanel defaultSize={75} minSize={50}>
@@ -161,6 +177,8 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
               getJumpableSystemIds={getJumpableSystemIds}
               getScannerRangeSystemIds={getScannerRangeSystemIds}
               onJumpToSystem={onJumpToSystem}
+              isScanning={isScanning}
+              onScanComplete={handleScanComplete}
             />
           </ResizablePanel>
           
@@ -229,6 +247,8 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
                     needsRepair={shipStats && (shipStats.shields < shipStats.maxShields || shipStats.hull < shipStats.maxHull)}
                     onRepairShip={onRepairShip}
                     onOpenMarket={onOpenMarket}
+                    onTriggerScan={handleTriggerScan}
+                    isScanning={isScanning}
                   />
                 </div>
               </ResizablePanel>

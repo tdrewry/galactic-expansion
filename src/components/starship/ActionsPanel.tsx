@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Ship, Wrench, Currency } from 'lucide-react';
 import { StarSystem } from '../../utils/galaxyGenerator';
+import { ScannerButton } from '../galaxy/scanner/ScannerButton';
 
 interface ActionsPanelProps {
   selectedSystem: StarSystem | null;
@@ -23,6 +24,8 @@ interface ActionsPanelProps {
   needsRepair?: boolean;
   onRepairShip?: (cost: number) => void;
   onOpenMarket?: () => void;
+  onTriggerScan?: () => void;
+  isScanning?: boolean;
 }
 
 export const ActionsPanel: React.FC<ActionsPanelProps> = ({
@@ -38,7 +41,9 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
   canAffordRepair = false,
   needsRepair = false,
   onRepairShip,
-  onOpenMarket
+  onOpenMarket,
+  onTriggerScan,
+  isScanning = false
 }) => {
   const handleRepairShip = () => {
     if (onRepairShip && canAffordRepair && needsRepair) {
@@ -46,13 +51,16 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
     }
   };
 
-  // Check if system has repair capabilities (civilizations with tech level >= 3 OR stations)
+  // Fix exploration progress display with Math.min to cap at max
+  const displayProgress = Math.min(explorationStatus.explorationsCompleted, explorationStatus.maxExplorations);
+
+  // Check if system has repair capabilities
   const systemHasRepairShop = selectedSystem?.planets.some(planet => 
     (planet.civilization && planet.civilization.techLevel >= 3) ||
     (planet as any).features?.some((feature: any) => feature.type === 'station')
   );
 
-  // Check if system has market (civilizations with tech level >= 2)
+  // Check if system has market
   const systemHasMarket = selectedSystem?.planets.some(planet => 
     planet.civilization && planet.civilization.techLevel >= 2
   );
@@ -74,16 +82,9 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
       </CardHeader>
       <CardContent className="space-y-3">
         {!selectedSystem ? (
-          <p className="text-gray-400 text-sm">Select a star system to begin exploration</p>
+          <p className="text-gray-400 text-sm">Select a star system to begin operations</p>
         ) : (
           <>
-            <div className="space-y-2">
-              <h3 className="text-white font-medium">{selectedSystem.id}</h3>
-              <p className="text-gray-400 text-xs">
-                Exploration Progress: {explorationStatus.explorationsCompleted}/{explorationStatus.maxExplorations}
-              </p>
-            </div>
-            
             <div className="space-y-2">
               {canBeExplored ? (
                 <Button
@@ -91,11 +92,11 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                   size="sm"
                 >
-                  {isExplored ? 'Continue Exploration' : 'Begin Exploration'}
+                  {isExplored ? `Continue Exploration (${displayProgress}/${explorationStatus.maxExplorations})` : 'Begin Exploration'}
                 </Button>
               ) : (
                 <div className="text-center">
-                  <p className="text-green-400 text-sm font-medium mb-2">✓ Fully Explored</p>
+                  <p className="text-green-400 text-sm font-medium mb-2">✓ Fully Explored ({displayProgress}/{explorationStatus.maxExplorations})</p>
                 </div>
               )}
               
@@ -108,6 +109,15 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
                 >
                   Reset Exploration
                 </Button>
+              )}
+
+              {/* Scanner Button */}
+              {onTriggerScan && (
+                <ScannerButton
+                  onTriggerScan={onTriggerScan}
+                  isScanning={isScanning}
+                  hasSelectedSystem={!!selectedSystem}
+                />
               )}
 
               {/* Ship Repair Section */}
