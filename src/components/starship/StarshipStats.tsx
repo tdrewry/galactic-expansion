@@ -65,15 +65,15 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({ starship, currentS
             <StatBar label="Shields" value={currentStats.shields} max={currentStats.maxShields} />
           </div>
           <div className="space-y-4">
-            <StatBar label="Hull Integrity" value={currentStats.hull} max={currentStats.maxHull} />
-            <StatBar label="Combat Power" value={currentStats.combatPower} max={currentStats.maxCombatPower} />
+            <StatBar label="Hull" value={currentStats.hull} max={currentStats.maxHull} />
+            <StatBar label="Weapons" value={currentStats.combatPower} max={currentStats.maxCombatPower} />
           </div>
           <div className="space-y-4">
             <StatBar label="Crew" value={currentStats.crew} max={currentStats.maxCrew} />
-            <StatBar label="Scanner Range" value={currentStats.scanners} max={currentStats.maxScanners} />
+            <StatBar label="Scanner" value={currentStats.scanners} max={currentStats.maxScanners} />
           </div>
           <div className="space-y-4">
-            <StatBar label="Cargo Capacity" value={currentStats.cargo} max={currentStats.maxCargo} />
+            <StatBar label="Cargo" value={currentStats.cargo} max={currentStats.maxCargo} />
             <StatBar label="Diplomacy" value={currentStats.diplomacy} max={100} showMax={false} />
           </div>
         </div>
