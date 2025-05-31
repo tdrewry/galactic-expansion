@@ -39,7 +39,7 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
     const exploredSystems = allSystems.filter(system => exploredSystemIds.has(system.id) && system.id !== currentSystem.id);
     
     for (const targetSystem of exploredSystems) {
-      const isJumpable = jumpableSystemIds.includes(targetSystem.id);
+      const isInJumpRange = jumpableSystemIds.includes(targetSystem.id);
       const color = '#4ade80'; // Green for explored systems
       
       const lineData = {
@@ -50,14 +50,16 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
         color
       };
       
-      if (isJumpable) {
+      if (isInJumpRange) {
+        // System is explored AND within jump range - draw as jumpable
         jumpableLines.push(lineData);
       } else {
+        // System is explored but OUT of jump range - draw as visited
         visitedLines.push(lineData);
       }
     }
     
-    // Add unexplored jumpable systems
+    // Add unexplored systems that are within jump range
     for (const systemId of jumpableSystemIds) {
       if (!exploredSystemIds.has(systemId)) {
         const targetSystem = allSystems.find(s => s.id === systemId);
@@ -67,7 +69,7 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
               [currentSystem.position[0], currentSystem.position[1], currentSystem.position[2]] as [number, number, number],
               [targetSystem.position[0], targetSystem.position[1], targetSystem.position[2]] as [number, number, number]
             ],
-            color: '#fbbf24' // Yellow for unexplored
+            color: '#fbbf24' // Yellow for unexplored but in range
           });
         }
       }
