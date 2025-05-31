@@ -29,20 +29,16 @@ interface GalaxyLayoutPanelsProps {
   numNebulae: number;
   binaryFrequency: number;
   trinaryFrequency: number;
-  raymarchingSamples: number;
-  minimumVisibility: number;
   showDustLanes: boolean;
-  showStarFormingRegions: boolean;
   showCosmicDust: boolean;
   dustLaneParticles: number;
-  starFormingParticles: number;
   cosmicDustParticles: number;
   dustLaneOpacity: number;
-  starFormingOpacity: number;
   cosmicDustOpacity: number;
   dustLaneColorIntensity: number;
-  starFormingColorIntensity: number;
   cosmicDustColorIntensity: number;
+  jumpLaneOpacity: number;
+  greenPathOpacity: number;
   selectedSystem: StarSystem | null;
   selectedStar: 'primary' | 'binary' | 'trinary';
   exploredSystems: Set<string>;
@@ -51,6 +47,7 @@ interface GalaxyLayoutPanelsProps {
   shipStats: any;
   currentSystemId: string | null;
   exploredSystemIds: Set<string>;
+  travelHistory: string[];
   getJumpableSystemIds: (fromSystem: StarSystem, allSystems: StarSystem[]) => string[];
   getScannerRangeSystemIds: (fromSystem: StarSystem, allSystems: StarSystem[]) => string[];
   isSystemExplored: (system: StarSystem) => boolean;
@@ -72,20 +69,16 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
   numNebulae,
   binaryFrequency,
   trinaryFrequency,
-  raymarchingSamples,
-  minimumVisibility,
   showDustLanes,
-  showStarFormingRegions,
   showCosmicDust,
   dustLaneParticles,
-  starFormingParticles,
   cosmicDustParticles,
   dustLaneOpacity,
-  starFormingOpacity,
   cosmicDustOpacity,
   dustLaneColorIntensity,
-  starFormingColorIntensity,
   cosmicDustColorIntensity,
+  jumpLaneOpacity,
+  greenPathOpacity,
   selectedSystem,
   selectedStar,
   exploredSystems,
@@ -94,6 +87,7 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
   shipStats,
   currentSystemId,
   exploredSystemIds,
+  travelHistory,
   getJumpableSystemIds,
   getScannerRangeSystemIds,
   isSystemExplored,
@@ -154,20 +148,16 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
               numNebulae={numNebulae}
               binaryFrequency={binaryFrequency}
               trinaryFrequency={trinaryFrequency}
-              raymarchingSamples={raymarchingSamples}
-              minimumVisibility={minimumVisibility}
               showDustLanes={showDustLanes}
-              showStarFormingRegions={showStarFormingRegions}
               showCosmicDust={showCosmicDust}
               dustLaneParticles={dustLaneParticles}
-              starFormingParticles={starFormingParticles}
               cosmicDustParticles={cosmicDustParticles}
               dustLaneOpacity={dustLaneOpacity}
-              starFormingOpacity={starFormingOpacity}
               cosmicDustOpacity={cosmicDustOpacity}
               dustLaneColorIntensity={dustLaneColorIntensity}
-              starFormingColorIntensity={starFormingColorIntensity}
               cosmicDustColorIntensity={cosmicDustColorIntensity}
+              jumpLaneOpacity={jumpLaneOpacity}
+              greenPathOpacity={greenPathOpacity}
               onSystemSelect={onSystemSelect}
               selectedSystem={selectedSystem}
               selectedStar={selectedStar}
@@ -176,6 +166,7 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
               shipStats={shipStats}
               currentSystemId={currentSystemId}
               exploredSystemIds={exploredSystemIds}
+              travelHistory={travelHistory}
               getJumpableSystemIds={getJumpableSystemIds}
               getScannerRangeSystemIds={getScannerRangeSystemIds}
               onJumpToSystem={onJumpToSystem}

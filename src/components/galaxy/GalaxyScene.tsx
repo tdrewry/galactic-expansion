@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stars, Billboard } from '@react-three/drei';
@@ -14,22 +15,19 @@ interface GalaxySceneProps {
   galaxy: Galaxy;
   selectedSystem: StarSystemType | null;
   onSystemSelect: (system: StarSystemType | null) => void;
-  raymarchingSamples?: number;
-  minimumVisibility?: number;
   showDustLanes?: boolean;
-  showStarFormingRegions?: boolean;
   showCosmicDust?: boolean;
   dustLaneParticles?: number;
-  starFormingParticles?: number;
   cosmicDustParticles?: number;
   dustLaneOpacity?: number;
-  starFormingOpacity?: number;
   cosmicDustOpacity?: number;
   dustLaneColorIntensity?: number;
-  starFormingColorIntensity?: number;
   cosmicDustColorIntensity?: number;
+  jumpLaneOpacity?: number;
+  greenPathOpacity?: number;
   shipStats?: any;
   exploredSystemIds?: Set<string>;
+  travelHistory?: string[];
   getJumpableSystemIds?: (fromSystem: StarSystemType, allSystems: StarSystemType[]) => string[];
   getScannerRangeSystemIds?: (fromSystem: StarSystemType, allSystems: StarSystemType[]) => string[];
   isScanning?: boolean;
@@ -40,22 +38,19 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
   galaxy, 
   selectedSystem, 
   onSystemSelect,
-  raymarchingSamples = 8,
-  minimumVisibility = 0.1,
   showDustLanes = true,
-  showStarFormingRegions = true,
   showCosmicDust = true,
   dustLaneParticles = 15000,
-  starFormingParticles = 12000,
   cosmicDustParticles = 10000,
-  dustLaneOpacity = 0.4,
-  starFormingOpacity = 0.3,
-  cosmicDustOpacity = 0.4,
-  dustLaneColorIntensity = 1.0,
-  starFormingColorIntensity = 1.2,
-  cosmicDustColorIntensity = 0.8,
+  dustLaneOpacity = 0.2,
+  cosmicDustOpacity = 0.2,
+  dustLaneColorIntensity = 0.4,
+  cosmicDustColorIntensity = 0.4,
+  jumpLaneOpacity = 0.3,
+  greenPathOpacity = 0.6,
   shipStats,
   exploredSystemIds = new Set(),
+  travelHistory = [],
   getJumpableSystemIds,
   getScannerRangeSystemIds,
   isScanning = false,
@@ -81,11 +76,11 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
     
     console.log('Camera positioned for galaxy view');
     console.log('Galaxy systems:', galaxy.starSystems.length);
-    console.log('Particle settings - Dust lanes:', dustLaneParticles, 'Star forming:', starFormingParticles, 'Cosmic dust:', cosmicDustParticles);
+    console.log('Particle settings - Dust lanes:', dustLaneParticles, 'Cosmic dust:', cosmicDustParticles);
     
     gl.domElement.style.touchAction = 'none';
     gl.domElement.style.pointerEvents = 'auto';
-  }, [camera, galaxy, gl, dustLaneParticles, starFormingParticles, cosmicDustParticles]);
+  }, [camera, galaxy, gl, dustLaneParticles, cosmicDustParticles]);
 
   useEffect(() => {
     if (selectedSystem && controlsRef.current) {
@@ -143,19 +138,13 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
       
       <InterstellarMaterial 
         galaxy={galaxy} 
-        raymarchingSamples={raymarchingSamples}
-        minimumVisibility={minimumVisibility}
         showDustLanes={showDustLanes}
-        showStarFormingRegions={showStarFormingRegions}
         showCosmicDust={showCosmicDust}
         dustLaneParticles={dustLaneParticles}
-        starFormingParticles={starFormingParticles}
         cosmicDustParticles={cosmicDustParticles}
         dustLaneOpacity={dustLaneOpacity}
-        starFormingOpacity={starFormingOpacity}
         cosmicDustOpacity={cosmicDustOpacity}
         dustLaneColorIntensity={dustLaneColorIntensity}
-        starFormingColorIntensity={starFormingColorIntensity}
         cosmicDustColorIntensity={cosmicDustColorIntensity}
       />
       
@@ -175,8 +164,11 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
           allSystems={galaxy.starSystems}
           shipStats={shipStats}
           exploredSystemIds={exploredSystemIds}
+          travelHistory={travelHistory}
           scannerRangeSystemIds={getScannerRangeSystemIds(selectedSystem, galaxy.starSystems)}
           jumpableSystemIds={getJumpableSystemIds(selectedSystem, galaxy.starSystems)}
+          jumpLaneOpacity={jumpLaneOpacity}
+          greenPathOpacity={greenPathOpacity}
         />
       )}
       
@@ -201,7 +193,7 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
         </>
       )}
       
-      {showStarFormingRegions && galaxy.nebulae.map((nebula) => (
+      {galaxy.nebulae.map((nebula) => (
         <Nebula key={nebula.id} nebula={nebula} />
       ))}
       
