@@ -1,116 +1,85 @@
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
-import { generateStarship } from '../utils/starshipGenerator';
+
+export interface GalaxySettings {
+  numSystems: number;
+  numNebulae: number;
+  binaryFrequency: number;
+  trinaryFrequency: number;
+  showDustLanes: boolean;
+  showCosmicDust: boolean;
+  appTitle: string;
+  dustLaneParticles: number;
+  cosmicDustParticles: number;
+  dustLaneOpacity: number;
+  cosmicDustOpacity: number;
+  dustLaneColorIntensity: number;
+  cosmicDustColorIntensity: number;
+  jumpLaneOpacity: number;
+  greenPathOpacity: number;
+  defaultShipStats: any;
+}
 
 export const useGalaxyState = () => {
   const [galaxySeed, setGalaxySeed] = useState(12345);
   const [inputSeed, setInputSeed] = useState('12345');
+  
+  // Galaxy settings with new defaults
   const [appTitle, setAppTitle] = useState('Stardust Voyager');
   const [numSystems, setNumSystems] = useState(1000);
   const [numNebulae, setNumNebulae] = useState(50);
   const [binaryFrequency, setBinaryFrequency] = useState(0.15);
-  const [trinaryFrequency, setTriinaryFrequency] = useState(0.03);
-  const [raymarchingSamples, setRaymarchingSamples] = useState(8);
-  const [minimumVisibility, setMinimumVisibility] = useState(0.1);
+  const [trinaryFrequency, setTrinaryFrequency] = useState(0.03);
   const [showDustLanes, setShowDustLanes] = useState(true);
-  const [showStarFormingRegions, setShowStarFormingRegions] = useState(false);
   const [showCosmicDust, setShowCosmicDust] = useState(true);
-  
-  // Particle system settings
   const [dustLaneParticles, setDustLaneParticles] = useState(15000);
-  const [starFormingParticles, setStarFormingParticles] = useState(12000);
   const [cosmicDustParticles, setCosmicDustParticles] = useState(10000);
-  const [dustLaneOpacity, setDustLaneOpacity] = useState(0.4);
-  const [starFormingOpacity, setStarFormingOpacity] = useState(0.3);
-  const [cosmicDustOpacity, setCosmicDustOpacity] = useState(0.4);
-  const [dustLaneColorIntensity, setDustLaneColorIntensity] = useState(1.0);
-  const [starFormingColorIntensity, setStarFormingColorIntensity] = useState(1.2);
-  const [cosmicDustColorIntensity, setCosmicDustColorIntensity] = useState(0.8);
-  
+  const [dustLaneOpacity, setDustLaneOpacity] = useState(0.2);
+  const [cosmicDustOpacity, setCosmicDustOpacity] = useState(0.2);
+  const [dustLaneColorIntensity, setDustLaneColorIntensity] = useState(0.4);
+  const [cosmicDustColorIntensity, setCosmicDustColorIntensity] = useState(0.4);
+  const [jumpLaneOpacity, setJumpLaneOpacity] = useState(0.3);
+  const [greenPathOpacity, setGreenPathOpacity] = useState(0.6);
+  const [defaultShipStats, setDefaultShipStats] = useState({
+    techLevel: 3,
+    shields: 75,
+    hull: 80,
+    combatPower: 40,
+    diplomacy: 50,
+    scanners: 60,
+    cargo: 25,
+    credits: 5000,
+    crew: 15
+  });
+
+  // Selection state
   const [selectedSystem, setSelectedSystem] = useState<StarSystem | null>(null);
   const [selectedStar, setSelectedStar] = useState<'primary' | 'binary' | 'trinary'>('primary');
   const [selectedBody, setSelectedBody] = useState<Planet | Moon | null>(null);
 
-  const handleSettingsChange = useCallback((settings: {
-    numSystems: number;
-    numNebulae: number;
-    binaryFrequency: number;
-    trinaryFrequency: number;
-    raymarchingSamples?: number;
-    minimumVisibility?: number;
-    showDustLanes?: boolean;
-    showStarFormingRegions?: boolean;
-    showCosmicDust?: boolean;
-    appTitle?: string;
-    dustLaneParticles?: number;
-    starFormingParticles?: number;
-    cosmicDustParticles?: number;
-    dustLaneOpacity?: number;
-    starFormingOpacity?: number;
-    cosmicDustOpacity?: number;
-    dustLaneColorIntensity?: number;
-    starFormingColorIntensity?: number;
-    cosmicDustColorIntensity?: number;
-  }) => {
-    setNumSystems(settings.numSystems);
-    setNumNebulae(settings.numNebulae);
-    setBinaryFrequency(settings.binaryFrequency);
-    setTriinaryFrequency(settings.trinaryFrequency);
-    if (settings.raymarchingSamples !== undefined) {
-      setRaymarchingSamples(settings.raymarchingSamples);
-    }
-    if (settings.minimumVisibility !== undefined) {
-      setMinimumVisibility(settings.minimumVisibility);
-    }
-    if (settings.showDustLanes !== undefined) {
-      setShowDustLanes(settings.showDustLanes);
-    }
-    if (settings.showStarFormingRegions !== undefined) {
-      setShowStarFormingRegions(settings.showStarFormingRegions);
-    }
-    if (settings.showCosmicDust !== undefined) {
-      setShowCosmicDust(settings.showCosmicDust);
-    }
-    if (settings.appTitle !== undefined) {
-      setAppTitle(settings.appTitle);
-    }
+  const handleSettingsChange = (newSettings: Partial<GalaxySettings>) => {
+    console.log('Galaxy settings updated:', newSettings);
     
-    // Update particle system settings
-    if (settings.dustLaneParticles !== undefined) {
-      setDustLaneParticles(settings.dustLaneParticles);
-    }
-    if (settings.starFormingParticles !== undefined) {
-      setStarFormingParticles(settings.starFormingParticles);
-    }
-    if (settings.cosmicDustParticles !== undefined) {
-      setCosmicDustParticles(settings.cosmicDustParticles);
-    }
-    if (settings.dustLaneOpacity !== undefined) {
-      setDustLaneOpacity(settings.dustLaneOpacity);
-    }
-    if (settings.starFormingOpacity !== undefined) {
-      setStarFormingOpacity(settings.starFormingOpacity);
-    }
-    if (settings.cosmicDustOpacity !== undefined) {
-      setCosmicDustOpacity(settings.cosmicDustOpacity);
-    }
-    if (settings.dustLaneColorIntensity !== undefined) {
-      setDustLaneColorIntensity(settings.dustLaneColorIntensity);
-    }
-    if (settings.starFormingColorIntensity !== undefined) {
-      setStarFormingColorIntensity(settings.starFormingColorIntensity);
-    }
-    if (settings.cosmicDustColorIntensity !== undefined) {
-      setCosmicDustColorIntensity(settings.cosmicDustColorIntensity);
-    }
-    
-    setSelectedSystem(null);
-    setSelectedBody(null);
-  }, []);
+    if (newSettings.appTitle !== undefined) setAppTitle(newSettings.appTitle);
+    if (newSettings.numSystems !== undefined) setNumSystems(newSettings.numSystems);
+    if (newSettings.numNebulae !== undefined) setNumNebulae(newSettings.numNebulae);
+    if (newSettings.binaryFrequency !== undefined) setBinaryFrequency(newSettings.binaryFrequency);
+    if (newSettings.trinaryFrequency !== undefined) setTrinaryFrequency(newSettings.trinaryFrequency);
+    if (newSettings.showDustLanes !== undefined) setShowDustLanes(newSettings.showDustLanes);
+    if (newSettings.showCosmicDust !== undefined) setShowCosmicDust(newSettings.showCosmicDust);
+    if (newSettings.dustLaneParticles !== undefined) setDustLaneParticles(newSettings.dustLaneParticles);
+    if (newSettings.cosmicDustParticles !== undefined) setCosmicDustParticles(newSettings.cosmicDustParticles);
+    if (newSettings.dustLaneOpacity !== undefined) setDustLaneOpacity(newSettings.dustLaneOpacity);
+    if (newSettings.cosmicDustOpacity !== undefined) setCosmicDustOpacity(newSettings.cosmicDustOpacity);
+    if (newSettings.dustLaneColorIntensity !== undefined) setDustLaneColorIntensity(newSettings.dustLaneColorIntensity);
+    if (newSettings.cosmicDustColorIntensity !== undefined) setCosmicDustColorIntensity(newSettings.cosmicDustColorIntensity);
+    if (newSettings.jumpLaneOpacity !== undefined) setJumpLaneOpacity(newSettings.jumpLaneOpacity);
+    if (newSettings.greenPathOpacity !== undefined) setGreenPathOpacity(newSettings.greenPathOpacity);
+    if (newSettings.defaultShipStats !== undefined) setDefaultShipStats(newSettings.defaultShipStats);
+  };
 
   return {
-    // State values
     galaxySeed,
     setGalaxySeed,
     inputSeed,
@@ -120,28 +89,23 @@ export const useGalaxyState = () => {
     numNebulae,
     binaryFrequency,
     trinaryFrequency,
-    raymarchingSamples,
-    minimumVisibility,
     showDustLanes,
-    showStarFormingRegions,
     showCosmicDust,
     dustLaneParticles,
-    starFormingParticles,
     cosmicDustParticles,
     dustLaneOpacity,
-    starFormingOpacity,
     cosmicDustOpacity,
     dustLaneColorIntensity,
-    starFormingColorIntensity,
     cosmicDustColorIntensity,
+    jumpLaneOpacity,
+    greenPathOpacity,
+    defaultShipStats,
     selectedSystem,
     setSelectedSystem,
     selectedStar,
     setSelectedStar,
     selectedBody,
     setSelectedBody,
-    
-    // Handlers
     handleSettingsChange
   };
 };

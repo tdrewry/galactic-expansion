@@ -28,7 +28,7 @@ export const SystemFeatureIcon: React.FC<SystemFeatureIconProps> = ({
     <Billboard position={[position[0], position[1] + 800 + offset, position[2]]}>
       <mesh position={[0, 0, 1]}>
         <planeGeometry args={[300, 300]} />
-        <meshBasicMaterial transparent>
+        <meshBasicMaterial transparent color="transparent">
           <canvasTexture 
             attach="map" 
             image={(() => {

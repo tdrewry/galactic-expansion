@@ -14,42 +14,23 @@ interface GalaxySettingsProps {
   numNebulae: number;
   binaryFrequency: number;
   trinaryFrequency: number;
-  raymarchingSamples?: number;
-  minimumVisibility?: number;
   showDustLanes?: boolean;
-  showStarFormingRegions?: boolean;
   showCosmicDust?: boolean;
   appTitle?: string;
   dustLaneParticles?: number;
-  starFormingParticles?: number;
   cosmicDustParticles?: number;
   dustLaneOpacity?: number;
-  starFormingOpacity?: number;
   cosmicDustOpacity?: number;
   dustLaneColorIntensity?: number;
-  starFormingColorIntensity?: number;
   cosmicDustColorIntensity?: number;
-  onSettingsChange: (settings: {
-    numSystems: number;
-    numNebulae: number;
-    binaryFrequency: number;
-    trinaryFrequency: number;
-    raymarchingSamples?: number;
-    minimumVisibility?: number;
-    showDustLanes?: boolean;
-    showStarFormingRegions?: boolean;
-    showCosmicDust?: boolean;
-    appTitle?: string;
-    dustLaneParticles?: number;
-    starFormingParticles?: number;
-    cosmicDustParticles?: number;
-    dustLaneOpacity?: number;
-    starFormingOpacity?: number;
-    cosmicDustOpacity?: number;
-    dustLaneColorIntensity?: number;
-    starFormingColorIntensity?: number;
-    cosmicDustColorIntensity?: number;
-  }) => void;
+  jumpLaneOpacity?: number;
+  greenPathOpacity?: number;
+  defaultShipStats?: any;
+  inputSeed: string;
+  setInputSeed: (seed: string) => void;
+  galaxySeed: number;
+  setGalaxySeed: (seed: number) => void;
+  onSettingsChange: (settings: any) => void;
 }
 
 export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
@@ -57,21 +38,22 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
   numNebulae,
   binaryFrequency,
   trinaryFrequency,
-  raymarchingSamples = 8,
-  minimumVisibility = 0.1,
   showDustLanes = true,
-  showStarFormingRegions = false,
   showCosmicDust = true,
   appTitle = 'Stardust Voyager',
   dustLaneParticles = 15000,
-  starFormingParticles = 12000,
   cosmicDustParticles = 10000,
-  dustLaneOpacity = 0.4,
-  starFormingOpacity = 0.3,
-  cosmicDustOpacity = 0.4,
-  dustLaneColorIntensity = 1.0,
-  starFormingColorIntensity = 1.2,
-  cosmicDustColorIntensity = 0.8,
+  dustLaneOpacity = 0.2,
+  cosmicDustOpacity = 0.2,
+  dustLaneColorIntensity = 0.4,
+  cosmicDustColorIntensity = 0.4,
+  jumpLaneOpacity = 0.3,
+  greenPathOpacity = 0.6,
+  defaultShipStats = {},
+  inputSeed,
+  setInputSeed,
+  galaxySeed,
+  setGalaxySeed,
   onSettingsChange
 }) => {
   const [localSettings, setLocalSettings] = React.useState({
@@ -79,21 +61,18 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
     numNebulae,
     binaryFrequency,
     trinaryFrequency,
-    raymarchingSamples,
-    minimumVisibility,
     showDustLanes,
-    showStarFormingRegions,
     showCosmicDust,
     appTitle,
     dustLaneParticles,
-    starFormingParticles,
     cosmicDustParticles,
     dustLaneOpacity,
-    starFormingOpacity,
     cosmicDustOpacity,
     dustLaneColorIntensity,
-    starFormingColorIntensity,
-    cosmicDustColorIntensity
+    cosmicDustColorIntensity,
+    jumpLaneOpacity,
+    greenPathOpacity,
+    defaultShipStats
   });
 
   // Update local settings when props change
@@ -103,26 +82,28 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
       numNebulae,
       binaryFrequency,
       trinaryFrequency,
-      raymarchingSamples,
-      minimumVisibility,
       showDustLanes,
-      showStarFormingRegions,
       showCosmicDust,
       appTitle,
       dustLaneParticles,
-      starFormingParticles,
       cosmicDustParticles,
       dustLaneOpacity,
-      starFormingOpacity,
       cosmicDustOpacity,
       dustLaneColorIntensity,
-      starFormingColorIntensity,
-      cosmicDustColorIntensity
+      cosmicDustColorIntensity,
+      jumpLaneOpacity,
+      greenPathOpacity,
+      defaultShipStats
     });
-  }, [numSystems, numNebulae, binaryFrequency, trinaryFrequency, raymarchingSamples, minimumVisibility, showDustLanes, showStarFormingRegions, showCosmicDust, appTitle, dustLaneParticles, starFormingParticles, cosmicDustParticles, dustLaneOpacity, starFormingOpacity, cosmicDustOpacity, dustLaneColorIntensity, starFormingColorIntensity, cosmicDustColorIntensity]);
+  }, [numSystems, numNebulae, binaryFrequency, trinaryFrequency, showDustLanes, showCosmicDust, appTitle, dustLaneParticles, cosmicDustParticles, dustLaneOpacity, cosmicDustOpacity, dustLaneColorIntensity, cosmicDustColorIntensity, jumpLaneOpacity, greenPathOpacity, defaultShipStats]);
+
+  const handleSeedChange = () => {
+    const newSeed = parseInt(inputSeed) || 12345;
+    setGalaxySeed(newSeed);
+  };
 
   const handleApply = () => {
-    console.log('Applying particle settings:', localSettings);
+    console.log('Applying settings:', localSettings);
     onSettingsChange(localSettings);
   };
 
@@ -132,21 +113,28 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
       numNebulae: 50,
       binaryFrequency: 0.15,
       trinaryFrequency: 0.03,
-      raymarchingSamples: 8,
-      minimumVisibility: 0.1,
       showDustLanes: true,
-      showStarFormingRegions: false,
       showCosmicDust: true,
       appTitle: 'Stardust Voyager',
       dustLaneParticles: 15000,
-      starFormingParticles: 12000,
       cosmicDustParticles: 10000,
-      dustLaneOpacity: 0.4,
-      starFormingOpacity: 0.3,
-      cosmicDustOpacity: 0.4,
-      dustLaneColorIntensity: 1.0,
-      starFormingColorIntensity: 1.2,
-      cosmicDustColorIntensity: 0.8
+      dustLaneOpacity: 0.2,
+      cosmicDustOpacity: 0.2,
+      dustLaneColorIntensity: 0.4,
+      cosmicDustColorIntensity: 0.4,
+      jumpLaneOpacity: 0.3,
+      greenPathOpacity: 0.6,
+      defaultShipStats: {
+        techLevel: 3,
+        shields: 75,
+        hull: 80,
+        combatPower: 40,
+        diplomacy: 50,
+        scanners: 60,
+        cargo: 25,
+        credits: 5000,
+        crew: 15
+      }
     };
     setLocalSettings(defaultSettings);
     onSettingsChange(defaultSettings);
@@ -201,6 +189,148 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
 
             <Card>
               <CardHeader>
+                <CardTitle className="text-sm">Game Settings</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="seed-input">Galaxy Seed</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="seed-input"
+                      type="number"
+                      value={inputSeed}
+                      onChange={(e) => setInputSeed(e.target.value)}
+                      placeholder="Seed"
+                    />
+                    <Button onClick={handleSeedChange} variant="secondary" size="sm">
+                      Load Galaxy
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Default Ship Stats</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Tech Level: {localSettings.defaultShipStats.techLevel || 3}</Label>
+                  <Slider
+                    value={[localSettings.defaultShipStats.techLevel || 3]}
+                    onValueChange={([value]) => setLocalSettings(prev => ({
+                      ...prev,
+                      defaultShipStats: { ...prev.defaultShipStats, techLevel: value }
+                    }))}
+                    min={1}
+                    max={10}
+                    step={1}
+                    className="w-full"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Credits: {localSettings.defaultShipStats.credits || 5000}</Label>
+                  <Slider
+                    value={[localSettings.defaultShipStats.credits || 5000]}
+                    onValueChange={([value]) => setLocalSettings(prev => ({
+                      ...prev,
+                      defaultShipStats: { ...prev.defaultShipStats, credits: value }
+                    }))}
+                    min={1000}
+                    max={20000}
+                    step={500}
+                    className="w-full"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Scanners: {localSettings.defaultShipStats.scanners || 60}</Label>
+                  <Slider
+                    value={[localSettings.defaultShipStats.scanners || 60]}
+                    onValueChange={([value]) => setLocalSettings(prev => ({
+                      ...prev,
+                      defaultShipStats: { ...prev.defaultShipStats, scanners: value }
+                    }))}
+                    min={10}
+                    max={100}
+                    step={5}
+                    className="w-full"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Combat Power: {localSettings.defaultShipStats.combatPower || 40}</Label>
+                  <Slider
+                    value={[localSettings.defaultShipStats.combatPower || 40]}
+                    onValueChange={([value]) => setLocalSettings(prev => ({
+                      ...prev,
+                      defaultShipStats: { ...prev.defaultShipStats, combatPower: value }
+                    }))}
+                    min={10}
+                    max={100}
+                    step={5}
+                    className="w-full"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Diplomacy: {localSettings.defaultShipStats.diplomacy || 50}</Label>
+                  <Slider
+                    value={[localSettings.defaultShipStats.diplomacy || 50]}
+                    onValueChange={([value]) => setLocalSettings(prev => ({
+                      ...prev,
+                      defaultShipStats: { ...prev.defaultShipStats, diplomacy: value }
+                    }))}
+                    min={10}
+                    max={100}
+                    step={5}
+                    className="w-full"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Visual Settings</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Jump Lane Opacity: {localSettings.jumpLaneOpacity.toFixed(2)}</Label>
+                  <Slider
+                    value={[localSettings.jumpLaneOpacity]}
+                    onValueChange={([value]) => setLocalSettings(prev => ({
+                      ...prev,
+                      jumpLaneOpacity: value
+                    }))}
+                    min={0.1}
+                    max={1.0}
+                    step={0.05}
+                    className="w-full"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Green Path Opacity: {localSettings.greenPathOpacity.toFixed(2)}</Label>
+                  <Slider
+                    value={[localSettings.greenPathOpacity]}
+                    onValueChange={([value]) => setLocalSettings(prev => ({
+                      ...prev,
+                      greenPathOpacity: value
+                    }))}
+                    min={0.1}
+                    max={1.0}
+                    step={0.05}
+                    className="w-full"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
                 <CardTitle className="text-sm">Visual Features</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -212,18 +342,6 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
                     onCheckedChange={(checked) => setLocalSettings(prev => ({
                       ...prev,
                       showDustLanes: checked
-                    }))}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="star-forming">Star-forming Regions (Nebulae)</Label>
-                  <Switch
-                    id="star-forming"
-                    checked={localSettings.showStarFormingRegions}
-                    onCheckedChange={(checked) => setLocalSettings(prev => ({
-                      ...prev,
-                      showStarFormingRegions: checked
                     }))}
                   />
                 </div>
@@ -326,57 +444,6 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
                       onValueChange={([value]) => setLocalSettings(prev => ({
                         ...prev,
                         dustLaneColorIntensity: value
-                      }))}
-                      min={0.2}
-                      max={2.0}
-                      step={0.1}
-                      className="w-full"
-                    />
-                  </div>
-                </div>
-                
-                {/* Star-forming Region Particles */}
-                <div className="space-y-4 p-4 border rounded-lg">
-                  <h4 className="font-medium text-sm">Star-forming Region Particles</h4>
-                  <div className="space-y-2">
-                    <Label htmlFor="star-forming-particles">Particle Count</Label>
-                    <Input
-                      id="star-forming-particles"
-                      type="number"
-                      value={localSettings.starFormingParticles}
-                      onChange={(e) => setLocalSettings(prev => ({
-                        ...prev,
-                        starFormingParticles: parseInt(e.target.value) || 12000
-                      }))}
-                      min="1000"
-                      max="50000"
-                      step="1000"
-                    />
-                    <span className="text-xs text-gray-400">For nebula and star-forming regions</span>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label>Opacity: {localSettings.starFormingOpacity.toFixed(2)}</Label>
-                    <Slider
-                      value={[localSettings.starFormingOpacity]}
-                      onValueChange={([value]) => setLocalSettings(prev => ({
-                        ...prev,
-                        starFormingOpacity: value
-                      }))}
-                      min={0.1}
-                      max={1.0}
-                      step={0.05}
-                      className="w-full"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label>Color Intensity: {localSettings.starFormingColorIntensity.toFixed(1)}</Label>
-                    <Slider
-                      value={[localSettings.starFormingColorIntensity]}
-                      onValueChange={([value]) => setLocalSettings(prev => ({
-                        ...prev,
-                        starFormingColorIntensity: value
                       }))}
                       min={0.2}
                       max={2.0}

@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { StarshipStats } from '../utils/starshipGenerator';
 import { ExplorationEvent } from '../components/galaxy/ExplorationDialog';
@@ -9,6 +8,7 @@ export interface GameSaveData {
   stats: StarshipStats;
   currentSystemId: string | null;
   exploredSystemIds: string[];
+  travelHistory: string[];
   galaxySeed: number;
   timestamp: number;
 }
@@ -18,7 +18,17 @@ export const useShipStats = (initialStats: StarshipStats) => {
   const [isGameOver, setIsGameOver] = useState(false);
   const [currentSystemId, setCurrentSystemId] = useState<string | null>(null);
   const [exploredSystemIds, setExploredSystemIds] = useState<Set<string>>(new Set());
+  const [travelHistory, setTravelHistory] = useState<string[]>([]);
   const { toast } = useToast();
+
+  const triggerGameOver = useCallback(() => {
+    setIsGameOver(true);
+    toast({
+      title: "Retirement",
+      description: "You have chosen to retire from exploration.",
+      variant: "default",
+    });
+  }, [toast]);
 
   const updateStatsFromExploration = useCallback((event: ExplorationEvent) => {
     setStats(prevStats => {
@@ -188,6 +198,7 @@ export const useShipStats = (initialStats: StarshipStats) => {
       stats,
       currentSystemId,
       exploredSystemIds: Array.from(exploredSystemIds),
+      travelHistory,
       galaxySeed,
       timestamp: Date.now()
     };
@@ -197,7 +208,7 @@ export const useShipStats = (initialStats: StarshipStats) => {
       title: "Game Saved",
       description: "Your progress has been saved successfully.",
     });
-  }, [stats, currentSystemId, exploredSystemIds, toast]);
+  }, [stats, currentSystemId, exploredSystemIds, travelHistory, toast]);
 
   const loadGame = useCallback(() => {
     const savedData = localStorage.getItem('galaxyExplorerSave');
@@ -207,6 +218,7 @@ export const useShipStats = (initialStats: StarshipStats) => {
         setStats(gameData.stats);
         setCurrentSystemId(gameData.currentSystemId);
         setExploredSystemIds(new Set(gameData.exploredSystemIds));
+        setTravelHistory(gameData.travelHistory || []);
         setIsGameOver(false);
         
         toast({
@@ -233,6 +245,11 @@ export const useShipStats = (initialStats: StarshipStats) => {
   }, [toast]);
 
   const canJumpToSystem = useCallback((fromSystem: StarSystem, toSystem: StarSystem, allSystems: StarSystem[]) => {
+    // Can always jump to systems in travel history (green path)
+    if (travelHistory.includes(toSystem.id)) {
+      return true;
+    }
+    
     // Can always jump to explored systems
     if (exploredSystemIds.has(toSystem.id)) {
       return true;
@@ -249,7 +266,7 @@ export const useShipStats = (initialStats: StarshipStats) => {
     const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
     
     return distance <= maxJumpDistance;
-  }, [stats.techLevel, exploredSystemIds]);
+  }, [stats.techLevel, exploredSystemIds, travelHistory]);
 
   const getJumpableSystemIds = useCallback((fromSystem: StarSystem, allSystems: StarSystem[]) => {
     return allSystems
@@ -258,8 +275,10 @@ export const useShipStats = (initialStats: StarshipStats) => {
   }, [canJumpToSystem]);
 
   const getScannerRangeSystemIds = useCallback((fromSystem: StarSystem, allSystems: StarSystem[]) => {
-    // Scanner range determines which systems you can scan for information
-    const scannerRange = (stats.scanners / 100) * 50000; // Max range at 100 scanners
+    // Scanner range is a percentage of jump distance
+    const galaxyWidth = 100000;
+    const maxJumpDistance = (stats.techLevel / 10) * (galaxyWidth / 16);
+    const scannerRange = (stats.scanners / 100) * maxJumpDistance;
     
     return allSystems.filter(system => {
       if (system.id === fromSystem.id) return false;
@@ -271,11 +290,17 @@ export const useShipStats = (initialStats: StarshipStats) => {
       
       return distance <= scannerRange;
     }).map(system => system.id);
-  }, [stats.scanners]);
+  }, [stats.scanners, stats.techLevel]);
 
   const jumpToSystem = useCallback((systemId: string) => {
     setCurrentSystemId(systemId);
     setExploredSystemIds(prev => new Set([...prev, systemId]));
+    setTravelHistory(prev => {
+      if (!prev.includes(systemId)) {
+        return [...prev, systemId];
+      }
+      return prev;
+    });
   }, []);
 
   const resetStats = useCallback((newStats: StarshipStats, startingSystemId?: string) => {
@@ -283,6 +308,7 @@ export const useShipStats = (initialStats: StarshipStats) => {
     setIsGameOver(false);
     setCurrentSystemId(startingSystemId || null);
     setExploredSystemIds(startingSystemId ? new Set([startingSystemId]) : new Set());
+    setTravelHistory(startingSystemId ? [startingSystemId] : []);
   }, []);
 
   return {
@@ -290,6 +316,7 @@ export const useShipStats = (initialStats: StarshipStats) => {
     isGameOver,
     currentSystemId,
     exploredSystemIds,
+    travelHistory,
     updateStatsFromExploration,
     repairShip,
     upgradeSystem,
@@ -300,6 +327,7 @@ export const useShipStats = (initialStats: StarshipStats) => {
     jumpToSystem,
     resetStats,
     saveGame,
-    loadGame
+    loadGame,
+    triggerGameOver
   };
 };

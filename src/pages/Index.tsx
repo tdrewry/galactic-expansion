@@ -24,20 +24,17 @@ const Index = () => {
     numNebulae,
     binaryFrequency,
     trinaryFrequency,
-    raymarchingSamples,
-    minimumVisibility,
     showDustLanes,
-    showStarFormingRegions,
     showCosmicDust,
     dustLaneParticles,
-    starFormingParticles,
     cosmicDustParticles,
     dustLaneOpacity,
-    starFormingOpacity,
     cosmicDustOpacity,
     dustLaneColorIntensity,
-    starFormingColorIntensity,
     cosmicDustColorIntensity,
+    jumpLaneOpacity,
+    greenPathOpacity,
+    defaultShipStats,
     selectedSystem,
     setSelectedSystem,
     selectedStar,
@@ -48,12 +45,13 @@ const Index = () => {
   } = useGalaxyState();
   
   // Initialize ship stats
-  const initialStarship = React.useMemo(() => generateStarship(galaxySeed), [galaxySeed]);
+  const initialStarship = React.useMemo(() => generateStarship(galaxySeed, defaultShipStats), [galaxySeed, defaultShipStats]);
   const {
     stats: shipStats,
     isGameOver,
     currentSystemId,
     exploredSystemIds,
+    travelHistory,
     updateStatsFromExploration,
     repairShip,
     upgradeSystem,
@@ -63,7 +61,8 @@ const Index = () => {
     jumpToSystem,
     resetStats,
     saveGame,
-    loadGame
+    loadGame,
+    triggerGameOver
   } = useShipStats(initialStarship.stats);
 
   // Market dialog state
@@ -109,19 +108,7 @@ const Index = () => {
     setSelectedBody(null);
     resetAllExploration();
     // Reset ship stats to new ship with new starting system
-    const newStarship = generateStarship(newSeed);
-    resetStats(newStarship.stats);
-  };
-
-  const generateRandomSeed = () => {
-    const randomSeed = Math.floor(Math.random() * 999999) + 1;
-    setInputSeed(randomSeed.toString());
-    setGalaxySeed(randomSeed);
-    setSelectedSystem(null);
-    setSelectedBody(null);
-    resetAllExploration();
-    // Reset ship stats to new ship with new starting system
-    const newStarship = generateStarship(randomSeed);
+    const newStarship = generateStarship(newSeed, defaultShipStats);
     resetStats(newStarship.stats);
   };
 
@@ -237,38 +224,41 @@ const Index = () => {
           <div className="flex items-center gap-4">
             <h1 className="text-2xl font-bold">{appTitle}</h1>
             <div className="flex gap-2">
-              <Button onClick={handleSaveGame} size="sm" className="bg-green-600 hover:bg-green-700">
+              <Button onClick={generateRandomSeed} className="bg-green-600 hover:bg-green-700">
+                Start New Game
+              </Button>
+              <Button onClick={triggerGameOver} variant="destructive" size="sm">
+                Retire
+              </Button>
+              <Button onClick={handleSaveGame} size="sm" className="bg-blue-600 hover:bg-blue-700">
                 Save Game
               </Button>
-              <Button onClick={handleLoadGame} size="sm" className="bg-blue-600 hover:bg-blue-700">
+              <Button onClick={handleLoadGame} size="sm" className="bg-purple-600 hover:bg-purple-700">
                 Load Game
               </Button>
             </div>
           </div>
           <GalaxyControls
-            inputSeed={inputSeed}
-            setInputSeed={setInputSeed}
-            handleSeedChange={handleSeedChange}
-            generateRandomSeed={generateRandomSeed}
             numSystems={numSystems}
             numNebulae={numNebulae}
             binaryFrequency={binaryFrequency}
             trinaryFrequency={trinaryFrequency}
-            raymarchingSamples={raymarchingSamples}
-            minimumVisibility={minimumVisibility}
             showDustLanes={showDustLanes}
-            showStarFormingRegions={showStarFormingRegions}
             showCosmicDust={showCosmicDust}
             appTitle={appTitle}
             dustLaneParticles={dustLaneParticles}
-            starFormingParticles={starFormingParticles}
             cosmicDustParticles={cosmicDustParticles}
             dustLaneOpacity={dustLaneOpacity}
-            starFormingOpacity={starFormingOpacity}
             cosmicDustOpacity={cosmicDustOpacity}
             dustLaneColorIntensity={dustLaneColorIntensity}
-            starFormingColorIntensity={starFormingColorIntensity}
             cosmicDustColorIntensity={cosmicDustColorIntensity}
+            jumpLaneOpacity={jumpLaneOpacity}
+            greenPathOpacity={greenPathOpacity}
+            defaultShipStats={defaultShipStats}
+            inputSeed={inputSeed}
+            setInputSeed={setInputSeed}
+            galaxySeed={galaxySeed}
+            setGalaxySeed={setGalaxySeed}
             onSettingsChange={handleSettingsChange}
           />
         </div>
@@ -280,20 +270,16 @@ const Index = () => {
         numNebulae={numNebulae}
         binaryFrequency={binaryFrequency}
         trinaryFrequency={trinaryFrequency}
-        raymarchingSamples={raymarchingSamples}
-        minimumVisibility={minimumVisibility}
         showDustLanes={showDustLanes}
-        showStarFormingRegions={showStarFormingRegions}
         showCosmicDust={showCosmicDust}
         dustLaneParticles={dustLaneParticles}
-        starFormingParticles={starFormingParticles}
         cosmicDustParticles={cosmicDustParticles}
         dustLaneOpacity={dustLaneOpacity}
-        starFormingOpacity={starFormingOpacity}
         cosmicDustOpacity={cosmicDustOpacity}
         dustLaneColorIntensity={dustLaneColorIntensity}
-        starFormingColorIntensity={starFormingColorIntensity}
         cosmicDustColorIntensity={cosmicDustColorIntensity}
+        jumpLaneOpacity={jumpLaneOpacity}
+        greenPathOpacity={greenPathOpacity}
         selectedSystem={selectedSystem}
         selectedStar={selectedStar}
         exploredSystems={exploredSystems}
@@ -305,6 +291,7 @@ const Index = () => {
         shipStats={shipStats}
         currentSystemId={currentSystemId}
         exploredSystemIds={exploredSystemIds}
+        travelHistory={travelHistory}
         isSystemExplored={isSystemExplored}
         canSystemBeExplored={canSystemBeExplored}
         getSystemExplorationStatus={getSystemExplorationStatus}
@@ -323,7 +310,7 @@ const Index = () => {
       />
 
       <footer className="bg-gray-900 p-2 border-t border-gray-700 text-center text-sm text-gray-400 flex-shrink-0">
-        <p>Procedurally Generated Galaxy | Seed: {galaxySeed} | Systems: {numSystems} | Nebulae: {numNebulae} | Binary: {Math.round(binaryFrequency * 100)}% | Trinary: {Math.round(trinaryFrequency * 100)}% | Raymarching: {raymarchingSamples} samples | Click and drag to navigate, scroll to zoom</p>
+        <p>Procedurally Generated Galaxy | Seed: {galaxySeed} | Systems: {numSystems} | Nebulae: {numNebulae} | Binary: {Math.round(binaryFrequency * 100)}% | Trinary: {Math.round(trinaryFrequency * 100)}% | Click and drag to navigate, scroll to zoom</p>
       </footer>
 
       {currentMarketInfo && (
