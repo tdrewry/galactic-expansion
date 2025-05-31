@@ -34,6 +34,7 @@ const Index = () => {
     cosmicDustColorIntensity,
     jumpLaneOpacity,
     greenPathOpacity,
+    visitedJumpLaneOpacity,
     defaultShipStats,
     selectedSystem,
     setSelectedSystem,
@@ -290,6 +291,7 @@ const Index = () => {
             cosmicDustColorIntensity={cosmicDustColorIntensity}
             jumpLaneOpacity={jumpLaneOpacity}
             greenPathOpacity={greenPathOpacity}
+            visitedJumpLaneOpacity={visitedJumpLaneOpacity}
             defaultShipStats={defaultShipStats}
             inputSeed={inputSeed}
             setInputSeed={setInputSeed}
