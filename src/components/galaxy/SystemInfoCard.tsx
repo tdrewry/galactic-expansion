@@ -51,6 +51,43 @@ export const SystemInfoCard: React.FC<SystemInfoCardProps> = ({
     }
   };
 
+  // Get system feature icons
+  const getSystemFeatureIcons = () => {
+    const icons = [];
+    
+    // Check for repair shops (civilizations with tech level >= 3 or stations)
+    const hasRepairShop = system.planets.some(planet => 
+      (planet.civilization && planet.civilization.techLevel >= 3) ||
+      (planet as any).features?.some((feature: any) => feature.type === 'station')
+    );
+    
+    // Check for markets (civilizations with tech level >= 2)
+    const hasMarket = system.planets.some(planet => 
+      planet.civilization && planet.civilization.techLevel >= 2
+    );
+    
+    // Check for civilizations
+    const hasCivilization = system.planets.some(planet => planet.civilization);
+    
+    // Check for stations
+    const hasStation = system.planets.some(planet => 
+      (planet as any).features?.some((feature: any) => feature.type === 'station')
+    );
+    
+    // Check for ruins
+    const hasRuins = system.planets.some(planet => 
+      (planet as any).features?.some((feature: any) => feature.type === 'ruins')
+    );
+
+    if (hasRepairShop) icons.push('🛠️');
+    if (hasMarket) icons.push('🏛️');
+    if (hasCivilization) icons.push('🌇');
+    if (hasStation) icons.push('🛰️');
+    if (hasRuins) icons.push('🗿');
+
+    return icons.join('');
+  };
+
   const currentStar = getCurrentStarData();
   const isMultipleStars = system.binaryCompanion || system.trinaryCompanion;
 
@@ -71,10 +108,13 @@ export const SystemInfoCard: React.FC<SystemInfoCardProps> = ({
     return total;
   };
 
+  const featureIcons = getSystemFeatureIcons();
+  const systemNameWithIcons = `${system.id}${featureIcons ? ' ' + featureIcons : ''}`;
+
   return (
     <Card className="bg-gray-900 border-gray-700 mb-4">
       <CardHeader className="pb-2">
-        <CardTitle className="text-yellow-400 text-sm">{system.id}</CardTitle>
+        <CardTitle className="text-yellow-400 text-sm">{systemNameWithIcons}</CardTitle>
         <p className="text-blue-400 text-xs">{getSystemType()}</p>
       </CardHeader>
       <CardContent className="space-y-2">

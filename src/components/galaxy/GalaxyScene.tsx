@@ -65,11 +65,46 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
   const preserveCameraPosition = useRef(false);
   const hasInitiallyZoomed = useRef(false);
   
+  // Scanner state management
+  const [showScannerIcons, setShowScannerIcons] = useState(false);
+  const [scannerFadeTimer, setScannerFadeTimer] = useState<NodeJS.Timeout | null>(null);
+  
   // Find the actual current system object
   const currentSystem = currentSystemId ? galaxy.starSystems.find(s => s.id === currentSystemId) : null;
   
   // Calculate scanner range for ping visualization
   const scannerRange = shipStats ? (shipStats.scanners / 100) * 50000 : 25000;
+
+  // Handle scanner completion - start the 15 second fade timer
+  const handleScanComplete = () => {
+    setShowScannerIcons(true);
+    
+    // Clear any existing timer
+    if (scannerFadeTimer) {
+      clearTimeout(scannerFadeTimer);
+    }
+    
+    // Set new timer for 15 seconds
+    const timer = setTimeout(() => {
+      setShowScannerIcons(false);
+    }, 15000);
+    
+    setScannerFadeTimer(timer);
+    
+    // Call the original onScanComplete if provided
+    if (onScanComplete) {
+      onScanComplete();
+    }
+  };
+
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (scannerFadeTimer) {
+        clearTimeout(scannerFadeTimer);
+      }
+    };
+  }, [scannerFadeTimer]);
   
   useEffect(() => {
     // Only set initial camera position on first mount, don't reset during exploration
@@ -115,6 +150,13 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
     onSystemSelect(null);
   };
 
+  // Determine if scanner icons should be shown
+  const shouldShowScannerIcons = showScannerIcons && currentSystem && getScannerRangeSystemIds;
+  
+  // Determine if selected system icons should be shown
+  const shouldShowSelectedSystemIcons = selectedSystem && currentSystem && getScannerRangeSystemIds && 
+    getScannerRangeSystemIds(currentSystem, galaxy.starSystems).includes(selectedSystem.id);
+
   return (
     <>
       <ambientLight intensity={0.4} />
@@ -159,7 +201,7 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
           system={selectedSystem}
           isActive={isScanning}
           scannerRange={scannerRange}
-          onPingComplete={onScanComplete}
+          onPingComplete={handleScanComplete}
         />
       )}
       
@@ -187,16 +229,26 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
         />
       ))}
       
-      {selectedSystem && getScannerRangeSystemIds && currentSystem && (
+      {/* Scanner Icons - show for all systems in scanner range after scan completion (15 second fade) */}
+      {shouldShowScannerIcons && (
         <>
           {galaxy.starSystems.map((system) => (
             <ScannerRangeIcons
-              key={`scanner-${system.id}`}
+              key={`scanner-all-${system.id}`}
               system={system}
               scannerRangeSystemIds={getScannerRangeSystemIds(currentSystem, galaxy.starSystems)}
             />
           ))}
         </>
+      )}
+      
+      {/* Selected System Icons - show only for manually selected system in scanner range */}
+      {shouldShowSelectedSystemIcons && (
+        <ScannerRangeIcons
+          key={`scanner-selected-${selectedSystem.id}`}
+          system={selectedSystem}
+          scannerRangeSystemIds={[selectedSystem.id]} // Only show for this specific system
+        />
       )}
       
       {galaxy.nebulae.map((nebula) => (
