@@ -31,6 +31,7 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
     if (!currentSystem) return [];
     
     // Only show jump lanes to systems that are actually jumpable (within range)
+    // This excludes visited systems that are now out of range
     return jumpableSystemIds.map(systemId => {
       const targetSystem = allSystems.find(s => s.id === systemId);
       if (!targetSystem) return null;
@@ -75,7 +76,7 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
 
   return (
     <group>
-      {/* Jump range lines (dashed) - only to systems within jump range */}
+      {/* Jump range lines (dashed) - only to systems within jump range, no lines to out-of-range visited systems */}
       {jumpLines.map((line, index) => (
         <Line
           key={`jump-${index}`}
