@@ -195,10 +195,10 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
         cosmicDustColorIntensity={cosmicDustColorIntensity}
       />
       
-      {/* Scanner Ping - only show when scanning the selected system */}
-      {selectedSystem && isScanning && (
+      {/* Scanner Ping - always from current system when scanning */}
+      {currentSystem && isScanning && (
         <ScannerPing
-          system={selectedSystem}
+          system={currentSystem}
           isActive={isScanning}
           scannerRange={scannerRange}
           onPingComplete={handleScanComplete}

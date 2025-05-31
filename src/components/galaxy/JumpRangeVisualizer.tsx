@@ -21,7 +21,7 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
   allSystems,
   shipStats,
   exploredSystemIds,
-  travelHistory = [], // Default to empty array to prevent undefined errors
+  travelHistory = [],
   scannerRangeSystemIds,
   jumpableSystemIds,
   jumpLaneOpacity,
@@ -30,6 +30,7 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
   const jumpLines = useMemo(() => {
     if (!currentSystem) return [];
     
+    // Only show jump lanes to systems that are actually jumpable (within range)
     return jumpableSystemIds.map(systemId => {
       const targetSystem = allSystems.find(s => s.id === systemId);
       if (!targetSystem) return null;
@@ -50,6 +51,8 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
   const greenPathLines = useMemo(() => {
     if (!travelHistory || travelHistory.length < 2) return [];
     
+    // Show the green path connecting systems in order of travel history
+    // This is always visible regardless of jump range
     const lines = [];
     for (let i = 0; i < travelHistory.length - 1; i++) {
       const fromSystem = allSystems.find(s => s.id === travelHistory[i]);
@@ -72,7 +75,7 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
 
   return (
     <group>
-      {/* Jump range lines (dashed) */}
+      {/* Jump range lines (dashed) - only to systems within jump range */}
       {jumpLines.map((line, index) => (
         <Line
           key={`jump-${index}`}
@@ -87,7 +90,7 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
         />
       ))}
       
-      {/* Green travel history path (solid) */}
+      {/* Green travel history path (solid) - always visible */}
       {greenPathLines.map((line, index) => (
         <Line
           key={`history-${index}`}
