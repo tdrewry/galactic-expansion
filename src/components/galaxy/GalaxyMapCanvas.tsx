@@ -22,8 +22,11 @@ interface GalaxyMapCanvasProps {
   dustLaneColorIntensity?: number;
   starFormingColorIntensity?: number;
   cosmicDustColorIntensity?: number;
+  jumpLaneOpacity?: number;
+  greenPathOpacity?: number;
   shipStats?: any;
   exploredSystemIds?: Set<string>;
+  travelHistory?: string[];
   getJumpableSystemIds?: (fromSystem: StarSystem, allSystems: StarSystem[]) => string[];
   getScannerRangeSystemIds?: (fromSystem: StarSystem, allSystems: StarSystem[]) => string[];
   isScanning?: boolean;
@@ -38,6 +41,9 @@ export const GalaxyMapCanvas: React.FC<GalaxyMapCanvasProps> = ({
   onCanvasError,
   isScanning,
   onScanComplete,
+  jumpLaneOpacity,
+  greenPathOpacity,
+  travelHistory,
   ...sceneProps
 }) => {
   return (
@@ -64,6 +70,9 @@ export const GalaxyMapCanvas: React.FC<GalaxyMapCanvasProps> = ({
         onSystemSelect={onSystemSelect}
         isScanning={isScanning}
         onScanComplete={onScanComplete}
+        jumpLaneOpacity={jumpLaneOpacity}
+        greenPathOpacity={greenPathOpacity}
+        travelHistory={travelHistory}
         {...sceneProps}
       />
     </Canvas>

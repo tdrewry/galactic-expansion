@@ -25,6 +25,8 @@ interface GalaxyMapProps {
   dustLaneColorIntensity?: number;
   starFormingColorIntensity?: number;
   cosmicDustColorIntensity?: number;
+  jumpLaneOpacity?: number;
+  greenPathOpacity?: number;
   onSystemSelect?: (system: StarSystem) => void;
   selectedSystem?: StarSystem | null;
   selectedStar?: 'primary' | 'binary' | 'trinary';
@@ -33,6 +35,7 @@ interface GalaxyMapProps {
   shipStats?: any;
   currentSystemId?: string | null;
   exploredSystemIds?: Set<string>;
+  travelHistory?: string[];
   getJumpableSystemIds?: (fromSystem: StarSystem, allSystems: StarSystem[]) => string[];
   getScannerRangeSystemIds?: (fromSystem: StarSystem, allSystems: StarSystem[]) => string[];
   onJumpToSystem?: (systemId: string) => void;
@@ -52,10 +55,13 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
   onStarSelect,
   exploredSystems = new Set(),
   exploredSystemIds = new Set(),
+  travelHistory = [],
   getJumpableSystemIds,
   getScannerRangeSystemIds,
   isScanning = false,
   onScanComplete,
+  jumpLaneOpacity = 0.3,
+  greenPathOpacity = 0.6,
   ...canvasProps
 }) => {
   const [selectedSystem, setSelectedSystem] = useState<StarSystem | null>(null);
@@ -126,10 +132,13 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
         selectedSystem={currentSelectedSystem}
         onSystemSelect={handleSystemSelect}
         exploredSystemIds={exploredSystemIds}
+        travelHistory={travelHistory}
         getJumpableSystemIds={getJumpableSystemIds}
         getScannerRangeSystemIds={getScannerRangeSystemIds}
         isScanning={isScanning}
         onScanComplete={onScanComplete}
+        jumpLaneOpacity={jumpLaneOpacity}
+        greenPathOpacity={greenPathOpacity}
         onCanvasError={setCanvasError}
         {...canvasProps}
       />
