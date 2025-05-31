@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Edit } from 'lucide-react';
 
 interface StarshipStatsProps {
-  stats: StarshipStatsType;
+  stats: StarshipStatsType & { name?: string };
   onNameChange?: (newName: string) => void;
 }
 

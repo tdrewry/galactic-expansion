@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
 import { ExplorationDialog } from '../components/galaxy/ExplorationDialog';
@@ -86,6 +87,18 @@ const Index = () => {
     closeExplorationDialog,
     resetAllExploration
   } = useExploration();
+
+  const generateRandomSeed = () => {
+    const newSeed = Math.floor(Math.random() * 1000000);
+    setGalaxySeed(newSeed);
+    setInputSeed(newSeed.toString());
+    setSelectedSystem(null);
+    setSelectedBody(null);
+    resetAllExploration();
+    // Reset ship stats to new ship with new starting system
+    const newStarship = generateStarship(newSeed, defaultShipStats);
+    resetStats(newStarship.stats);
+  };
 
   // Initialize starting system
   React.useEffect(() => {
