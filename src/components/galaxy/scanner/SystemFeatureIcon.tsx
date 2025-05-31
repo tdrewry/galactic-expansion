@@ -33,8 +33,8 @@ export const SystemFeatureIcon: React.FC<SystemFeatureIconProps> = ({
             attach="map" 
             image={(() => {
               const canvas = document.createElement('canvas');
-              canvas.width = 128;
-              canvas.height = 128;
+              canvas.width = 256;
+              canvas.height = 256;
               const ctx = canvas.getContext('2d');
               if (ctx) {
                 ctx.font = '80px Arial';
