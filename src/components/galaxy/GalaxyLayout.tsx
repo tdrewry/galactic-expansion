@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { StarSystem, Planet, Moon } from '../../utils/galaxyGenerator';
 import { ExplorationDialog } from './ExplorationDialog';
@@ -60,6 +59,8 @@ interface GalaxyLayoutProps {
   onJumpToSystem: (systemId: string) => void;
   handleCompleteExploration: () => void;
   handleContinueExploration: () => void;
+  canJumpToSelected?: boolean;
+  onJumpToSystem: (systemId: string) => void;
 }
 
 export const GalaxyLayout: React.FC<GalaxyLayoutProps> = ({

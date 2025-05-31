@@ -50,6 +50,7 @@ const Index = () => {
     stats: shipStats,
     isGameOver,
     currentSystemId,
+    selectedSystemId,
     exploredSystemIds,
     travelHistory,
     updateStatsFromExploration,
@@ -58,6 +59,7 @@ const Index = () => {
     sellCargo,
     getJumpableSystemIds,
     getScannerRangeSystemIds,
+    selectSystem,
     jumpToSystem,
     resetStats,
     saveGame,
@@ -107,11 +109,22 @@ const Index = () => {
       const startingSystem = selectStartingSystem(tempGalaxy.starSystems);
       
       if (startingSystem) {
-        jumpToSystem(startingSystem.id);
+        jumpToSystem(startingSystem.id, false); // No interrupt for initial placement
         setSelectedSystem(startingSystem);
       }
     }
   }, [galaxySeed, numSystems, numNebulae, binaryFrequency, trinaryFrequency, currentSystemId, jumpToSystem]);
+
+  // Update selected system when selectedSystemId changes
+  React.useEffect(() => {
+    if (selectedSystemId && numSystems > 0) {
+      const tempGalaxy = generateGalaxy(galaxySeed, numSystems, numNebulae, binaryFrequency, trinaryFrequency);
+      const system = tempGalaxy.starSystems.find(s => s.id === selectedSystemId);
+      if (system) {
+        setSelectedSystem(system);
+      }
+    }
+  }, [selectedSystemId, galaxySeed, numSystems, numNebulae, binaryFrequency, trinaryFrequency]);
 
   const handleSeedChange = () => {
     const newSeed = parseInt(inputSeed) || 12345;
@@ -141,8 +154,7 @@ const Index = () => {
 
   const handleSystemSelect = (system: StarSystem) => {
     console.log('Index: System selected:', system.id);
-    const updatedSystem = { ...system, explored: isSystemExplored(system) };
-    setSelectedSystem(updatedSystem);
+    selectSystem(system.id);
     setSelectedStar('primary');
     setSelectedBody(null);
   };
@@ -204,10 +216,7 @@ const Index = () => {
   };
 
   const handleJumpToSystem = (systemId: string) => {
-    // Find the system and jump to it
     jumpToSystem(systemId);
-    // Update selected system
-    // This will be handled by the galaxy state
   };
 
   const handleRepairShip = () => {
@@ -228,6 +237,21 @@ const Index = () => {
       </div>
     );
   }
+
+  // Check if we can jump to selected system
+  const canJumpToSelected = React.useMemo(() => {
+    if (!selectedSystem || !currentSystemId || selectedSystem.id === currentSystemId) {
+      return false;
+    }
+    
+    const tempGalaxy = generateGalaxy(galaxySeed, numSystems, numNebulae, binaryFrequency, trinaryFrequency);
+    const currentSystem = tempGalaxy.starSystems.find(s => s.id === currentSystemId);
+    
+    if (!currentSystem) return false;
+    
+    const jumpableIds = getJumpableSystemIds(currentSystem, tempGalaxy.starSystems);
+    return jumpableIds.includes(selectedSystem.id);
+  }, [selectedSystem, currentSystemId, galaxySeed, numSystems, numNebulae, binaryFrequency, trinaryFrequency, getJumpableSystemIds]);
 
   return (
     <div className="h-screen bg-black text-white flex flex-col overflow-hidden">
@@ -309,6 +333,7 @@ const Index = () => {
         getSystemExplorationStatus={getSystemExplorationStatus}
         getJumpableSystemIds={getJumpableSystemIds}
         getScannerRangeSystemIds={getScannerRangeSystemIds}
+        canJumpToSelected={canJumpToSelected}
         onSystemSelect={handleSystemSelect}
         onStarSelect={handleStarSelect}
         onBodySelect={handleBodySelect}

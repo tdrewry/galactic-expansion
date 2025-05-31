@@ -2,12 +2,13 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Ship, Wrench, Currency } from 'lucide-react';
+import { Ship, Wrench, Currency, Zap } from 'lucide-react';
 import { StarSystem } from '../../utils/galaxyGenerator';
 import { ScannerButton } from '../galaxy/scanner/ScannerButton';
 
 interface ActionsPanelProps {
   selectedSystem: StarSystem | null;
+  currentSystemId: string | null;
   isExplored: boolean;
   canBeExplored: boolean;
   explorationStatus: {
@@ -26,10 +27,13 @@ interface ActionsPanelProps {
   onOpenMarket?: () => void;
   onTriggerScan?: () => void;
   isScanning?: boolean;
+  canJumpToSelected?: boolean;
+  onJumpToSystem?: (systemId: string) => void;
 }
 
 export const ActionsPanel: React.FC<ActionsPanelProps> = ({
   selectedSystem,
+  currentSystemId,
   isExplored,
   canBeExplored,
   explorationStatus,
@@ -43,7 +47,9 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
   onRepairShip,
   onOpenMarket,
   onTriggerScan,
-  isScanning = false
+  isScanning = false,
+  canJumpToSelected = false,
+  onJumpToSystem
 }) => {
   const handleRepairShip = () => {
     if (onRepairShip && canAffordRepair && needsRepair) {
@@ -51,17 +57,26 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
     }
   };
 
+  const handleJumpToSystem = () => {
+    if (onJumpToSystem && selectedSystem) {
+      onJumpToSystem(selectedSystem.id);
+    }
+  };
+
+  // Check if we're looking at the current system or a different one
+  const isCurrentSystem = selectedSystem?.id === currentSystemId;
+  
   // Fix exploration progress display with Math.min to cap at max
   const displayProgress = Math.min(explorationStatus.explorationsCompleted, explorationStatus.maxExplorations);
 
-  // Check if system has repair capabilities
-  const systemHasRepairShop = selectedSystem?.planets.some(planet => 
+  // Check if system has repair capabilities - only for current system
+  const systemHasRepairShop = isCurrentSystem && selectedSystem?.planets.some(planet => 
     (planet.civilization && planet.civilization.techLevel >= 3) ||
     (planet as any).features?.some((feature: any) => feature.type === 'station')
   );
 
-  // Check if system has market
-  const systemHasMarket = selectedSystem?.planets.some(planet => 
+  // Check if system has market - only for current system
+  const systemHasMarket = isCurrentSystem && selectedSystem?.planets.some(planet => 
     planet.civilization && planet.civilization.techLevel >= 2
   );
 
@@ -85,79 +100,103 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
           <p className="text-gray-400 text-sm">Select a star system to begin operations</p>
         ) : (
           <>
-            <div className="space-y-2">
-              {canBeExplored ? (
-                <Button
-                  onClick={onBeginExploration}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                  size="sm"
-                >
-                  {isExplored ? `Continue Exploration (${displayProgress}/${explorationStatus.maxExplorations})` : 'Begin Exploration'}
-                </Button>
-              ) : (
-                <div className="text-center">
-                  <p className="text-green-400 text-sm font-medium mb-2">✓ Fully Explored ({displayProgress}/{explorationStatus.maxExplorations})</p>
-                </div>
-              )}
-              
-              {isExplored && (
-                <Button
-                  onClick={onResetExploration}
-                  variant="outline"
-                  size="sm"
-                  className="w-full border-gray-600 text-gray-300 hover:bg-gray-700"
-                >
-                  Reset Exploration
-                </Button>
-              )}
+            {/* Jump Button - only show if not in current system and can jump */}
+            {!isCurrentSystem && canJumpToSelected && onJumpToSystem && (
+              <Button
+                onClick={handleJumpToSystem}
+                className="w-full bg-yellow-600 hover:bg-yellow-700 text-white"
+                size="sm"
+              >
+                <Zap className="h-4 w-4 mr-2" />
+                Jump to: {selectedSystem.name}
+              </Button>
+            )}
 
-              {/* Scanner Button */}
-              {onTriggerScan && (
-                <ScannerButton
-                  onTriggerScan={onTriggerScan}
-                  isScanning={isScanning}
-                  hasSelectedSystem={!!selectedSystem}
-                />
-              )}
+            {/* Show system info when not in current system */}
+            {!isCurrentSystem && (
+              <div className="text-center text-gray-400 text-sm border-b border-gray-600 pb-2">
+                Viewing: {selectedSystem.name}
+                <br />
+                Current Location: {currentSystemId || 'Unknown'}
+              </div>
+            )}
 
-              {/* Ship Repair Section */}
-              {systemHasRepairShop && needsRepair && (
-                <div className="pt-2 border-t border-gray-600">
-                  <p className="text-gray-300 text-xs mb-2">
-                    Repair facilities available
-                  </p>
+            {/* Exploration actions - only for current system */}
+            {isCurrentSystem && (
+              <div className="space-y-2">
+                {canBeExplored ? (
                   <Button
-                    onClick={handleRepairShip}
-                    disabled={!canAffordRepair}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white disabled:bg-gray-600 disabled:text-gray-400"
+                    onClick={onBeginExploration}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                     size="sm"
                   >
-                    <Wrench className="h-4 w-4 mr-2" />
-                    Repair Ship (₡{repairCost.toLocaleString()})
+                    {isExplored ? `Continue Exploration (${displayProgress}/${explorationStatus.maxExplorations})` : 'Begin Exploration'}
                   </Button>
-                  {!canAffordRepair && (
-                    <p className="text-red-400 text-xs mt-1">Insufficient credits</p>
-                  )}
-                </div>
-              )}
-
-              {/* Market Section */}
-              {systemHasMarket && onOpenMarket && (
-                <div className="pt-2 border-t border-gray-600">
-                  <p className="text-gray-300 text-xs mb-2">
-                    Trading market available
-                  </p>
+                ) : (
+                  <div className="text-center">
+                    <p className="text-green-400 text-sm font-medium mb-2">✓ Fully Explored ({displayProgress}/{explorationStatus.maxExplorations})</p>
+                  </div>
+                )}
+                
+                {isExplored && (
                   <Button
-                    onClick={onOpenMarket}
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                    onClick={onResetExploration}
+                    variant="outline"
                     size="sm"
+                    className="w-full border-gray-600 text-gray-300 hover:bg-gray-700"
                   >
-                    <Currency className="h-4 w-4 mr-2" />
-                    Open Market
+                    Reset Exploration
                   </Button>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
+
+            {/* Scanner Button - works from any system */}
+            {onTriggerScan && (
+              <ScannerButton
+                onTriggerScan={onTriggerScan}
+                isScanning={isScanning}
+                hasSelectedSystem={!!selectedSystem}
+              />
+            )}
+
+            {/* Ship Repair Section - only for current system */}
+            {systemHasRepairShop && needsRepair && (
+              <div className="pt-2 border-t border-gray-600">
+                <p className="text-gray-300 text-xs mb-2">
+                  Repair facilities available
+                </p>
+                <Button
+                  onClick={handleRepairShip}
+                  disabled={!canAffordRepair}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white disabled:bg-gray-600 disabled:text-gray-400"
+                  size="sm"
+                >
+                  <Wrench className="h-4 w-4 mr-2" />
+                  Repair Ship (₡{repairCost.toLocaleString()})
+                </Button>
+                {!canAffordRepair && (
+                  <p className="text-red-400 text-xs mt-1">Insufficient credits</p>
+                )}
+              </div>
+            )}
+
+            {/* Market Section - only for current system */}
+            {systemHasMarket && onOpenMarket && (
+              <div className="pt-2 border-t border-gray-600">
+                <p className="text-gray-300 text-xs mb-2">
+                  Trading market available
+                </p>
+                <Button
+                  onClick={onOpenMarket}
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                  size="sm"
+                >
+                  <Currency className="h-4 w-4 mr-2" />
+                  Open Market
+                </Button>
+              </div>
+            )}
           </>
         )}
       </CardContent>

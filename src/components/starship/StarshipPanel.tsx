@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from 'react';
 import { generateStarship } from '../../utils/starshipGenerator';
 import { ActionsPanel } from './ActionsPanel';
@@ -9,6 +8,7 @@ import { StarSystem } from '../../utils/galaxyGenerator';
 interface StarshipPanelProps {
   seed: number;
   selectedSystem: StarSystem | null;
+  currentSystemId: string | null;
   isExplored: boolean;
   canBeExplored: boolean;
   explorationStatus: {
@@ -22,11 +22,16 @@ interface StarshipPanelProps {
   onRepairShip?: (cost: number) => void;
   onOpenMarket?: () => void;
   hideActions?: boolean;
+  canJumpToSelected?: boolean;
+  onJumpToSystem?: (systemId: string) => void;
+  onTriggerScan?: () => void;
+  isScanning?: boolean;
 }
 
 export const StarshipPanel: React.FC<StarshipPanelProps> = ({ 
   seed,
   selectedSystem,
+  currentSystemId,
   isExplored,
   canBeExplored,
   explorationStatus,
@@ -35,15 +40,20 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
   shipStats,
   onRepairShip,
   onOpenMarket,
-  hideActions = false
+  hideActions = false,
+  canJumpToSelected = false,
+  onJumpToSystem,
+  onTriggerScan,
+  isScanning = false
 }) => {
   const starship = useMemo(() => generateStarship(seed), [seed]);
-  const [isShipLayoutOpen, setIsShipLayoutOpen] = useState(false);
 
   const currentStats = shipStats || starship.stats;
 
-  const canRepairShip = selectedSystem && 
-    selectedSystem.planets.some(planet => 
+  // Only check repair capabilities for the current system
+  const currentSystem = selectedSystem?.id === currentSystemId ? selectedSystem : null;
+  const canRepairShip = currentSystem && 
+    currentSystem.planets.some(planet => 
       planet.civilization && 
       planet.civilization.techLevel >= currentStats.techLevel
     );
@@ -63,6 +73,7 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
           <div className="w-80 p-4 flex">
             <ActionsPanel
               selectedSystem={selectedSystem}
+              currentSystemId={currentSystemId}
               isExplored={isExplored}
               canBeExplored={canBeExplored}
               explorationStatus={explorationStatus}
@@ -75,6 +86,10 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
               needsRepair={needsRepair}
               onRepairShip={onRepairShip}
               onOpenMarket={onOpenMarket}
+              canJumpToSelected={canJumpToSelected}
+              onJumpToSystem={onJumpToSystem}
+              onTriggerScan={onTriggerScan}
+              isScanning={isScanning}
             />
           </div>
         )}

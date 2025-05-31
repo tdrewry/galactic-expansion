@@ -93,7 +93,7 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
           key={`history-${index}`}
           points={line.points}
           color={line.color}
-          lineWidth={2}
+          lineWidth={3}
           transparent
           opacity={greenPathOpacity}
         />

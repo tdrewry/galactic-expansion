@@ -17,8 +17,10 @@ export const useShipStats = (initialStats: StarshipStats) => {
   const [stats, setStats] = useState<StarshipStats>(initialStats);
   const [isGameOver, setIsGameOver] = useState(false);
   const [currentSystemId, setCurrentSystemId] = useState<string | null>(null);
+  const [selectedSystemId, setSelectedSystemId] = useState<string | null>(null);
   const [exploredSystemIds, setExploredSystemIds] = useState<Set<string>>(new Set());
   const [travelHistory, setTravelHistory] = useState<string[]>([]);
+  const [isJumping, setIsJumping] = useState(false);
   const { toast } = useToast();
 
   const triggerGameOver = useCallback(() => {
@@ -123,6 +125,32 @@ export const useShipStats = (initialStats: StarshipStats) => {
     });
   }, [toast]);
 
+  const selectSystem = useCallback((systemId: string | null) => {
+    setSelectedSystemId(systemId);
+  }, []);
+
+  const jumpToSystem = useCallback((systemId: string, allowInterrupt: boolean = true) => {
+    if (allowInterrupt && Math.random() < 0.1) { // 10% chance of interrupt for future use
+      console.log('Jump interrupt triggered - stub for future implementation');
+      // TODO: Implement jump interrupt events
+    }
+    
+    setCurrentSystemId(systemId);
+    setSelectedSystemId(systemId);
+    setExploredSystemIds(prev => new Set([...prev, systemId]));
+    setTravelHistory(prev => {
+      if (!prev.includes(systemId)) {
+        return [...prev, systemId];
+      }
+      return prev;
+    });
+    
+    toast({
+      title: "Jump Complete",
+      description: `Successfully jumped to system ${systemId}`,
+    });
+  }, [toast]);
+
   const sellCargo = useCallback((amount: number, isMarket: boolean = false) => {
     setStats(prevStats => {
       if (prevStats.cargo >= amount) {
@@ -217,6 +245,7 @@ export const useShipStats = (initialStats: StarshipStats) => {
         const gameData: GameSaveData = JSON.parse(savedData);
         setStats(gameData.stats);
         setCurrentSystemId(gameData.currentSystemId);
+        setSelectedSystemId(gameData.selectedSystemId);
         setExploredSystemIds(new Set(gameData.exploredSystemIds));
         setTravelHistory(gameData.travelHistory || []);
         setIsGameOver(false);
@@ -307,6 +336,7 @@ export const useShipStats = (initialStats: StarshipStats) => {
     setStats(newStats);
     setIsGameOver(false);
     setCurrentSystemId(startingSystemId || null);
+    setSelectedSystemId(startingSystemId || null);
     setExploredSystemIds(startingSystemId ? new Set([startingSystemId]) : new Set());
     setTravelHistory(startingSystemId ? [startingSystemId] : []);
   }, []);
@@ -315,8 +345,10 @@ export const useShipStats = (initialStats: StarshipStats) => {
     stats,
     isGameOver,
     currentSystemId,
+    selectedSystemId,
     exploredSystemIds,
     travelHistory,
+    isJumping,
     updateStatsFromExploration,
     repairShip,
     upgradeSystem,
@@ -324,6 +356,7 @@ export const useShipStats = (initialStats: StarshipStats) => {
     canJumpToSystem,
     getJumpableSystemIds,
     getScannerRangeSystemIds,
+    selectSystem,
     jumpToSystem,
     resetStats,
     saveGame,
