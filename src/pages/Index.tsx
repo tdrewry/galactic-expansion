@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
 import { ExplorationDialog } from '../components/galaxy/ExplorationDialog';
@@ -46,7 +45,7 @@ const Index = () => {
   } = useGalaxyState();
   
   // Initialize ship stats
-  const initialStarship = React.useMemo(() => generateStarship(galaxySeed, defaultShipStats), [galaxySeed, defaultShipStats]);
+  const initialStarship = React.useMemo(() => generateStarship(galaxySeed), [galaxySeed]);
   const {
     stats: shipStats,
     isGameOver,
@@ -96,7 +95,7 @@ const Index = () => {
     setSelectedBody(null);
     resetAllExploration();
     // Reset ship stats to new ship with new starting system
-    const newStarship = generateStarship(newSeed, defaultShipStats);
+    const newStarship = generateStarship(newSeed);
     resetStats(newStarship.stats);
   };
 
@@ -121,7 +120,7 @@ const Index = () => {
     setSelectedBody(null);
     resetAllExploration();
     // Reset ship stats to new ship with new starting system
-    const newStarship = generateStarship(newSeed, defaultShipStats);
+    const newStarship = generateStarship(newSeed);
     resetStats(newStarship.stats);
   };
 

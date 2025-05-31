@@ -21,7 +21,7 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
   allSystems,
   shipStats,
   exploredSystemIds,
-  travelHistory,
+  travelHistory = [], // Default to empty array to prevent undefined errors
   scannerRangeSystemIds,
   jumpableSystemIds,
   jumpLaneOpacity,
@@ -48,7 +48,7 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
   }, [currentSystem, allSystems, jumpableSystemIds, exploredSystemIds]);
 
   const greenPathLines = useMemo(() => {
-    if (travelHistory.length < 2) return [];
+    if (!travelHistory || travelHistory.length < 2) return [];
     
     const lines = [];
     for (let i = 0; i < travelHistory.length - 1; i++) {
