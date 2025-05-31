@@ -528,8 +528,8 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm">Star System Types</CardHeader>
-              </CardContent>
+                <CardTitle className="text-sm">Star System Types</CardTitle>
+              </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="binary">Binary System Frequency</Label>
