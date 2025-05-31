@@ -40,7 +40,7 @@ export const SystemFeatureIcon: React.FC<SystemFeatureIconProps> = ({
                 ctx.font = '80px Arial';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(getEmoji(), 64, 64);
+                ctx.fillText(getEmoji(), 128, 128);
               }
               return canvas;
             })()} 
