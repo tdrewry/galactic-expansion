@@ -27,6 +27,7 @@ interface GalaxyMapCanvasProps {
   shipStats?: any;
   exploredSystemIds?: Set<string>;
   travelHistory?: string[];
+  currentSystemId?: string | null;
   getJumpableSystemIds?: (fromSystem: StarSystem, allSystems: StarSystem[]) => string[];
   getScannerRangeSystemIds?: (fromSystem: StarSystem, allSystems: StarSystem[]) => string[];
   isScanning?: boolean;
@@ -44,6 +45,7 @@ export const GalaxyMapCanvas: React.FC<GalaxyMapCanvasProps> = ({
   jumpLaneOpacity,
   greenPathOpacity,
   travelHistory,
+  currentSystemId,
   ...sceneProps
 }) => {
   return (
@@ -73,6 +75,7 @@ export const GalaxyMapCanvas: React.FC<GalaxyMapCanvasProps> = ({
         jumpLaneOpacity={jumpLaneOpacity}
         greenPathOpacity={greenPathOpacity}
         travelHistory={travelHistory}
+        currentSystemId={currentSystemId}
         {...sceneProps}
       />
     </Canvas>

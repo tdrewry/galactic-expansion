@@ -28,6 +28,7 @@ interface GalaxySceneProps {
   shipStats?: any;
   exploredSystemIds?: Set<string>;
   travelHistory?: string[];
+  currentSystemId?: string | null;
   getJumpableSystemIds?: (fromSystem: StarSystemType, allSystems: StarSystemType[]) => string[];
   getScannerRangeSystemIds?: (fromSystem: StarSystemType, allSystems: StarSystemType[]) => string[];
   isScanning?: boolean;
@@ -51,6 +52,7 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
   shipStats,
   exploredSystemIds = new Set(),
   travelHistory = [],
+  currentSystemId,
   getJumpableSystemIds,
   getScannerRangeSystemIds,
   isScanning = false,
@@ -62,6 +64,9 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
   const isMoving = useRef(false);
   const preserveCameraPosition = useRef(false);
   const hasInitiallyZoomed = useRef(false);
+  
+  // Find the actual current system object
+  const currentSystem = currentSystemId ? galaxy.starSystems.find(s => s.id === currentSystemId) : null;
   
   // Calculate scanner range for ping visualization
   const scannerRange = shipStats ? (shipStats.scanners / 100) * 50000 : 25000;
@@ -148,8 +153,8 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
         cosmicDustColorIntensity={cosmicDustColorIntensity}
       />
       
-      {/* Scanner Ping */}
-      {selectedSystem && (
+      {/* Scanner Ping - only show when scanning the selected system */}
+      {selectedSystem && isScanning && (
         <ScannerPing
           system={selectedSystem}
           isActive={isScanning}
@@ -158,15 +163,16 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
         />
       )}
       
-      {selectedSystem && shipStats && getJumpableSystemIds && getScannerRangeSystemIds && (
+      {/* Jump Range Visualizer - only show from current system where player is located */}
+      {currentSystem && shipStats && getJumpableSystemIds && getScannerRangeSystemIds && (
         <JumpRangeVisualizer
-          currentSystem={selectedSystem}
+          currentSystem={currentSystem}
           allSystems={galaxy.starSystems}
           shipStats={shipStats}
           exploredSystemIds={exploredSystemIds}
           travelHistory={travelHistory}
-          scannerRangeSystemIds={getScannerRangeSystemIds(selectedSystem, galaxy.starSystems)}
-          jumpableSystemIds={getJumpableSystemIds(selectedSystem, galaxy.starSystems)}
+          scannerRangeSystemIds={getScannerRangeSystemIds(currentSystem, galaxy.starSystems)}
+          jumpableSystemIds={getJumpableSystemIds(currentSystem, galaxy.starSystems)}
           jumpLaneOpacity={jumpLaneOpacity}
           greenPathOpacity={greenPathOpacity}
         />
@@ -181,13 +187,13 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
         />
       ))}
       
-      {selectedSystem && getScannerRangeSystemIds && (
+      {selectedSystem && getScannerRangeSystemIds && currentSystem && (
         <>
           {galaxy.starSystems.map((system) => (
             <ScannerRangeIcons
               key={`scanner-${system.id}`}
               system={system}
-              scannerRangeSystemIds={getScannerRangeSystemIds(selectedSystem, galaxy.starSystems)}
+              scannerRangeSystemIds={getScannerRangeSystemIds(currentSystem, galaxy.starSystems)}
             />
           ))}
         </>
