@@ -224,7 +224,7 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
               <ResizableHandle withHandle />
               
               {/* Actions Panel */}
-              <ResizablePanel defaultSize={30} minSize={25}>
+              <ResizablePanel defaultSize={40} minSize={25}>
                 <div className="h-full bg-gray-900 border-l border-gray-700 p-4">
                   <ActionsPanel
                     selectedSystem={selectedSystem}
