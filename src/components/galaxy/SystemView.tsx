@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { StarSystem, Planet, Moon } from '../../utils/galaxyGenerator';
 import { SystemViewHeader } from './system-view/SystemViewHeader';
@@ -88,12 +89,12 @@ export const SystemView: React.FC<SystemViewProps> = ({
     
     setZoom(Math.max(0.5, Math.min(3, optimalZoom)));
     setPan({ x: 0, y: 0 });
-  }, [planetsToShow]);
+  }, [planetsToShow.length]); // Only depend on the length, not the entire array
 
   // Auto-zoom when system or selected star changes
   useEffect(() => {
     calculateZoomToFit();
-  }, [system.id, selectedStar, calculateZoomToFit]);
+  }, [system.id, selectedStar]); // Remove calculateZoomToFit from dependencies to break the cycle
 
   const handleBodyClick = (body: Planet | Moon | null) => {
     if (body) {
