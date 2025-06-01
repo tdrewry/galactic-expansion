@@ -233,8 +233,7 @@ const Index = () => {
           type: marketInfo.type,
           techLevel: marketInfo.techLevel,
           hasMarket: marketInfo.hasMarket,
-          hasRepair: marketInfo.hasRepair,
-          planetName: marketInfo.planetName
+          hasRepair: marketInfo.hasRepair
         });
         setCurrentMarketInfo(marketInfo);
         setIsMarketDialogOpen(true);
