@@ -208,6 +208,7 @@ const Index = () => {
   };
 
   const handleOpenMarket = () => {
+    console.log('=== MARKET OPEN DEBUG START ===');
     console.log('handleOpenMarket called');
     console.log('selectedSystem:', selectedSystem);
     console.log('currentSystemId:', currentSystemId);
@@ -215,19 +216,39 @@ const Index = () => {
     
     if (selectedSystem) {
       console.log('Getting market info for system:', selectedSystem.id);
+      console.log('System planets before getSystemMarketInfo:', selectedSystem.planets.map(p => ({
+        name: p.name,
+        hasCivilization: !!p.civilization,
+        techLevel: p.civilization?.techLevel,
+        civilizationType: p.civilization?.type
+      })));
+      
       const marketInfo = getSystemMarketInfo(selectedSystem);
       console.log('Market info result:', marketInfo);
+      console.log('Market info type:', typeof marketInfo);
+      console.log('Market info keys:', marketInfo ? Object.keys(marketInfo) : 'null');
       
       if (marketInfo) {
-        console.log('Setting market dialog open with info:', marketInfo);
+        console.log('Setting market dialog open with info:', {
+          type: marketInfo.type,
+          techLevel: marketInfo.techLevel,
+          hasMarket: marketInfo.hasMarket,
+          hasRepair: marketInfo.hasRepair,
+          planetName: marketInfo.planetName
+        });
         setCurrentMarketInfo(marketInfo);
         setIsMarketDialogOpen(true);
+        console.log('Market dialog state set - isOpen should be true');
       } else {
-        console.log('No market info available for system');
+        console.log('No market info available for system - this is the problem!');
+        console.log('Retrying getSystemMarketInfo immediately...');
+        const retryMarketInfo = getSystemMarketInfo(selectedSystem);
+        console.log('Retry result:', retryMarketInfo);
       }
     } else {
       console.log('No selected system');
     }
+    console.log('=== MARKET OPEN DEBUG END ===');
   };
 
   const handleJumpToSystem = (systemId: string) => {
@@ -372,7 +393,9 @@ const Index = () => {
           isOpen={isMarketDialogOpen}
           onClose={() => {
             console.log('Market dialog closing');
+            console.log('Clearing currentMarketInfo');
             setIsMarketDialogOpen(false);
+            setCurrentMarketInfo(null);
           }}
           marketInfo={currentMarketInfo}
           shipStats={shipStats}
