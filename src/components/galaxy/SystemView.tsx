@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { StarSystem, Planet, Moon } from '../../utils/galaxyGenerator';
 import { SystemViewHeader } from './system-view/SystemViewHeader';
