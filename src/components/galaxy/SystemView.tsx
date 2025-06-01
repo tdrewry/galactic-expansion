@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { StarSystem, Planet, Moon } from '../../utils/galaxyGenerator';
 import { SystemViewHeader } from './system-view/SystemViewHeader';
 import { SystemMapCanvas } from './system-view/SystemMapCanvas';
@@ -63,6 +63,39 @@ export const SystemView: React.FC<SystemViewProps> = ({
 
   console.log('Current star data:', currentStarData, 'Planets to show:', planetsToShow.length);
 
+  // Auto-zoom to fit system when system or selectedStar changes
+  const calculateZoomToFit = useCallback(() => {
+    if (planetsToShow.length === 0) {
+      // No planets, just show the star
+      setZoom(1);
+      setPan({ x: 0, y: 0 });
+      return;
+    }
+
+    // Calculate the furthest planet distance
+    const maxDistance = Math.max(...planetsToShow.map(planet => planet.distanceFromStar));
+    
+    // Base radius for first planet orbit + increments for each additional planet
+    const baseRadius = 60;
+    const radiusIncrement = 35;
+    const maxOrbitRadius = baseRadius + ((planetsToShow.length - 1) * radiusIncrement);
+    
+    // Add padding for moons (25px) and some extra margin
+    const totalRadius = maxOrbitRadius + 25 + 50;
+    
+    // Canvas size is 400x400, so we want to fit within ~350x350 for padding
+    const canvasSize = 350;
+    const optimalZoom = Math.min(1, canvasSize / (totalRadius * 2));
+    
+    setZoom(Math.max(0.5, Math.min(3, optimalZoom)));
+    setPan({ x: 0, y: 0 });
+  }, [planetsToShow]);
+
+  // Auto-zoom when system or selected star changes
+  useEffect(() => {
+    calculateZoomToFit();
+  }, [system.id, selectedStar, calculateZoomToFit]);
+
   const handleBodyClick = (body: Planet | Moon | null) => {
     if (body) {
       console.log('Selected celestial body:', body.name);
@@ -104,8 +137,7 @@ export const SystemView: React.FC<SystemViewProps> = ({
   }, [zoom]);
 
   const resetView = () => {
-    setZoom(1);
-    setPan({ x: 0, y: 0 });
+    calculateZoomToFit();
   };
 
   if (!currentStarData) {

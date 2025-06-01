@@ -118,8 +118,8 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
 
   return (
     <ResizablePanelGroup direction="horizontal" className="flex-1">
-      {/* Left Panel - Always visible with System Info and Exploration Log */}
-      <ResizablePanel defaultSize={25} minSize={20} maxSize={35}>
+      {/* Left Panel - Set to minimum size (20) as default */}
+      <ResizablePanel defaultSize={20} minSize={20} maxSize={35}>
         <div className="h-full bg-gray-900 border-r border-gray-700 flex flex-col">
           <div className="flex-shrink-0 p-4">
             <SystemInfoCard
@@ -140,10 +140,10 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
       <ResizableHandle withHandle />
 
       {/* Center Panel - Galaxy Map and Ship Stats */}
-      <ResizablePanel defaultSize={45} minSize={40}>
+      <ResizablePanel defaultSize={55} minSize={40}>
         <ResizablePanelGroup direction="vertical" className="h-full">
-          {/* Galaxy Map */}
-          <ResizablePanel defaultSize={75} minSize={50}>
+          {/* Galaxy Map - Reduced from 75% to 65% */}
+          <ResizablePanel defaultSize={65} minSize={50}>
             <GalaxyMap 
               seed={galaxySeed} 
               numSystems={numSystems}
@@ -179,8 +179,8 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
           
           <ResizableHandle withHandle />
           
-          {/* Ship Stats */}
-          <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
+          {/* Ship Stats - Increased from 25% to 35% (25% * 1.25 = 31.25%, rounded to 35%) */}
+          <ResizablePanel defaultSize={35} minSize={20} maxSize={40}>
             <div className="border-t border-gray-700">
               <StarshipPanel 
                 seed={galaxySeed}
@@ -201,14 +201,14 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
         </ResizablePanelGroup>
       </ResizablePanel>
 
-      {/* Right Panel - System View and Actions */}
+      {/* Right Panel - System View and Actions - Set to minimum size (25) as default */}
       {selectedSystem && (
         <>
           <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={30} minSize={25} maxSize={40}>
+          <ResizablePanel defaultSize={25} minSize={25} maxSize={40}>
             <ResizablePanelGroup direction="vertical" className="h-full">
-              {/* System View */}
-              <ResizablePanel defaultSize={70} minSize={50}>
+              {/* System View - Increased from 70% to 75% to accommodate actions panel */}
+              <ResizablePanel defaultSize={75} minSize={50}>
                 <div className="h-full bg-gray-900 border-l border-gray-700 overflow-y-auto">
                   <div className="p-4">
                     <SystemView 
@@ -223,8 +223,8 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
               
               <ResizableHandle withHandle />
               
-              {/* Actions Panel */}
-              <ResizablePanel defaultSize={30} minSize={25}>
+              {/* Actions Panel - Reduced from 30% to 25% */}
+              <ResizablePanel defaultSize={25} minSize={25}>
                 <div className="h-full bg-gray-900 border-l border-gray-700 p-4">
                   <ActionsPanel
                     selectedSystem={selectedSystem}
