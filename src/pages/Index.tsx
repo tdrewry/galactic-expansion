@@ -5,6 +5,7 @@ import { useExploration } from '../components/exploration/useExploration';
 import { generateStarship } from '../utils/starshipGenerator';
 import { useShipStats } from '../hooks/useShipStats';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import { useGalaxyState } from '../hooks/useGalaxyState';
 import { GalaxyControls } from '../components/galaxy/GalaxyControls';
 import { GalaxyLayout } from '../components/galaxy/GalaxyLayout';
@@ -260,10 +261,11 @@ const Index = () => {
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <h1 className="text-2xl font-bold">{appTitle}</h1>
-            <div className="flex gap-2">
-              <Button onClick={generateRandomSeed} className="bg-green-600 hover:bg-green-700">
+            <div className="flex items-center gap-2">
+              <Button onClick={generateRandomSeed} size="sm" className="bg-green-600 hover:bg-green-700">
                 Start New Game
               </Button>
+              <Separator orientation="vertical" className="h-6" />
               <Button onClick={triggerGameOver} variant="destructive" size="sm">
                 Retire
               </Button>
