@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { StarshipStats } from '../utils/starshipGenerator';
 import { ExplorationEvent } from '../components/galaxy/ExplorationDialog';
@@ -82,6 +83,8 @@ export const useShipStats = (initialStats: StarshipStats) => {
           if (combatSuccess) {
             newStats.credits += 1500;
             newStats.cargo = Math.min(newStats.maxCargo, newStats.cargo + 25);
+            // Successful combat increases combat power
+            newStats.combatPower = Math.min(newStats.maxCombatPower, newStats.combatPower + 3);
           } else {
             // Combat failure causes damage and crew loss
             const crewLoss = Math.floor(Math.random() * 3) + 1;
@@ -221,6 +224,26 @@ export const useShipStats = (initialStats: StarshipStats) => {
     });
   }, []);
 
+  const repairCombatSystems = useCallback((cost: number) => {
+    setStats(prevStats => {
+      if (prevStats.credits >= cost) {
+        const repairAmount = Math.min(20, prevStats.maxCombatPower - prevStats.combatPower);
+        
+        return {
+          ...prevStats,
+          combatPower: Math.min(prevStats.maxCombatPower, prevStats.combatPower + repairAmount),
+          credits: prevStats.credits - cost
+        };
+      }
+      return prevStats;
+    });
+    
+    toast({
+      title: "Combat Systems Repaired",
+      description: "Combat effectiveness has been restored.",
+    });
+  }, [toast]);
+
   const saveGame = useCallback((galaxySeed: number) => {
     const saveData: GameSaveData = {
       stats,
@@ -340,6 +363,7 @@ export const useShipStats = (initialStats: StarshipStats) => {
     isJumping,
     updateStatsFromExploration,
     repairShip,
+    repairCombatSystems,
     upgradeSystem,
     sellCargo,
     canJumpToSystem,

@@ -1,4 +1,5 @@
-import React, { useRef, useCallback, useMemo, useState } from 'react';
+
+import React, { useRef, useCallback, useMemo, useState, useEffect } from 'react';
 import { StarSystem, Planet, Moon } from '../../../utils/galaxyGenerator';
 
 interface SystemMapCanvasProps {
@@ -32,6 +33,33 @@ export const SystemMapCanvas: React.FC<SystemMapCanvasProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [touchStart, setTouchStart] = useState<{ distance: number; centerX: number; centerY: number } | null>(null);
+  const [canvasSize, setCanvasSize] = useState({ width: 400, height: 400 });
+
+  // Auto-resize canvas to fit container
+  useEffect(() => {
+    const updateSize = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const size = Math.min(rect.width, rect.height);
+        setCanvasSize({ width: size, height: size });
+      }
+    };
+
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    
+    // Use ResizeObserver if available for better responsiveness
+    if (window.ResizeObserver && containerRef.current) {
+      const resizeObserver = new ResizeObserver(updateSize);
+      resizeObserver.observe(containerRef.current);
+      return () => {
+        resizeObserver.disconnect();
+        window.removeEventListener('resize', updateSize);
+      };
+    }
+
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
 
   const getStarColor = (starType: string) => {
     const colors = {
@@ -64,10 +92,10 @@ export const SystemMapCanvas: React.FC<SystemMapCanvasProps> = ({
   // Memoize planet positions to prevent recalculation on every render
   const planetPositions = useMemo(() => {
     const sortedPlanets = [...planetsToShow].sort((a, b) => a.distanceFromStar - b.distanceFromStar);
-    const centerX = 200;
-    const centerY = 200;
-    const baseRadius = 60;
-    const radiusIncrement = 35;
+    const centerX = canvasSize.width / 2;
+    const centerY = canvasSize.height / 2;
+    const baseRadius = Math.min(canvasSize.width, canvasSize.height) * 0.15; // 15% of canvas size
+    const radiusIncrement = Math.min(canvasSize.width, canvasSize.height) * 0.0875; // 8.75% increment
 
     return sortedPlanets.map((planet, index) => {
       const orbitRadius = baseRadius + (index * radiusIncrement);
@@ -84,7 +112,7 @@ export const SystemMapCanvas: React.FC<SystemMapCanvasProps> = ({
         angle
       };
     });
-  }, [planetsToShow]);
+  }, [planetsToShow, canvasSize]);
 
   const transformStyle = {
     transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
@@ -133,11 +161,14 @@ export const SystemMapCanvas: React.FC<SystemMapCanvasProps> = ({
     setTouchStart(null);
   }, []);
 
+  const centerX = canvasSize.width / 2;
+  const centerY = canvasSize.height / 2;
+
   return (
     <div 
       ref={containerRef}
-      className="relative bg-black overflow-hidden cursor-move touch-none"
-      style={{ height: '400px' }}
+      className="relative bg-black overflow-hidden cursor-move touch-none w-full"
+      style={{ height: '100%', minHeight: '300px' }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
@@ -149,13 +180,13 @@ export const SystemMapCanvas: React.FC<SystemMapCanvasProps> = ({
       onTouchEnd={handleTouchEnd}
     >
       <div style={transformStyle}>
-        <svg width="400" height="400" className="absolute inset-0">
+        <svg width={canvasSize.width} height={canvasSize.height} className="absolute inset-0">
           {/* Orbital rings */}
           {planetPositions.map((pos, index) => (
             <circle
               key={`orbit-${index}`}
-              cx={200}
-              cy={200}
+              cx={centerX}
+              cy={centerY}
               r={pos.orbitRadius}
               fill="none"
               stroke="rgba(100, 116, 139, 0.3)"
@@ -168,8 +199,8 @@ export const SystemMapCanvas: React.FC<SystemMapCanvasProps> = ({
           {planetPositions.map((pos, index) => (
             <line
               key={`line-${index}`}
-              x1={200}
-              y1={200}
+              x1={centerX}
+              y1={centerY}
               x2={pos.x}
               y2={pos.y}
               stroke="rgba(100, 116, 139, 0.2)"
@@ -182,8 +213,8 @@ export const SystemMapCanvas: React.FC<SystemMapCanvasProps> = ({
         <div 
           className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer hover:scale-110 transition-transform"
           style={{ 
-            left: 200, 
-            top: 200,
+            left: centerX, 
+            top: centerY,
             backgroundColor: getStarColor(currentStarData.starType),
             width: '24px',
             height: '24px',
@@ -231,7 +262,7 @@ export const SystemMapCanvas: React.FC<SystemMapCanvasProps> = ({
               style={{ 
                 left: pos.x, 
                 top: pos.y + 15,
-                fontSize: '10px'
+                fontSize: Math.max(8, canvasSize.width * 0.025) + 'px'
               }}
             >
               {pos.planet.name.length > 8 ? pos.planet.name.substring(0, 8) + '...' : pos.planet.name}
@@ -242,7 +273,7 @@ export const SystemMapCanvas: React.FC<SystemMapCanvasProps> = ({
               <>
                 {pos.planet.moons.map((moon, moonIndex) => {
                   const moonAngle = (moonIndex * 90) + pos.angle;
-                  const moonDistance = 25;
+                  const moonDistance = Math.min(canvasSize.width, canvasSize.height) * 0.0625; // 6.25% of canvas size
                   const moonX = pos.x + Math.cos(moonAngle * Math.PI / 180) * moonDistance;
                   const moonY = pos.y + Math.sin(moonAngle * Math.PI / 180) * moonDistance;
                   

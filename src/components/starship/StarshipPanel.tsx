@@ -21,6 +21,7 @@ interface StarshipPanelProps {
   onResetExploration: () => void;
   shipStats?: any;
   onRepairShip?: (cost: number) => void;
+  onRepairCombatSystems?: (cost: number) => void;
   onOpenMarket?: () => void;
   hideActions?: boolean;
   canJumpToSelected?: boolean;
@@ -40,6 +41,7 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
   onResetExploration,
   shipStats,
   onRepairShip,
+  onRepairCombatSystems,
   onOpenMarket,
   hideActions = false,
   canJumpToSelected = false,
@@ -61,14 +63,21 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
     );
 
   const repairCost = 1000;
+  const combatRepairCost = 1500;
   const canAffordRepair = currentStats.credits >= repairCost;
+  const canAffordCombatRepair = currentStats.credits >= combatRepairCost;
   const needsRepair = currentStats.shields < currentStats.maxShields || currentStats.hull < currentStats.maxHull;
+  const needsCombatRepair = currentStats.combatPower < currentStats.maxCombatPower;
 
   return (
     <>
       <div className={`h-full bg-gray-900 border-t border-gray-700 ${hideActions ? '' : 'flex'}`}>
         <div className={hideActions ? 'w-full p-4' : 'flex-1 border-r border-gray-700 p-4'}>
-          <StarshipStats stats={currentStats} />
+          <StarshipStats 
+            stats={currentStats} 
+            onRepairCombatSystems={canRepairShip && needsCombatRepair && canAffordCombatRepair ? onRepairCombatSystems : undefined}
+            combatRepairCost={combatRepairCost}
+          />
         </div>
 
         {!hideActions && (
