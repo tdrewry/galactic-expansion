@@ -63,6 +63,14 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
     }
   };
 
+  const handleOpenMarket = () => {
+    console.log('ActionsPanel: handleOpenMarket called');
+    console.log('ActionsPanel: onOpenMarket available:', !!onOpenMarket);
+    if (onOpenMarket) {
+      onOpenMarket();
+    }
+  };
+
   // Check if we're looking at the current system or a different one
   const isCurrentSystem = selectedSystem?.id === currentSystemId;
   
@@ -79,6 +87,15 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
   const systemHasMarket = isCurrentSystem && selectedSystem?.planets.some(planet => 
     planet.civilization && planet.civilization.techLevel >= 2
   );
+
+  console.log('ActionsPanel render:');
+  console.log('- isCurrentSystem:', isCurrentSystem);
+  console.log('- systemHasMarket:', systemHasMarket);
+  console.log('- selectedSystem planets:', selectedSystem?.planets?.map(p => ({ 
+    name: p.name, 
+    civilization: p.civilization,
+    techLevel: p.civilization?.techLevel 
+  })));
 
   return (
     <Card className="bg-gray-800 border-gray-600 h-full w-full">
@@ -188,7 +205,7 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
                   Trading market available
                 </p>
                 <Button
-                  onClick={onOpenMarket}
+                  onClick={handleOpenMarket}
                   className="w-full bg-purple-600 hover:bg-purple-700 text-white"
                   size="sm"
                 >

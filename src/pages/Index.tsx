@@ -208,12 +208,25 @@ const Index = () => {
   };
 
   const handleOpenMarket = () => {
+    console.log('handleOpenMarket called');
+    console.log('selectedSystem:', selectedSystem);
+    console.log('currentSystemId:', currentSystemId);
+    console.log('selectedSystem?.id === currentSystemId:', selectedSystem?.id === currentSystemId);
+    
     if (selectedSystem) {
+      console.log('Getting market info for system:', selectedSystem.id);
       const marketInfo = getSystemMarketInfo(selectedSystem);
+      console.log('Market info result:', marketInfo);
+      
       if (marketInfo) {
+        console.log('Setting market dialog open with info:', marketInfo);
         setCurrentMarketInfo(marketInfo);
         setIsMarketDialogOpen(true);
+      } else {
+        console.log('No market info available for system');
       }
+    } else {
+      console.log('No selected system');
     }
   };
 
@@ -357,7 +370,10 @@ const Index = () => {
       {currentMarketInfo && (
         <MarketDialog
           isOpen={isMarketDialogOpen}
-          onClose={() => setIsMarketDialogOpen(false)}
+          onClose={() => {
+            console.log('Market dialog closing');
+            setIsMarketDialogOpen(false);
+          }}
           marketInfo={currentMarketInfo}
           shipStats={shipStats}
           onSellCargo={(amount) => sellCargo(amount, true)}
