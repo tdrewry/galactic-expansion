@@ -4,16 +4,20 @@ import { StarshipStats as StarshipStatsType } from '../../utils/starshipGenerato
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Edit } from 'lucide-react';
+import { Edit, Wrench } from 'lucide-react';
 
 interface StarshipStatsProps {
   stats: StarshipStatsType & { name?: string };
   onNameChange?: (newName: string) => void;
+  onRepairCombatSystems?: (cost: number) => void;
+  combatRepairCost?: number;
 }
 
 export const StarshipStats: React.FC<StarshipStatsProps> = ({ 
   stats,
-  onNameChange 
+  onNameChange,
+  onRepairCombatSystems,
+  combatRepairCost = 1500
 }) => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [shipName, setShipName] = useState(stats.name || 'Starship');
@@ -29,6 +33,9 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({
     setShipName(stats.name || 'Starship');
     setIsEditingName(false);
   };
+
+  const needsCombatRepair = stats.combatPower < stats.maxCombatPower;
+  const canAffordCombatRepair = stats.credits >= combatRepairCost;
 
   return (
     <div className="bg-gray-800 p-4 rounded-lg">
@@ -100,6 +107,18 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({
           <div className="flex justify-between mb-1">
             <span>Combat</span>
             <span className="text-red-300">{stats.combatPower}/{stats.maxCombatPower}</span>
+            {onRepairCombatSystems && needsCombatRepair && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => onRepairCombatSystems(combatRepairCost)}
+                disabled={!canAffordCombatRepair}
+                className="ml-2 h-5 px-2 text-xs"
+              >
+                <Wrench className="h-3 w-3 mr-1" />
+                Repair ({combatRepairCost})
+              </Button>
+            )}
           </div>
           <Progress value={(stats.combatPower / stats.maxCombatPower) * 100} className="h-2" />
         </div>
