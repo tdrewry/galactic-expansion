@@ -72,7 +72,7 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
   return (
     <>
       <div className={`h-full bg-gray-900 border-t border-gray-700 ${hideActions ? '' : 'flex'}`}>
-        <div className={hideActions ? 'w-full p-4' : 'flex-1 border-r border-gray-700 p-4'}>
+        <div className={hideActions ? 'w-full h-auto p-4' : 'flex-1 h-auto border-r border-gray-700 p-4'}>
           <StarshipStats 
             stats={currentStats} 
             onRepairCombatSystems={canRepairShip && needsCombatRepair && canAffordCombatRepair ? onRepairCombatSystems : undefined}
