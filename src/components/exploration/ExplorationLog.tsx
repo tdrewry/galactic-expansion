@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -23,11 +24,13 @@ export const ExplorationLog: React.FC<ExplorationLogProps> = ({
 }) => {
   const getEventIcon = (type: string) => {
     switch (type) {
-      case 'discovery': return '🔍';
+      case 'discovery': return '🧬';
       case 'resources': return '⛏️';
       case 'civilization': return '🏛️';
       case 'artifact': return '🗿';
+      case 'combat': return '💥';
       case 'danger': return '⚠️';
+      case 'market': return '🛰️';
       case 'empty': return '🌌';
       default: return '❓';
     }
