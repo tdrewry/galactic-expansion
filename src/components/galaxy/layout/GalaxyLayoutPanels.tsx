@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { StarSystem, Planet, Moon } from '../../../utils/galaxyGenerator';
@@ -142,8 +141,8 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
       {/* Center Panel - Galaxy Map and Ship Stats */}
       <ResizablePanel defaultSize={55} minSize={40}>
         <ResizablePanelGroup direction="vertical" className="h-full">
-          {/* Galaxy Map - Reduced from 75% to 65% */}
-          <ResizablePanel defaultSize={65} minSize={50}>
+          {/* Galaxy Map - Set to 60% to give more space to ship stats */}
+          <ResizablePanel defaultSize={60} minSize={50}>
             <GalaxyMap 
               seed={galaxySeed} 
               numSystems={numSystems}
@@ -179,8 +178,8 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
           
           <ResizableHandle withHandle />
           
-          {/* Ship Stats - Increased from 25% to 35% (25% * 1.25 = 31.25%, rounded to 35%) */}
-          <ResizablePanel defaultSize={35} minSize={20} maxSize={40}>
+          {/* Ship Stats - Increased to 40% for better visibility */}
+          <ResizablePanel defaultSize={40} minSize={20} maxSize={40}>
             <div className="border-t border-gray-700">
               <StarshipPanel 
                 seed={galaxySeed}
@@ -207,8 +206,8 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
           <ResizableHandle withHandle />
           <ResizablePanel defaultSize={25} minSize={25} maxSize={40}>
             <ResizablePanelGroup direction="vertical" className="h-full">
-              {/* System View - Increased from 70% to 75% to accommodate actions panel */}
-              <ResizablePanel defaultSize={75} minSize={50}>
+              {/* System View - Set to 70% */}
+              <ResizablePanel defaultSize={70} minSize={50}>
                 <div className="h-full bg-gray-900 border-l border-gray-700 overflow-y-auto">
                   <div className="p-4">
                     <SystemView 
@@ -223,8 +222,8 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
               
               <ResizableHandle withHandle />
               
-              {/* Actions Panel - Reduced from 30% to 25% */}
-              <ResizablePanel defaultSize={25} minSize={25}>
+              {/* Actions Panel - Set to 30% */}
+              <ResizablePanel defaultSize={30} minSize={25}>
                 <div className="h-full bg-gray-900 border-l border-gray-700 p-4">
                   <ActionsPanel
                     selectedSystem={selectedSystem}

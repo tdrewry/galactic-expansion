@@ -132,7 +132,7 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({
             <span>Cargo</span>
             <span className="text-gray-300">{stats.cargo}/{stats.maxCargo}</span>
           </div>
-          <Progress value={(stats.cargo / stats.maxCargo) * 100} className="h-2" />
+          <Progress value={(stats.cargo / stats.maxCargo) * 100} className="h-2" inverted />
         </div>
       </div>
     </div>
