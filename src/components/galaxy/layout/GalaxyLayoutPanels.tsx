@@ -180,7 +180,7 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
           <ResizableHandle withHandle />
           
           {/* Ship Stats */}
-          <ResizablePanel defaultSize={20} minSize={10} maxSize={40}>
+          <ResizablePanel defaultSize={24} minSize={10} maxSize={40}>
             <div className="border-t border-gray-700">
               <StarshipPanel 
                 seed={galaxySeed}
