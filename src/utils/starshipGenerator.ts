@@ -1,4 +1,5 @@
 export interface StarshipStats {
+  name?: string;
   techLevel: number;
   shields: number;
   hull: number;
@@ -64,7 +65,7 @@ function seededRandom(seed: number): number {
   return x - Math.floor(x);
 }
 
-function generateStats(seed: number): StarshipStats {
+function generateStats(seed: number, shipName: string): StarshipStats {
   let currentSeed = seed;
   
   // Base stats
@@ -87,6 +88,7 @@ function generateStats(seed: number): StarshipStats {
   const crew = Math.floor(maxCrew * 0.8); // Start with 80% of max crew
   
   return {
+    name: shipName,
     techLevel,
     shields,
     hull,
@@ -189,11 +191,12 @@ export function generateStarship(seed: number): Starship {
   
   const nameIndex = Math.floor(seededRandom(currentSeed++) * shipNames.length);
   const classIndex = Math.floor(seededRandom(currentSeed++) * shipClasses.length);
+  const shipName = shipNames[nameIndex];
   
   return {
-    name: shipNames[nameIndex],
+    name: shipName,
     class: shipClasses[classIndex],
-    stats: generateStats(currentSeed),
+    stats: generateStats(currentSeed, shipName),
     layout: generateLayout(currentSeed + 1000)
   };
 }

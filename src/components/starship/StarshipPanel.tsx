@@ -54,10 +54,11 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
   const starship = useMemo(() => generateStarship(seed), [seed]);
   const [isShipLayoutOpen, setIsShipLayoutOpen] = useState(false);
 
-  // Merge ship stats with ship name and class
+  // Merge ship stats with ship name and class, prioritizing saved name over generated name
   const currentStats = shipStats ? {
     ...shipStats,
-    name: starship.name,
+    // Use saved name if it exists, otherwise fall back to generated name
+    name: shipStats.name || starship.name,
     class: starship.class
   } : {
     ...starship.stats,
