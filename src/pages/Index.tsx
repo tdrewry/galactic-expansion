@@ -99,7 +99,7 @@ const Index = () => {
     setSelectedSystem(null);
     setSelectedBody(null);
     resetAllExploration();
-    // Reset ship stats to new ship with new starting system
+    // Reset ship stats to new ship with new starting system and random name
     const newStarship = generateStarship(newSeed);
     resetStats(newStarship.stats);
   };
@@ -135,7 +135,7 @@ const Index = () => {
     setSelectedSystem(null);
     setSelectedBody(null);
     resetAllExploration();
-    // Reset ship stats to new ship with new starting system
+    // Reset ship stats to new ship with new starting system and random name
     const newStarship = generateStarship(newSeed);
     resetStats(newStarship.stats);
   };
