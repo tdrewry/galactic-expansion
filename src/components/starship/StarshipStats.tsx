@@ -37,9 +37,24 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({
   const needsCombatRepair = stats.combatPower < stats.maxCombatPower;
   const canAffordCombatRepair = stats.credits >= combatRepairCost;
 
+  const getStatusColor = (current: number, max: number) => {
+    const percentage = (current / max) * 100;
+    if (percentage <= 20) return "text-red-400";
+    if (percentage <= 60) return "text-yellow-400";
+    return "text-green-400";
+  };
+
+  const getCargoStatusColor = (current: number, max: number) => {
+    const percentage = (current / max) * 100;
+    if (percentage <= 20) return "text-green-400";
+    if (percentage <= 60) return "text-yellow-400";
+    return "text-red-400";
+  };
+
   return (
     <div className="bg-gray-800 p-4 rounded-lg">
-      <div className="flex items-center gap-2 mb-4">
+      {/* Header with ship name and class */}
+      <div className="flex items-center justify-between mb-4">
         {isEditingName ? (
           <div className="flex items-center gap-2 flex-1">
             <Input
@@ -57,101 +72,149 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({
           </div>
         ) : (
           <>
-            <h3 className="text-lg font-semibold text-blue-300 flex-1">
-              {stats.name || 'Starship'}
-            </h3>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setIsEditingName(true)}
-              className="h-6 w-6 p-0"
-            >
-              <Edit className="h-3 w-3" />
-            </Button>
+            <div className="flex items-center gap-2 flex-1">
+              <span className="text-lg font-semibold text-blue-300">
+                {stats.name || 'Starship'} : Class Unknown
+              </span>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setIsEditingName(true)}
+                className="h-6 w-6 p-0"
+              >
+                <Edit className="h-3 w-3" />
+              </Button>
+            </div>
+            <div className="text-sm">
+              <span className="text-gray-300">Tech Level </span>
+              <span className={getStatusColor(stats.techLevel, 10)}>{stats.techLevel.toString().padStart(3, '0')}</span>
+              <span className="text-gray-300">/010</span>
+            </div>
           </>
         )}
       </div>
       
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <div>
-          <div className="flex justify-between mb-1">
-            <span>Tech Level</span>
-            <span className="text-cyan-300">{stats.techLevel}</span>
+      {/* Two column layout */}
+      <div className="grid grid-cols-2 gap-6 text-sm">
+        {/* Left Column */}
+        <div className="space-y-3">
+          {/* Shields */}
+          <div>
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-gray-300">Shields</span>
+              <div>
+                <span className={getStatusColor(stats.shields, stats.maxShields)}>
+                  {stats.shields.toString().padStart(3, '0')}
+                </span>
+                <span className="text-gray-300">/{stats.maxShields.toString().padStart(3, '0')}</span>
+              </div>
+            </div>
+            <Progress value={(stats.shields / stats.maxShields) * 100} className="h-2" />
+          </div>
+
+          {/* Hull */}
+          <div>
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-gray-300">Hull</span>
+              <div>
+                <span className={getStatusColor(stats.hull, stats.maxHull)}>
+                  {stats.hull.toString().padStart(3, '0')}
+                </span>
+                <span className="text-gray-300">/{stats.maxHull.toString().padStart(3, '0')}</span>
+              </div>
+            </div>
+            <Progress value={(stats.hull / stats.maxHull) * 100} className="h-2" />
+          </div>
+
+          {/* Scanners */}
+          <div>
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-gray-300">Scanners</span>
+              <div>
+                <span className={getStatusColor(stats.scanners, stats.maxScanners)}>
+                  {stats.scanners.toString().padStart(3, '0')}
+                </span>
+                <span className="text-gray-300">/{stats.maxScanners.toString().padStart(3, '0')}</span>
+              </div>
+            </div>
+            <Progress value={(stats.scanners / stats.maxScanners) * 100} className="h-2" />
+          </div>
+
+          {/* Cargo */}
+          <div>
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-gray-300">Cargo</span>
+              <div>
+                <span className={getCargoStatusColor(stats.cargo, stats.maxCargo)}>
+                  {stats.cargo.toString().padStart(3, '0')}
+                </span>
+                <span className="text-gray-300">/{stats.maxCargo.toString().padStart(3, '0')}</span>
+              </div>
+            </div>
+            <Progress value={(stats.cargo / stats.maxCargo) * 100} className="h-2" inverted />
           </div>
         </div>
-        
-        <div>
-          <div className="flex justify-between mb-1">
-            <span>Credits</span>
-            <span className="text-yellow-300">{stats.credits.toLocaleString()}</span>
+
+        {/* Right Column */}
+        <div className="space-y-3">
+          {/* Combat */}
+          <div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-300">Combat</span>
+              <div className="flex items-center gap-2">
+                <div>
+                  <span className={getStatusColor(stats.combatPower, stats.maxCombatPower)}>
+                    {stats.combatPower.toString().padStart(3, '0')}
+                  </span>
+                  <span className="text-gray-300">/{stats.maxCombatPower.toString().padStart(3, '0')}</span>
+                </div>
+                {onRepairCombatSystems && needsCombatRepair && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => onRepairCombatSystems(combatRepairCost)}
+                    disabled={!canAffordCombatRepair}
+                    className="h-5 px-2 text-xs"
+                  >
+                    <Wrench className="h-3 w-3 mr-1" />
+                    Repair ({combatRepairCost})
+                  </Button>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-        
-        <div>
-          <div className="flex justify-between mb-1">
-            <span>Shields</span>
-            <span className="text-blue-300">{stats.shields}/{stats.maxShields}</span>
+
+          {/* Diplomacy */}
+          <div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-300">Diplomacy</span>
+              <div>
+                <span className="text-purple-300">{stats.diplomacy.toString().padStart(3, '0')}</span>
+                <span className="text-gray-300">/100</span>
+              </div>
+            </div>
           </div>
-          <Progress value={(stats.shields / stats.maxShields) * 100} className="h-2" />
-        </div>
-        
-        <div>
-          <div className="flex justify-between mb-1">
-            <span>Hull</span>
-            <span className="text-green-300">{stats.hull}/{stats.maxHull}</span>
+
+          {/* Crew */}
+          <div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-300">Crew</span>
+              <div>
+                <span className={getStatusColor(stats.crew, stats.maxCrew)}>
+                  {stats.crew.toString().padStart(3, '0')}
+                </span>
+                <span className="text-gray-300">/{stats.maxCrew.toString().padStart(3, '0')}</span>
+              </div>
+            </div>
           </div>
-          <Progress value={(stats.hull / stats.maxHull) * 100} className="h-2" />
-        </div>
-        
-        <div>
-          <div className="flex justify-between mb-1">
-            <span>Combat</span>
-            <span className="text-red-300">{stats.combatPower}/{stats.maxCombatPower}</span>
-            {onRepairCombatSystems && needsCombatRepair && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => onRepairCombatSystems(combatRepairCost)}
-                disabled={!canAffordCombatRepair}
-                className="ml-2 h-5 px-2 text-xs"
-              >
-                <Wrench className="h-3 w-3 mr-1" />
-                Repair ({combatRepairCost})
-              </Button>
-            )}
+
+          {/* Credits */}
+          <div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-300">💶</span>
+              <span className="text-yellow-300">{stats.credits.toLocaleString()}</span>
+            </div>
           </div>
-          <Progress value={(stats.combatPower / stats.maxCombatPower) * 100} className="h-2" />
-        </div>
-        
-        <div>
-          <div className="flex justify-between mb-1">
-            <span>Diplomacy</span>
-            <span className="text-purple-300">{stats.diplomacy}</span>
-          </div>
-        </div>
-        
-        <div>
-          <div className="flex justify-between mb-1">
-            <span>Scanners</span>
-            <span className="text-orange-300">{stats.scanners}/{stats.maxScanners}</span>
-          </div>
-          <Progress value={(stats.scanners / stats.maxScanners) * 100} className="h-2" />
-        </div>
-        
-        <div>
-          <div className="flex justify-between mb-1">
-            <span>Crew</span>
-            <span className="text-pink-300">{stats.crew}/{stats.maxCrew}</span>
-          </div>
-          <Progress value={(stats.crew / stats.maxCrew) * 100} className="h-2" />
-        </div>
-        
-        <div className="col-span-2">
-          <div className="flex justify-between mb-1">
-            <span>Cargo</span>
-            <span className="text-gray-300">{stats.cargo}/{stats.maxCargo}</span>
-          </div>
-          <Progress value={(stats.cargo / stats.maxCargo) * 100} className="h-2" inverted />
         </div>
       </div>
     </div>
