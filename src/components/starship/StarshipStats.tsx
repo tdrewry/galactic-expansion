@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { StarshipStats as StarshipStatsType } from '../../utils/starshipGenerator';
 import { Progress } from '@/components/ui/progress';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Edit, Wrench } from 'lucide-react';
+import { Wrench } from 'lucide-react';
+import { ShipNameEditor } from './ShipNameEditor';
+import { getStatusColor, getCargoStatusColor } from './statsUtils';
 
 interface StarshipStatsProps {
   stats: StarshipStatsType & { name?: string; class?: string };
@@ -19,84 +20,20 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({
   onRepairCombatSystems,
   combatRepairCost = 1500
 }) => {
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [shipName, setShipName] = useState(stats.name || 'Starship');
-
-  const handleNameSubmit = () => {
-    if (onNameChange) {
-      onNameChange(shipName);
-    }
-    setIsEditingName(false);
-  };
-
-  const handleNameCancel = () => {
-    setShipName(stats.name || 'Starship');
-    setIsEditingName(false);
-  };
-
   const needsCombatRepair = stats.combatPower < stats.maxCombatPower;
   const canAffordCombatRepair = stats.credits >= combatRepairCost;
-
-  const getStatusColor = (current: number, max: number) => {
-    const percentage = (current / max) * 100;
-    if (percentage <= 20) return "text-red-400";
-    if (percentage <= 60) return "text-yellow-400";
-    return "text-green-400";
-  };
-
-  const getCargoStatusColor = (current: number, max: number) => {
-    const percentage = (current / max) * 100;
-    if (percentage <= 20) return "text-green-400";
-    if (percentage <= 60) return "text-yellow-400";
-    return "text-red-400";
-  };
 
   return (
     <div className="bg-gray-800 p-4 rounded-lg">
       {/* Header with ship class and name */}
       <div className="flex items-center justify-between mb-4">
-        {isEditingName ? (
-          <div className="flex items-center gap-2 flex-1">
-            <Input
-              value={shipName}
-              onChange={(e) => setShipName(e.target.value)}
-              className="flex-1 bg-gray-700 text-white border-gray-600 focus:border-blue-400"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleNameSubmit();
-                if (e.key === 'Escape') handleNameCancel();
-              }}
-              autoFocus
-            />
-            <Button size="sm" onClick={handleNameSubmit}>Save</Button>
-            <Button 
-              size="sm" 
-              variant="secondary" 
-              onClick={handleNameCancel}
-              className="bg-gray-600 text-white hover:bg-gray-500"
-            >
-              Cancel
-            </Button>
-          </div>
-        ) : (
-          <>
-            <div className="text-lg font-semibold text-blue-300">
-              {stats.class || 'Unknown'} Class
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-semibold text-blue-300">
-                {stats.name || 'Starship'}
-              </span>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => setIsEditingName(true)}
-                className="h-6 w-6 p-0"
-              >
-                <Edit className="h-3 w-3" />
-              </Button>
-            </div>
-          </>
-        )}
+        <div className="text-lg font-semibold text-blue-300">
+          {stats.class || 'Unknown'} Class
+        </div>
+        <ShipNameEditor 
+          name={stats.name || 'Starship'} 
+          onNameChange={onNameChange} 
+        />
       </div>
       
       {/* Two column layout */}
