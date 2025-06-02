@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { StarshipStats } from '../utils/starshipGenerator';
 import { ExplorationEvent } from '../components/galaxy/ExplorationDialog';
@@ -9,6 +8,9 @@ import { useExplorationEvents } from './useExplorationEvents';
 import { useJumpMechanics } from './useJumpMechanics';
 
 export { type GameSaveData } from './useGameSave';
+
+// Type for numeric properties only (excluding name)
+type NumericStarshipStats = Omit<StarshipStats, 'name'>;
 
 export const useShipStats = (initialStats: StarshipStats) => {
   const [stats, setStats] = useState<StarshipStats>(initialStats);
@@ -92,10 +94,10 @@ export const useShipStats = (initialStats: StarshipStats) => {
     });
   }, []);
 
-  const upgradeSystem = useCallback((system: keyof StarshipStats, cost: number, amount: number) => {
+  const upgradeSystem = useCallback((system: keyof NumericStarshipStats, cost: number, amount: number) => {
     setStats(prevStats => {
       if (prevStats.credits >= cost) {
-        const maxValues: Record<keyof StarshipStats, number> = {
+        const maxValues: Record<keyof NumericStarshipStats, number> = {
           techLevel: 10,
           shields: prevStats.maxShields,
           hull: prevStats.maxHull,
@@ -113,9 +115,11 @@ export const useShipStats = (initialStats: StarshipStats) => {
           maxCargo: 2000
         };
         
+        const currentValue = prevStats[system] as number;
+        
         return {
           ...prevStats,
-          [system]: Math.min(maxValues[system], prevStats[system] + amount),
+          [system]: Math.min(maxValues[system], currentValue + amount),
           credits: prevStats.credits - cost
         };
       }
