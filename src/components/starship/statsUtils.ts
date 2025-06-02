@@ -12,3 +12,13 @@ export const getCargoStatusColor = (current: number, max: number) => {
   if (percentage <= 60) return "text-yellow-400";
   return "text-red-400";
 };
+
+export const formatStatValue = (value: number): string => {
+  if (value >= 1000000) {
+    return (value / 1000000).toFixed(1) + 'M';
+  }
+  if (value >= 1000) {
+    return (value / 1000).toFixed(1) + 'K';
+  }
+  return value.toString();
+};

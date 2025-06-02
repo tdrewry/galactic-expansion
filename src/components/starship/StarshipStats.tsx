@@ -45,12 +45,11 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({
             <div className="flex items-center gap-2">
               {!hideActions && isEditingName ? (
                 <ShipNameEditor
-                  currentName={stats.name || 'Unnamed Ship'}
-                  onSave={(newName) => {
+                  name={stats.name || 'Unnamed Ship'}
+                  onNameChange={(newName) => {
                     onNameChange?.(newName);
                     setIsEditingName(false);
                   }}
-                  onCancel={() => setIsEditingName(false)}
                 />
               ) : (
                 <>
@@ -83,7 +82,6 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({
               <Progress 
                 value={(stats.shields / stats.maxShields) * 100} 
                 className="h-2"
-                indicatorClassName={getHealthColor(stats.shields, stats.maxShields)}
               />
             </div>
             <div>
@@ -94,7 +92,6 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({
               <Progress 
                 value={(stats.hull / stats.maxHull) * 100} 
                 className="h-2"
-                indicatorClassName={getHealthColor(stats.hull, stats.maxHull)}
               />
             </div>
           </div>
@@ -119,7 +116,6 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({
             <Progress 
               value={(stats.combatPower / stats.maxCombatPower) * 100} 
               className="h-2"
-              indicatorClassName={getCombatSystemsColor(stats.combatPower, stats.maxCombatPower)}
             />
           </div>
 
