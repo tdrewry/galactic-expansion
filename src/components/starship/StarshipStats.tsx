@@ -68,7 +68,14 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({
               autoFocus
             />
             <Button size="sm" onClick={handleNameSubmit}>Save</Button>
-            <Button size="sm" variant="outline" onClick={handleNameCancel}>Cancel</Button>
+            <Button 
+              size="sm" 
+              variant="secondary" 
+              onClick={handleNameCancel}
+              className="bg-gray-600 text-white hover:bg-gray-500"
+            >
+              Cancel
+            </Button>
           </div>
         ) : (
           <>
