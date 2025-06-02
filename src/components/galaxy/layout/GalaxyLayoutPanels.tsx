@@ -61,6 +61,7 @@ interface GalaxyLayoutPanelsProps {
   onRepairShip: () => void;
   onOpenMarket: () => void;
   onJumpToSystem: (systemId: string) => void;
+  onUpdateShipName?: (newName: string) => void;
   canJumpToSelected?: boolean;
 }
 
@@ -102,6 +103,7 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
   onRepairShip,
   onOpenMarket,
   onJumpToSystem,
+  onUpdateShipName,
   canJumpToSelected = false
 }) => {
   const [isScanning, setIsScanning] = useState(false);
@@ -194,6 +196,7 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
                 shipStats={shipStats}
                 onRepairShip={onRepairShip}
                 onOpenMarket={onOpenMarket}
+                onUpdateShipName={onUpdateShipName}
                 hideActions={true}
               />
             </div>
