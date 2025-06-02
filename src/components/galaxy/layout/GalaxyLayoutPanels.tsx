@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { StarSystem, Planet, Moon } from '../../../utils/galaxyGenerator';
@@ -120,27 +119,40 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
 
   return (
     <ResizablePanelGroup direction="horizontal" className="flex-1">
-      {/* Left Panel - System Info and Exploration Log */}
-      <ResizablePanel defaultSize={25} minSize={20} maxSize={35}>
-        <div className="h-full bg-gray-900 border-r border-gray-700 flex flex-col">
-          <div className="flex-shrink-0 p-4">
-            <SystemInfoCard
-              system={selectedSystem}
-              selectedStar={selectedStar}
-              onStarSelect={onStarSelect}
-            />
-          </div>
-          
-          {explorationHistory.length > 0 && (
-            <div className="flex-1 min-h-0">
-              <ExplorationLog explorationHistory={explorationHistory} />
+      {/* Left Panel - Ship Actions */}
+      {selectedSystem && (
+        <>
+          <ResizablePanel defaultSize={25} minSize={25} maxSize={40}>
+            <div className="h-full bg-gray-900 border-r border-gray-700 p-4">
+              <ActionsPanel
+                selectedSystem={selectedSystem}
+                currentSystemId={currentSystemId}
+                isExplored={selectedSystem ? isSystemExplored(selectedSystem) : false}
+                canBeExplored={selectedSystem ? canSystemBeExplored(selectedSystem) : false}
+                explorationStatus={selectedSystem ? getSystemExplorationStatus(selectedSystem) : { systemId: '', explorationsCompleted: 0, maxExplorations: 0 }}
+                onBeginExploration={onBeginExploration}
+                onResetExploration={onResetExploration}
+                onOpenShipLayout={() => {}}
+                canRepairShip={selectedSystem && selectedSystem.planets.some(planet => 
+                  planet.civilization && 
+                  planet.civilization.techLevel >= (shipStats?.techLevel || 1)
+                )}
+                repairCost={1000}
+                canAffordRepair={(shipStats?.credits || 0) >= 1000}
+                needsRepair={shipStats && (shipStats.shields < shipStats.maxShields || shipStats.hull < shipStats.maxHull)}
+                onRepairShip={onRepairShip}
+                onOpenMarket={onOpenMarket}
+                onTriggerScan={handleTriggerScan}
+                isScanning={isScanning}
+                canJumpToSelected={canJumpToSelected}
+                onJumpToSystem={onJumpToSystem}
+              />
             </div>
-          )}
-        </div>
-      </ResizablePanel>
+          </ResizablePanel>
+          <ResizableHandle withHandle />
+        </>
+      )}
       
-      <ResizableHandle withHandle />
-
       {/* Center Panel - Galaxy Map and Ship Stats */}
       <ResizablePanel defaultSize={50} minSize={40}>
         <ResizablePanelGroup direction="vertical" className="h-full">
@@ -204,12 +216,33 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
         </ResizablePanelGroup>
       </ResizablePanel>
 
-      {/* Right Panel - System View and Actions */}
+      {/* Right Panel - System Info and System View */}
       {selectedSystem && (
         <>
           <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={25} minSize={25} maxSize={40}>
+          <ResizablePanel defaultSize={25} minSize={20} maxSize={35}>
             <ResizablePanelGroup direction="vertical" className="h-full">
+              {/* System Info */}
+              <ResizablePanel defaultSize={30} minSize={25}>
+                <div className="h-full bg-gray-900 border-l border-gray-700 flex flex-col">
+                  <div className="flex-shrink-0 p-4">
+                    <SystemInfoCard
+                      system={selectedSystem}
+                      selectedStar={selectedStar}
+                      onStarSelect={onStarSelect}
+                    />
+                  </div>
+                  
+                  {explorationHistory.length > 0 && (
+                    <div className="flex-1 min-h-0">
+                      <ExplorationLog explorationHistory={explorationHistory} />
+                    </div>
+                  )}
+                </div>
+              </ResizablePanel>
+              
+              <ResizableHandle withHandle />
+              
               {/* System View */}
               <ResizablePanel defaultSize={70} minSize={50}>
                 <div className="h-full bg-gray-900 border-l border-gray-700 overflow-y-auto">
@@ -221,37 +254,6 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
                       highlightedBodyId={highlightedBodyId}
                     />
                   </div>
-                </div>
-              </ResizablePanel>
-              
-              <ResizableHandle withHandle />
-              
-              {/* Actions Panel */}
-              <ResizablePanel defaultSize={40} minSize={25}>
-                <div className="h-full bg-gray-900 border-l border-gray-700 p-4">
-                  <ActionsPanel
-                    selectedSystem={selectedSystem}
-                    currentSystemId={currentSystemId}
-                    isExplored={selectedSystem ? isSystemExplored(selectedSystem) : false}
-                    canBeExplored={selectedSystem ? canSystemBeExplored(selectedSystem) : false}
-                    explorationStatus={selectedSystem ? getSystemExplorationStatus(selectedSystem) : { systemId: '', explorationsCompleted: 0, maxExplorations: 0 }}
-                    onBeginExploration={onBeginExploration}
-                    onResetExploration={onResetExploration}
-                    onOpenShipLayout={() => {}}
-                    canRepairShip={selectedSystem && selectedSystem.planets.some(planet => 
-                      planet.civilization && 
-                      planet.civilization.techLevel >= (shipStats?.techLevel || 1)
-                    )}
-                    repairCost={1000}
-                    canAffordRepair={(shipStats?.credits || 0) >= 1000}
-                    needsRepair={shipStats && (shipStats.shields < shipStats.maxShields || shipStats.hull < shipStats.maxHull)}
-                    onRepairShip={onRepairShip}
-                    onOpenMarket={onOpenMarket}
-                    onTriggerScan={handleTriggerScan}
-                    isScanning={isScanning}
-                    canJumpToSelected={canJumpToSelected}
-                    onJumpToSystem={onJumpToSystem}
-                  />
                 </div>
               </ResizablePanel>
             </ResizablePanelGroup>
