@@ -52,7 +52,16 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
   const starship = useMemo(() => generateStarship(seed), [seed]);
   const [isShipLayoutOpen, setIsShipLayoutOpen] = useState(false);
 
-  const currentStats = shipStats || starship.stats;
+  // Merge ship stats with ship name and class
+  const currentStats = shipStats ? {
+    ...shipStats,
+    name: starship.name,
+    class: starship.class
+  } : {
+    ...starship.stats,
+    name: starship.name,
+    class: starship.class
+  };
 
   // Only check repair capabilities for the current system
   const currentSystem = selectedSystem?.id === currentSystemId ? selectedSystem : null;

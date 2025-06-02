@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Edit, Wrench } from 'lucide-react';
 
 interface StarshipStatsProps {
-  stats: StarshipStatsType & { name?: string };
+  stats: StarshipStatsType & { name?: string; class?: string };
   onNameChange?: (newName: string) => void;
   onRepairCombatSystems?: (cost: number) => void;
   combatRepairCost?: number;
@@ -73,7 +73,7 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({
         ) : (
           <>
             <div className="text-lg font-semibold text-blue-300">
-              Class Unknown
+              {stats.class || 'Unknown'} Class
             </div>
             <div className="flex items-center gap-2">
               <span className="text-lg font-semibold text-blue-300">
