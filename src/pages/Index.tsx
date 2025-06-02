@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
 import { ExplorationDialog } from '../components/galaxy/ExplorationDialog';
 import { useExploration } from '../components/exploration/useExploration';
-import { generateStarship } from '../utils/starshipGenerator';
+import { generateStarship, generateShipOptions, Starship } from '../utils/starshipGenerator';
 import { useShipStats } from '../hooks/useShipStats';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -13,6 +13,7 @@ import { generateGalaxy } from '../utils/galaxyGenerator';
 import { selectStartingSystem } from '../utils/startingSystemSelector';
 import { MarketDialog } from '../components/starship/MarketDialog';
 import { getSystemMarketInfo, MarketLocation } from '../utils/explorationGenerator';
+import { ShipSelectionDialog } from '../components/starship/ShipSelectionDialog';
 
 const Index = () => {
   const {
@@ -70,6 +71,10 @@ const Index = () => {
     updateShipName
   } = useShipStats(initialStarship.stats);
 
+  // Ship selection state
+  const [isShipSelectionOpen, setIsShipSelectionOpen] = useState(false);
+  const [shipOptions, setShipOptions] = useState<Starship[]>([]);
+
   // Market dialog state
   const [isMarketDialogOpen, setIsMarketDialogOpen] = useState(false);
   const [currentMarketInfo, setCurrentMarketInfo] = useState<MarketLocation | null>(null);
@@ -99,9 +104,11 @@ const Index = () => {
     setSelectedSystem(null);
     setSelectedBody(null);
     resetAllExploration();
-    // Reset ship stats to new ship with new starting system and random name
-    const newStarship = generateStarship(newSeed);
-    resetStats(newStarship.stats);
+    
+    // Show ship selection dialog for new game
+    const options = generateShipOptions(newSeed);
+    setShipOptions(options);
+    setIsShipSelectionOpen(true);
   };
 
   // Initialize starting system
@@ -117,6 +124,17 @@ const Index = () => {
       }
     }
   }, [galaxySeed, numSystems, numNebulae, binaryFrequency, trinaryFrequency, currentSystemId, jumpToSystem]);
+
+  // Show ship selection on first load
+  React.useEffect(() => {
+    const hasShownSelection = localStorage.getItem('hasShownShipSelection');
+    if (!hasShownSelection && numSystems > 0) {
+      const options = generateShipOptions(galaxySeed);
+      setShipOptions(options);
+      setIsShipSelectionOpen(true);
+      localStorage.setItem('hasShownShipSelection', 'true');
+    }
+  }, [galaxySeed, numSystems]);
 
   // Update selected system when selectedSystemId changes
   React.useEffect(() => {
@@ -135,9 +153,16 @@ const Index = () => {
     setSelectedSystem(null);
     setSelectedBody(null);
     resetAllExploration();
-    // Reset ship stats to new ship with new starting system and random name
-    const newStarship = generateStarship(newSeed);
-    resetStats(newStarship.stats);
+    
+    // Show ship selection dialog for seed change
+    const options = generateShipOptions(newSeed);
+    setShipOptions(options);
+    setIsShipSelectionOpen(true);
+  };
+
+  const handleSelectShip = (selectedShip: Starship) => {
+    resetStats(selectedShip.stats);
+    setIsShipSelectionOpen(false);
   };
 
   const handleSaveGame = () => {
@@ -388,6 +413,12 @@ const Index = () => {
       <footer className="bg-gray-900 p-2 border-t border-gray-700 text-center text-sm text-gray-400 flex-shrink-0">
         <p>Procedurally Generated Galaxy | Seed: {galaxySeed} | Systems: {numSystems} | Nebulae: {numNebulae} | Binary: {Math.round(binaryFrequency * 100)}% | Trinary: {Math.round(trinaryFrequency * 100)}% | Click and drag to navigate, scroll to zoom</p>
       </footer>
+
+      <ShipSelectionDialog
+        isOpen={isShipSelectionOpen}
+        shipOptions={shipOptions}
+        onSelectShip={handleSelectShip}
+      />
 
       {currentMarketInfo && (
         <MarketDialog

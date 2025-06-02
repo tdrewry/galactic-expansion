@@ -1,177 +1,160 @@
 
-import React from 'react';
-import { StarshipStats as StarshipStatsType } from '../../utils/starshipGenerator';
-import { Progress } from '@/components/ui/progress';
-import { Button } from '@/components/ui/button';
-import { Wrench } from 'lucide-react';
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import { ShipNameEditor } from './ShipNameEditor';
-import { getStatusColor, getCargoStatusColor } from './statsUtils';
+import { formatStatValue } from './statsUtils';
 
 interface StarshipStatsProps {
-  stats: StarshipStatsType & { name?: string; class?: string };
+  stats: any;
   onNameChange?: (newName: string) => void;
   onRepairCombatSystems?: (cost: number) => void;
   combatRepairCost?: number;
+  hideActions?: boolean;
 }
 
 export const StarshipStats: React.FC<StarshipStatsProps> = ({ 
-  stats,
-  onNameChange,
+  stats, 
+  onNameChange, 
   onRepairCombatSystems,
-  combatRepairCost = 1500
+  combatRepairCost = 1500,
+  hideActions = false
 }) => {
-  const needsCombatRepair = stats.combatPower < stats.maxCombatPower;
-  const canAffordCombatRepair = stats.credits >= combatRepairCost;
+  const [isEditingName, setIsEditingName] = useState(false);
+
+  const getHealthColor = (current: number, max: number) => {
+    const percentage = (current / max) * 100;
+    if (percentage >= 70) return "bg-green-500";
+    if (percentage >= 40) return "bg-yellow-500";
+    return "bg-red-500";
+  };
+
+  const getCombatSystemsColor = (current: number, max: number) => {
+    const percentage = (current / max) * 100;
+    if (percentage >= 80) return "bg-blue-500";
+    if (percentage >= 50) return "bg-yellow-500";
+    return "bg-red-500";
+  };
 
   return (
-    <div className="bg-gray-800 p-4 rounded-lg">
-      {/* Header with ship class and name */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="text-lg font-semibold text-blue-300">
-          {stats.class || 'Unknown'} Class
-        </div>
-        <ShipNameEditor 
-          name={stats.name || 'Starship'} 
-          onNameChange={onNameChange} 
-        />
-      </div>
-      
-      {/* Two column layout */}
-      <div className="grid grid-cols-2 gap-6 text-sm">
-        {/* Left Column */}
-        <div className="space-y-3">
-          {/* Shields */}
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-gray-300">Shields</span>
-              <div>
-                <span className={getStatusColor(stats.shields, stats.maxShields)}>
-                  {stats.shields.toString().padStart(3, '0')}
-                </span>
-                <span className="text-gray-300">/{stats.maxShields.toString().padStart(3, '0')}</span>
-              </div>
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {!hideActions && isEditingName ? (
+                <ShipNameEditor
+                  currentName={stats.name || 'Unnamed Ship'}
+                  onSave={(newName) => {
+                    onNameChange?.(newName);
+                    setIsEditingName(false);
+                  }}
+                  onCancel={() => setIsEditingName(false)}
+                />
+              ) : (
+                <>
+                  <span>{stats.name || 'Unnamed Ship'}</span>
+                  {!hideActions && onNameChange && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsEditingName(true)}
+                      className="text-xs"
+                    >
+                      Rename
+                    </Button>
+                  )}
+                </>
+              )}
             </div>
-            <Progress value={(stats.shields / stats.maxShields) * 100} className="h-2" />
-          </div>
-
-          {/* Hull */}
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-gray-300">Hull</span>
-              <div>
-                <span className={getStatusColor(stats.hull, stats.maxHull)}>
-                  {stats.hull.toString().padStart(3, '0')}
-                </span>
-                <span className="text-gray-300">/{stats.maxHull.toString().padStart(3, '0')}</span>
+            {stats.class && (
+              <span className="text-sm text-gray-500">{stats.class} Class</span>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <div className="flex justify-between text-sm">
+                <span>Shields</span>
+                <span>{stats.shields}/{stats.maxShields}</span>
               </div>
+              <Progress 
+                value={(stats.shields / stats.maxShields) * 100} 
+                className="h-2"
+                indicatorClassName={getHealthColor(stats.shields, stats.maxShields)}
+              />
             </div>
-            <Progress value={(stats.hull / stats.maxHull) * 100} className="h-2" />
-          </div>
-
-          {/* Scanners */}
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-gray-300">Scanners</span>
-              <div>
-                <span className={getStatusColor(stats.scanners, stats.maxScanners)}>
-                  {stats.scanners.toString().padStart(3, '0')}
-                </span>
-                <span className="text-gray-300">/{stats.maxScanners.toString().padStart(3, '0')}</span>
+            <div>
+              <div className="flex justify-between text-sm">
+                <span>Hull</span>
+                <span>{stats.hull}/{stats.maxHull}</span>
               </div>
-            </div>
-            <Progress value={(stats.scanners / stats.maxScanners) * 100} className="h-2" />
-          </div>
-
-          {/* Cargo */}
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-gray-300">Cargo</span>
-              <div>
-                <span className={getCargoStatusColor(stats.cargo, stats.maxCargo)}>
-                  {stats.cargo.toString().padStart(3, '0')}
-                </span>
-                <span className="text-gray-300">/{stats.maxCargo.toString().padStart(3, '0')}</span>
-              </div>
-            </div>
-            <Progress value={(stats.cargo / stats.maxCargo) * 100} className="h-2" inverted />
-          </div>
-        </div>
-
-        {/* Right Column */}
-        <div className="space-y-3">
-          {/* Tech Level */}
-          <div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-300">Tech Level</span>
-              <div>
-                <span className={getStatusColor(stats.techLevel, 10)}>
-                  {stats.techLevel.toString().padStart(3, '0')}
-                </span>
-                <span className="text-gray-300">/010</span>
-              </div>
+              <Progress 
+                value={(stats.hull / stats.maxHull) * 100} 
+                className="h-2"
+                indicatorClassName={getHealthColor(stats.hull, stats.maxHull)}
+              />
             </div>
           </div>
 
-          {/* Combat */}
           <div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-300">Combat</span>
+            <div className="flex justify-between items-center text-sm">
+              <span>Combat Systems</span>
               <div className="flex items-center gap-2">
-                <div>
-                  <span className={getStatusColor(stats.combatPower, stats.maxCombatPower)}>
-                    {stats.combatPower.toString().padStart(3, '0')}
-                  </span>
-                  <span className="text-gray-300">/{stats.maxCombatPower.toString().padStart(3, '0')}</span>
-                </div>
-                {onRepairCombatSystems && needsCombatRepair && (
+                <span>{stats.combatPower}/{stats.maxCombatPower}</span>
+                {!hideActions && onRepairCombatSystems && stats.combatPower < stats.maxCombatPower && stats.credits >= combatRepairCost && (
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => onRepairCombatSystems(combatRepairCost)}
-                    disabled={!canAffordCombatRepair}
-                    className="h-5 px-2 text-xs"
+                    className="text-xs py-1 px-2 h-auto"
                   >
-                    <Wrench className="h-3 w-3 mr-1" />
-                    Repair ({combatRepairCost})
+                    Repair ({combatRepairCost} credits)
                   </Button>
                 )}
               </div>
             </div>
+            <Progress 
+              value={(stats.combatPower / stats.maxCombatPower) * 100} 
+              className="h-2"
+              indicatorClassName={getCombatSystemsColor(stats.combatPower, stats.maxCombatPower)}
+            />
           </div>
 
-          {/* Diplomacy */}
-          <div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-300">Diplomacy</span>
-              <div>
-                <span className="text-purple-300">{stats.diplomacy.toString().padStart(3, '0')}</span>
-                <span className="text-gray-300">/100</span>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <span>Tech Level:</span>
+                <span className="font-mono">{stats.techLevel}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Diplomacy:</span>
+                <span className="font-mono">{formatStatValue(stats.diplomacy)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Scanners:</span>
+                <span className="font-mono">{stats.scanners}/{stats.maxScanners}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Cargo:</span>
+                <span className="font-mono">{formatStatValue(stats.cargo)}/{formatStatValue(stats.maxCargo)}</span>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <span>Credits:</span>
+                <span className="font-mono text-green-400">{formatStatValue(stats.credits)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Crew:</span>
+                <span className="font-mono">{stats.crew}/{stats.maxCrew}</span>
               </div>
             </div>
           </div>
-
-          {/* Crew */}
-          <div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-300">Crew</span>
-              <div>
-                <span className={getStatusColor(stats.crew, stats.maxCrew)}>
-                  {stats.crew.toString().padStart(3, '0')}
-                </span>
-                <span className="text-gray-300">/{stats.maxCrew.toString().padStart(3, '0')}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Credits */}
-          <div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-300">💶</span>
-              <span className="text-yellow-300">{stats.credits.toLocaleString()}</span>
-            </div>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

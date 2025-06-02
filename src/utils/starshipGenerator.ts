@@ -44,9 +44,71 @@ const shipNames = [
   'Phoenix', 'Orion', 'Andromeda', 'Pegasus', 'Titan', 'Apollo'
 ];
 
-const shipClasses = [
-  'Explorer', 'Cruiser', 'Destroyer', 'Frigate', 'Battleship', 'Scout',
-  'Research', 'Diplomatic', 'Cargo', 'Colony'
+interface ShipClassConfig {
+  name: string;
+  description: string;
+  statModifiers: {
+    combatPower: number;
+    diplomacy: number;
+    scanners: number;
+    cargo: number;
+    maxCrew: number;
+    shields: number;
+    hull: number;
+  };
+}
+
+const shipClasses: ShipClassConfig[] = [
+  {
+    name: 'Explorer',
+    description: 'Balanced ship designed for long-range exploration',
+    statModifiers: { combatPower: 0, diplomacy: 10, scanners: 20, cargo: 5, maxCrew: 10, shields: 0, hull: 5 }
+  },
+  {
+    name: 'Cruiser',
+    description: 'Well-rounded vessel suitable for any mission',
+    statModifiers: { combatPower: 5, diplomacy: 5, scanners: 5, cargo: 5, maxCrew: 5, shields: 5, hull: 5 }
+  },
+  {
+    name: 'Destroyer',
+    description: 'Combat-focused warship with heavy firepower',
+    statModifiers: { combatPower: 25, diplomacy: -10, scanners: -5, cargo: -10, maxCrew: 0, shields: 10, hull: 15 }
+  },
+  {
+    name: 'Frigate',
+    description: 'Fast and maneuverable patrol vessel',
+    statModifiers: { combatPower: 10, diplomacy: 0, scanners: 10, cargo: -5, maxCrew: -5, shields: 5, hull: 0 }
+  },
+  {
+    name: 'Battleship',
+    description: 'Heavily armored fortress with maximum firepower',
+    statModifiers: { combatPower: 30, diplomacy: -15, scanners: -10, cargo: -15, maxCrew: 15, shields: 20, hull: 25 }
+  },
+  {
+    name: 'Scout',
+    description: 'Small, fast ship optimized for reconnaissance',
+    statModifiers: { combatPower: -10, diplomacy: 5, scanners: 25, cargo: -15, maxCrew: -15, shields: -5, hull: -10 }
+  },
+  {
+    name: 'Research',
+    description: 'Scientific vessel equipped with advanced sensors',
+    statModifiers: { combatPower: -15, diplomacy: 15, scanners: 30, cargo: 0, maxCrew: 5, shields: -5, hull: -5 }
+  },
+  {
+    name: 'Diplomatic',
+    description: 'Luxury vessel designed for negotiations and trade',
+    statModifiers: { combatPower: -20, diplomacy: 35, scanners: 0, cargo: 10, maxCrew: 10, shields: 0, hull: 0 }
+  },
+  {
+    name: 'Cargo',
+    description: 'Merchant freighter with massive storage capacity',
+    statModifiers: { combatPower: -15, diplomacy: 10, scanners: -5, cargo: 40, maxCrew: 0, shields: -10, hull: 5 }
+  },
+  {
+    name: 'Colony',
+    description: 'Transport ship designed for colonization missions',
+    statModifiers: { combatPower: -10, diplomacy: 20, scanners: 5, cargo: 20, maxCrew: 25, shields: 0, hull: 10 }
+  }
 ];
 
 const roomTypes = [
@@ -65,31 +127,41 @@ function seededRandom(seed: number): number {
   return x - Math.floor(x);
 }
 
-function generateStats(seed: number, shipName: string): StarshipStats {
+function generateStats(seed: number, shipName: string, shipClass: ShipClassConfig): StarshipStats {
   let currentSeed = seed;
   
   // Base stats
-  const techLevel = Math.floor(seededRandom(currentSeed++) * 6) + 3; // 3-8
-  const maxShields = 100;
-  const maxHull = 100;
-  const maxCombatPower = 100;
-  const maxScanners = 100;
-  const maxCargo = 1000;
-  const maxCrew = Math.floor(seededRandom(currentSeed++) * 50) + 50; // 50-100 crew capacity
+  const baseTechLevel = Math.floor(seededRandom(currentSeed++) * 6) + 3; // 3-8
+  const baseMaxShields = 100;
+  const baseMaxHull = 100;
+  const baseMaxCombatPower = 100;
+  const baseMaxScanners = 100;
+  const baseMaxCargo = 1000;
+  const baseMaxCrew = Math.floor(seededRandom(currentSeed++) * 50) + 50; // 50-100 crew capacity
   
-  // Current values
-  const shields = Math.floor(seededRandom(currentSeed++) * 60) + 30; // 30-90
-  const hull = Math.floor(seededRandom(currentSeed++) * 60) + 40; // 40-100
-  const combatPower = Math.floor(seededRandom(currentSeed++) * 70) + 20; // 20-90
-  const diplomacy = Math.floor(seededRandom(currentSeed++) * 80) + 10; // 10-90
-  const scanners = Math.floor(seededRandom(currentSeed++) * 70) + 25; // 25-95
-  const cargo = Math.floor(seededRandom(currentSeed++) * 600) + 200; // 200-800
+  // Apply class modifiers
+  const maxShields = Math.max(50, baseMaxShields + shipClass.statModifiers.shields);
+  const maxHull = Math.max(50, baseMaxHull + shipClass.statModifiers.hull);
+  const maxCombatPower = Math.max(20, baseMaxCombatPower + shipClass.statModifiers.combatPower);
+  const maxScanners = Math.max(50, baseMaxScanners);
+  const maxCargo = Math.max(200, baseMaxCargo + shipClass.statModifiers.cargo);
+  const maxCrew = Math.max(20, baseMaxCrew + shipClass.statModifiers.maxCrew);
+  
+  // Current values (start at 70-90% of max)
+  const shields = Math.floor(maxShields * (0.7 + seededRandom(currentSeed++) * 0.2));
+  const hull = Math.floor(maxHull * (0.7 + seededRandom(currentSeed++) * 0.2));
+  const combatPower = Math.floor(maxCombatPower * (0.7 + seededRandom(currentSeed++) * 0.2));
+  const baseDiplomacy = Math.floor(seededRandom(currentSeed++) * 80) + 10; // 10-90
+  const diplomacy = Math.max(5, baseDiplomacy + shipClass.statModifiers.diplomacy);
+  const baseScanners = Math.floor(maxScanners * (0.7 + seededRandom(currentSeed++) * 0.2));
+  const scanners = Math.max(25, baseScanners + shipClass.statModifiers.scanners);
+  const cargo = Math.floor(maxCargo * (0.3 + seededRandom(currentSeed++) * 0.4)); // 30-70% of max
   const credits = Math.floor(seededRandom(currentSeed++) * 5000) + 1000; // 1000-6000
   const crew = Math.floor(maxCrew * 0.8); // Start with 80% of max crew
   
   return {
     name: shipName,
-    techLevel,
+    techLevel: baseTechLevel,
     shields,
     hull,
     combatPower,
@@ -186,17 +258,34 @@ function generateLayout(seed: number): StarshipLayout {
   };
 }
 
-export function generateStarship(seed: number): Starship {
+export function generateStarship(seed: number, shipClassIndex?: number): Starship {
   let currentSeed = seed;
   
   const nameIndex = Math.floor(seededRandom(currentSeed++) * shipNames.length);
-  const classIndex = Math.floor(seededRandom(currentSeed++) * shipClasses.length);
+  const classIndex = shipClassIndex !== undefined ? shipClassIndex : Math.floor(seededRandom(currentSeed++) * shipClasses.length);
   const shipName = shipNames[nameIndex];
+  const shipClass = shipClasses[classIndex];
   
   return {
     name: shipName,
-    class: shipClasses[classIndex],
-    stats: generateStats(currentSeed, shipName),
+    class: shipClass.name,
+    stats: generateStats(currentSeed, shipName, shipClass),
     layout: generateLayout(currentSeed + 1000)
   };
 }
+
+export function generateShipOptions(seed: number, count: number = 3): Starship[] {
+  const options: Starship[] = [];
+  let currentSeed = seed;
+  
+  for (let i = 0; i < count; i++) {
+    // Ensure we get different classes by using different class indices
+    const classIndex = Math.floor(seededRandom(currentSeed++) * shipClasses.length);
+    const shipSeed = Math.floor(seededRandom(currentSeed++) * 1000000);
+    options.push(generateStarship(shipSeed, classIndex));
+  }
+  
+  return options;
+}
+
+export { shipClasses };
