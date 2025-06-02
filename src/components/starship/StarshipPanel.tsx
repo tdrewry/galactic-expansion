@@ -28,6 +28,7 @@ interface StarshipPanelProps {
   onJumpToSystem?: (systemId: string) => void;
   onTriggerScan?: () => void;
   isScanning?: boolean;
+  onUpdateShipName?: (newName: string) => void;
 }
 
 export const StarshipPanel: React.FC<StarshipPanelProps> = ({ 
@@ -47,7 +48,8 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
   canJumpToSelected = false,
   onJumpToSystem,
   onTriggerScan,
-  isScanning = false
+  isScanning = false,
+  onUpdateShipName
 }) => {
   const starship = useMemo(() => generateStarship(seed), [seed]);
   const [isShipLayoutOpen, setIsShipLayoutOpen] = useState(false);
@@ -84,6 +86,7 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
         <div className={hideActions ? 'w-full h-auto p-4' : 'flex-1 border-r border-gray-700 p-4'}>
           <StarshipStats 
             stats={currentStats} 
+            onNameChange={onUpdateShipName}
             onRepairCombatSystems={canRepairShip && needsCombatRepair && canAffordCombatRepair ? onRepairCombatSystems : undefined}
             combatRepairCost={combatRepairCost}
           />

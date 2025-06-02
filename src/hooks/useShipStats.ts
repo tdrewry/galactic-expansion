@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { StarshipStats } from '../utils/starshipGenerator';
 import { ExplorationEvent } from '../components/galaxy/ExplorationDialog';
@@ -30,6 +29,18 @@ export const useShipStats = (initialStats: StarshipStats) => {
       title: "Retirement",
       description: "You have chosen to retire from exploration.",
       variant: "default",
+    });
+  }, [toast]);
+
+  const updateShipName = useCallback((newName: string) => {
+    setStats(prevStats => ({
+      ...prevStats,
+      name: newName
+    }));
+    
+    toast({
+      title: "Ship Renamed",
+      description: `Your ship is now called "${newName}"`,
     });
   }, [toast]);
 
@@ -374,6 +385,7 @@ export const useShipStats = (initialStats: StarshipStats) => {
     resetStats,
     saveGame,
     loadGame,
-    triggerGameOver
+    triggerGameOver,
+    updateShipName
   };
 };
