@@ -60,7 +60,7 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({
             <Input
               value={shipName}
               onChange={(e) => setShipName(e.target.value)}
-              className="flex-1"
+              className="flex-1 bg-gray-700 text-white border-gray-600 focus:border-blue-400"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleNameSubmit();
                 if (e.key === 'Escape') handleNameCancel();
