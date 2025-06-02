@@ -66,7 +66,8 @@ const Index = () => {
     resetStats,
     saveGame,
     loadGame,
-    triggerGameOver
+    triggerGameOver,
+    updateShipName
   } = useShipStats(initialStarship.stats);
 
   // Market dialog state
@@ -379,6 +380,7 @@ const Index = () => {
         onRepairShip={handleRepairShip}
         onOpenMarket={handleOpenMarket}
         onJumpToSystem={handleJumpToSystem}
+        onUpdateShipName={updateShipName}
         handleCompleteExploration={handleCompleteExploration}
         handleContinueExploration={handleContinueExploration}
       />
