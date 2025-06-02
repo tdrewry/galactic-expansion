@@ -58,6 +58,7 @@ interface GalaxyLayoutProps {
   onRepairShip: () => void;
   onOpenMarket: () => void;
   onJumpToSystem: (systemId: string) => void;
+  onUpdateShipName?: (newName: string) => void;
   handleCompleteExploration: () => void;
   handleContinueExploration: () => void;
   canJumpToSelected?: boolean;
