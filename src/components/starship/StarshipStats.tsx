@@ -53,7 +53,7 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({
 
   return (
     <div className="bg-gray-800 p-4 rounded-lg">
-      {/* Header with ship name and class */}
+      {/* Header with ship class and name */}
       <div className="flex items-center justify-between mb-4">
         {isEditingName ? (
           <div className="flex items-center gap-2 flex-1">
@@ -72,9 +72,12 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({
           </div>
         ) : (
           <>
-            <div className="flex items-center gap-2 flex-1">
+            <div className="text-lg font-semibold text-blue-300">
+              Class Unknown
+            </div>
+            <div className="flex items-center gap-2">
               <span className="text-lg font-semibold text-blue-300">
-                {stats.name || 'Starship'} : Class Unknown
+                {stats.name || 'Starship'}
               </span>
               <Button
                 size="sm"
@@ -84,11 +87,6 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({
               >
                 <Edit className="h-3 w-3" />
               </Button>
-            </div>
-            <div className="text-sm">
-              <span className="text-gray-300">Tech Level </span>
-              <span className={getStatusColor(stats.techLevel, 10)}>{stats.techLevel.toString().padStart(3, '0')}</span>
-              <span className="text-gray-300">/010</span>
             </div>
           </>
         )}
@@ -157,6 +155,19 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({
 
         {/* Right Column */}
         <div className="space-y-3">
+          {/* Tech Level */}
+          <div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-300">Tech Level</span>
+              <div>
+                <span className={getStatusColor(stats.techLevel, 10)}>
+                  {stats.techLevel.toString().padStart(3, '0')}
+                </span>
+                <span className="text-gray-300">/010</span>
+              </div>
+            </div>
+          </div>
+
           {/* Combat */}
           <div>
             <div className="flex justify-between items-center">
