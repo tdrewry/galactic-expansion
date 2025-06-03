@@ -14,12 +14,12 @@ interface ExplorationLogEntry {
 }
 
 interface ExplorationLogProps {
-  explorationHistory: ExplorationLogEntry[];
+  explorationHistory?: ExplorationLogEntry[];
   onClearLog?: () => void;
 }
 
 export const ExplorationLog: React.FC<ExplorationLogProps> = ({
-  explorationHistory,
+  explorationHistory = [],
   onClearLog
 }) => {
   const getEventIcon = (type: string) => {
