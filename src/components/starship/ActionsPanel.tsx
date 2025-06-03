@@ -24,14 +24,7 @@ interface ActionsPanelProps {
   onBeginExploration: () => void;
   onResetExploration: () => void;
   onOpenShipLayout: () => void;
-  canRepairShip?: boolean;
-  repairCost?: number;
-  canAffordRepair?: boolean;
   needsRepair?: boolean;
-  onRepairShip?: (cost: number) => void;
-  onRepairCombatSystems?: (cost: number) => void;
-  combatRepairCost?: number;
-  canAffordCombatRepair?: boolean;
   needsCombatRepair?: boolean;
   onOpenMarket?: () => void;
   onTriggerScan?: () => void;
@@ -49,14 +42,7 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
   onBeginExploration,
   onResetExploration,
   onOpenShipLayout,
-  canRepairShip = false,
-  repairCost = 1000,
-  canAffordRepair = false,
   needsRepair = false,
-  onRepairShip,
-  onRepairCombatSystems,
-  combatRepairCost = 1500,
-  canAffordCombatRepair = false,
   needsCombatRepair = false,
   onOpenMarket,
   onTriggerScan,
@@ -117,14 +103,7 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
             <RepairActions
               selectedSystem={selectedSystem}
               currentSystemId={currentSystemId}
-              canRepairShip={canRepairShip}
-              repairCost={repairCost}
-              canAffordRepair={canAffordRepair}
               needsRepair={needsRepair}
-              onRepairShip={onRepairShip}
-              onRepairCombatSystems={onRepairCombatSystems}
-              combatRepairCost={combatRepairCost}
-              canAffordCombatRepair={canAffordCombatRepair}
               needsCombatRepair={needsCombatRepair}
             />
 

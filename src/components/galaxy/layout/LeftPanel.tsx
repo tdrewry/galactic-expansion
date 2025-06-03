@@ -28,8 +28,6 @@ interface LeftPanelProps {
   getSystemExplorationStatus: (system: StarSystem) => SystemExplorationStatus;
   onBeginExploration: () => void;
   onResetExploration: () => void;
-  onRepairShip: () => void;
-  onRepairCombatSystems?: (cost: number) => void;
   onOpenMarket: () => void;
   onJumpToSystem: (systemId: string) => void;
   canJumpToSelected?: boolean;
@@ -47,34 +45,14 @@ export const LeftPanel: React.FC<LeftPanelProps> = ({
   getSystemExplorationStatus,
   onBeginExploration,
   onResetExploration,
-  onRepairShip,
-  onRepairCombatSystems,
   onOpenMarket,
   onJumpToSystem,
   canJumpToSelected = false,
   isScanning,
   onTriggerScan
 }) => {
-  const repairCost = 1000;
-  const combatRepairCost = 1500;
-  const canAffordRepair = (shipStats?.credits || 0) >= repairCost;
-  const canAffordCombatRepair = (shipStats?.credits || 0) >= combatRepairCost;
   const needsRepair = shipStats && (shipStats.shields < shipStats.maxShields || shipStats.hull < shipStats.maxHull);
   const needsCombatRepair = shipStats && shipStats.combatPower < shipStats.maxCombatPower;
-
-  const handleRepairShip = (cost: number) => {
-    console.log('LeftPanel: handleRepairShip called with cost:', cost);
-    if (onRepairShip) {
-      onRepairShip();
-    }
-  };
-
-  const handleRepairCombatSystems = (cost: number) => {
-    console.log('LeftPanel: handleRepairCombatSystems called with cost:', cost);
-    if (onRepairCombatSystems) {
-      onRepairCombatSystems(cost);
-    }
-  };
 
   return (
     <ResizablePanelGroup direction="vertical" className="h-full">
@@ -91,17 +69,7 @@ export const LeftPanel: React.FC<LeftPanelProps> = ({
               onBeginExploration={onBeginExploration}
               onResetExploration={onResetExploration}
               onOpenShipLayout={() => {}}
-              canRepairShip={selectedSystem && selectedSystem.planets.some(planet => 
-                planet.civilization && 
-                planet.civilization.techLevel >= (shipStats?.techLevel || 1)
-              )}
-              repairCost={repairCost}
-              canAffordRepair={canAffordRepair}
               needsRepair={needsRepair}
-              onRepairShip={handleRepairShip}
-              onRepairCombatSystems={handleRepairCombatSystems}
-              combatRepairCost={combatRepairCost}
-              canAffordCombatRepair={canAffordCombatRepair}
               needsCombatRepair={needsCombatRepair}
               onOpenMarket={onOpenMarket}
               onTriggerScan={onTriggerScan}

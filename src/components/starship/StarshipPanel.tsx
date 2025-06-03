@@ -20,8 +20,6 @@ interface StarshipPanelProps {
   onBeginExploration: () => void;
   onResetExploration: () => void;
   shipStats?: any;
-  onRepairShip?: (cost: number) => void;
-  onRepairCombatSystems?: (cost: number) => void;
   onOpenMarket?: () => void;
   hideActions?: boolean;
   canJumpToSelected?: boolean;
@@ -41,8 +39,6 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
   onBeginExploration,
   onResetExploration,
   shipStats,
-  onRepairShip,
-  onRepairCombatSystems,
   onOpenMarket,
   hideActions = false,
   canJumpToSelected = false,
@@ -66,18 +62,6 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
     class: starship.class
   };
 
-  // Only check repair capabilities for the current system
-  const currentSystem = selectedSystem?.id === currentSystemId ? selectedSystem : null;
-  const canRepairShip = currentSystem && 
-    currentSystem.planets.some(planet => 
-      planet.civilization && 
-      planet.civilization.techLevel >= currentStats.techLevel
-    );
-
-  const repairCost = 1000;
-  const combatRepairCost = 1500;
-  const canAffordRepair = currentStats.credits >= repairCost;
-  const canAffordCombatRepair = currentStats.credits >= combatRepairCost;
   const needsRepair = currentStats.shields < currentStats.maxShields || currentStats.hull < currentStats.maxHull;
   const needsCombatRepair = currentStats.combatPower < currentStats.maxCombatPower;
 
@@ -103,14 +87,7 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
               onBeginExploration={onBeginExploration}
               onResetExploration={onResetExploration}
               onOpenShipLayout={() => setIsShipLayoutOpen(true)}
-              canRepairShip={canRepairShip}
-              repairCost={repairCost}
-              canAffordRepair={canAffordRepair}
               needsRepair={needsRepair}
-              onRepairShip={onRepairShip}
-              onRepairCombatSystems={onRepairCombatSystems}
-              combatRepairCost={combatRepairCost}
-              canAffordCombatRepair={canAffordCombatRepair}
               needsCombatRepair={needsCombatRepair}
               onOpenMarket={onOpenMarket}
               canJumpToSelected={canJumpToSelected}
