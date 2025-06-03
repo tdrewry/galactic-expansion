@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Ship } from 'lucide-react';
 import { StarSystem } from '../../utils/galaxyGenerator';
@@ -51,21 +50,8 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
   onJumpToSystem
 }) => {
   return (
-    <Card className="bg-gray-800 border-gray-600 h-full w-full">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-white text-base flex items-center gap-2">
-          <Button
-            onClick={onOpenShipLayout}
-            variant="ghost"
-            size="sm"
-            className="p-1 h-auto text-blue-400 hover:text-blue-300 hover:bg-blue-900/20"
-          >
-            <Ship className="h-5 w-5" />
-          </Button>
-          Ship Actions
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
+    <div className="bg-gray-800 border border-gray-600 rounded-lg h-full w-full p-3 flex flex-col">
+      <div className="flex-1 space-y-2 min-h-0">
         {!selectedSystem ? (
           <p className="text-gray-400 text-sm">Select a star system to begin operations</p>
         ) : (
@@ -114,7 +100,7 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
             />
           </>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };

@@ -80,31 +80,23 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => 
 
   return (
     <ResizablePanelGroup direction="horizontal" className="flex-1">
-      {/* Left Panel - Ship Actions and Exploration Log */}
-      <ResizablePanel defaultSize={25} minSize={25} maxSize={40}>
-        <LeftPanel
-          selectedSystem={props.selectedSystem}
-          currentSystemId={props.currentSystemId}
-          explorationHistory={props.explorationHistory}
-          shipStats={props.shipStats}
-          isSystemExplored={props.isSystemExplored}
-          canSystemBeExplored={props.canSystemBeExplored}
-          getSystemExplorationStatus={props.getSystemExplorationStatus}
-          onBeginExploration={props.onBeginExploration}
-          onResetExploration={props.onResetExploration}
-          onOpenMarket={props.onOpenMarket}
-          onJumpToSystem={props.onJumpToSystem}
-          canJumpToSelected={props.canJumpToSelected}
-          isScanning={isScanning}
-          onTriggerScan={handleTriggerScan}
-          onUpdateShipName={props.onUpdateShipName}
-          onRepairCombatSystems={props.onRepairCombatSystems}
-        />
-      </ResizablePanel>
+      {/* Left Panel - System Map and System Info (previously Right Panel) */}
+      {props.selectedSystem && (
+        <>
+          <ResizablePanel defaultSize={25} minSize={20} maxSize={35}>
+            <RightPanel
+              selectedSystem={props.selectedSystem}
+              selectedStar={props.selectedStar}
+              highlightedBodyId={props.highlightedBodyId}
+              onBodySelect={props.onBodySelect}
+              onStarSelect={props.onStarSelect}
+            />
+          </ResizablePanel>
+          <ResizableHandle withHandle />
+        </>
+      )}
       
-      <ResizableHandle withHandle />
-      
-      {/* Center Panel - Galaxy Map and Ship Stats */}
+      {/* Center Panel - Galaxy Map, Ship Stats, and Actions */}
       <ResizablePanel defaultSize={50} minSize={40}>
         <CenterPanel
           galaxySeed={props.galaxySeed}
@@ -145,24 +137,35 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => 
           isScanning={isScanning}
           onScanComplete={handleScanComplete}
           galaxyMapRef={props.galaxyMapRef}
+          canJumpToSelected={props.canJumpToSelected}
+          onTriggerScan={handleTriggerScan}
+          onRepairCombatSystems={props.onRepairCombatSystems}
         />
       </ResizablePanel>
 
-      {/* Right Panel - System Map and System Info */}
-      {props.selectedSystem && (
-        <>
-          <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={25} minSize={20} maxSize={35}>
-            <RightPanel
-              selectedSystem={props.selectedSystem}
-              selectedStar={props.selectedStar}
-              highlightedBodyId={props.highlightedBodyId}
-              onBodySelect={props.onBodySelect}
-              onStarSelect={props.onStarSelect}
-            />
-          </ResizablePanel>
-        </>
-      )}
+      <ResizableHandle withHandle />
+      
+      {/* Right Panel - Ship Actions and Exploration Log (previously Left Panel) */}
+      <ResizablePanel defaultSize={25} minSize={25} maxSize={40}>
+        <LeftPanel
+          selectedSystem={props.selectedSystem}
+          currentSystemId={props.currentSystemId}
+          explorationHistory={props.explorationHistory}
+          shipStats={props.shipStats}
+          isSystemExplored={props.isSystemExplored}
+          canSystemBeExplored={props.canSystemBeExplored}
+          getSystemExplorationStatus={props.getSystemExplorationStatus}
+          onBeginExploration={props.onBeginExploration}
+          onResetExploration={props.onResetExploration}
+          onOpenMarket={props.onOpenMarket}
+          onJumpToSystem={props.onJumpToSystem}
+          canJumpToSelected={props.canJumpToSelected}
+          isScanning={isScanning}
+          onTriggerScan={handleTriggerScan}
+          onUpdateShipName={props.onUpdateShipName}
+          onRepairCombatSystems={props.onRepairCombatSystems}
+        />
+      </ResizablePanel>
     </ResizablePanelGroup>
   );
 };

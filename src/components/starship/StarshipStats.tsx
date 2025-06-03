@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
+import { Ship } from 'lucide-react';
 import { ShipNameEditor } from './ShipNameEditor';
 import { formatStatValue } from './statsUtils';
 
@@ -12,6 +13,7 @@ interface StarshipStatsProps {
   onRepairCombatSystems?: (cost: number) => void;
   combatRepairCost?: number;
   hideActions?: boolean;
+  onOpenShipLayout?: () => void;
 }
 
 export const StarshipStats: React.FC<StarshipStatsProps> = ({ 
@@ -19,7 +21,8 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({
   onNameChange, 
   onRepairCombatSystems,
   combatRepairCost = 1500,
-  hideActions = false
+  hideActions = false,
+  onOpenShipLayout
 }) => {
   const [isEditingName, setIsEditingName] = useState(false);
 
@@ -67,9 +70,22 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({
                 </>
               )}
             </div>
-            {stats.class && (
-              <span className="text-sm text-gray-500">{stats.class} Class</span>
-            )}
+            <div className="flex items-center gap-2">
+              {stats.class && (
+                <span className="text-sm text-gray-500">{stats.class} Class</span>
+              )}
+              {onOpenShipLayout && (
+                <Button
+                  onClick={onOpenShipLayout}
+                  variant="ghost"
+                  size="sm"
+                  className="text-blue-400 hover:text-blue-300 hover:bg-blue-900/20"
+                >
+                  <Ship className="h-4 w-4 mr-1" />
+                  Ship Layout
+                </Button>
+              )}
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
