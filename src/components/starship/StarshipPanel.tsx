@@ -88,8 +88,6 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
           <StarshipStats 
             stats={currentStats} 
             onNameChange={onUpdateShipName}
-            onRepairCombatSystems={canRepairShip && needsCombatRepair && canAffordCombatRepair ? onRepairCombatSystems : undefined}
-            combatRepairCost={combatRepairCost}
             hideActions={hideActions}
           />
         </div>

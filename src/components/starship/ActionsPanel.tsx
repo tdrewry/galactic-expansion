@@ -61,30 +61,17 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
 }) => {
   const handleRepairShip = () => {
     console.log('ActionsPanel: handleRepairShip called');
-    console.log('ActionsPanel: onRepairShip available:', !!onRepairShip);
-    console.log('ActionsPanel: canAffordRepair:', canAffordRepair);
-    console.log('ActionsPanel: needsRepair:', needsRepair);
-    
     if (onRepairShip && canAffordRepair && needsRepair) {
       console.log('ActionsPanel: Calling onRepairShip with cost:', repairCost);
       onRepairShip(repairCost);
-    } else {
-      console.log('ActionsPanel: Repair ship conditions not met');
     }
   };
 
   const handleRepairCombatSystems = () => {
     console.log('ActionsPanel: handleRepairCombatSystems called');
-    console.log('ActionsPanel: onRepairCombatSystems available:', !!onRepairCombatSystems);
-    console.log('ActionsPanel: canAffordCombatRepair:', canAffordCombatRepair);
-    console.log('ActionsPanel: needsCombatRepair:', needsCombatRepair);
-    console.log('ActionsPanel: combatRepairCost:', combatRepairCost);
-    
     if (onRepairCombatSystems && canAffordCombatRepair && needsCombatRepair) {
       console.log('ActionsPanel: Calling onRepairCombatSystems with cost:', combatRepairCost);
       onRepairCombatSystems(combatRepairCost);
-    } else {
-      console.log('ActionsPanel: Combat repair conditions not met');
     }
   };
 
@@ -96,15 +83,9 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
 
   const handleOpenMarket = () => {
     console.log('ActionsPanel: handleOpenMarket called');
-    console.log('ActionsPanel: onOpenMarket available:', !!onOpenMarket);
-    console.log('ActionsPanel: selectedSystem:', selectedSystem);
-    console.log('ActionsPanel: currentSystemId:', currentSystemId);
-    
     if (onOpenMarket) {
       console.log('ActionsPanel: Calling onOpenMarket');
       onOpenMarket();
-    } else {
-      console.log('ActionsPanel: onOpenMarket not available');
     }
   };
 
@@ -124,17 +105,6 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
   const systemHasMarket = isCurrentSystem && selectedSystem?.planets.some(planet => 
     planet.civilization && planet.civilization.techLevel >= 2
   );
-
-  console.log('ActionsPanel render:');
-  console.log('- isCurrentSystem:', isCurrentSystem);
-  console.log('- systemHasRepairShop:', systemHasRepairShop);
-  console.log('- systemHasMarket:', systemHasMarket);
-  console.log('- needsRepair:', needsRepair);
-  console.log('- needsCombatRepair:', needsCombatRepair);
-  console.log('- canAffordRepair:', canAffordRepair);
-  console.log('- canAffordCombatRepair:', canAffordCombatRepair);
-  console.log('- onRepairCombatSystems available:', !!onRepairCombatSystems);
-  console.log('- onOpenMarket available:', !!onOpenMarket);
 
   return (
     <Card className="bg-gray-800 border-gray-600 h-full w-full">
@@ -216,7 +186,7 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
               />
             )}
 
-            {/* Ship Repair Section - always show if repairs are needed */}
+            {/* Ship Repair Section - same logic for both hull/shields and combat systems */}
             {(needsRepair || needsCombatRepair) && (
               <div className="pt-2 border-t border-gray-600">
                 <p className="text-gray-300 text-xs mb-2">
@@ -236,7 +206,7 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
                   </Button>
                 )}
 
-                {/* Combat Systems Repair - Always show if needed */}
+                {/* Combat Systems Repair - follows same logic as hull/shields */}
                 {needsCombatRepair && onRepairCombatSystems && (
                   <Button
                     onClick={handleRepairCombatSystems}

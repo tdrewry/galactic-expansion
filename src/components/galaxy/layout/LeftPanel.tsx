@@ -62,12 +62,17 @@ export const LeftPanel: React.FC<LeftPanelProps> = ({
   const needsRepair = shipStats && (shipStats.shields < shipStats.maxShields || shipStats.hull < shipStats.maxHull);
   const needsCombatRepair = shipStats && shipStats.combatPower < shipStats.maxCombatPower;
 
-  console.log('LeftPanel: onRepairCombatSystems prop available:', !!onRepairCombatSystems);
-
   const handleRepairShip = (cost: number) => {
     console.log('LeftPanel: handleRepairShip called with cost:', cost);
     if (onRepairShip) {
       onRepairShip();
+    }
+  };
+
+  const handleRepairCombatSystems = (cost: number) => {
+    console.log('LeftPanel: handleRepairCombatSystems called with cost:', cost);
+    if (onRepairCombatSystems) {
+      onRepairCombatSystems(cost);
     }
   };
 
@@ -94,7 +99,7 @@ export const LeftPanel: React.FC<LeftPanelProps> = ({
               canAffordRepair={canAffordRepair}
               needsRepair={needsRepair}
               onRepairShip={handleRepairShip}
-              onRepairCombatSystems={onRepairCombatSystems}
+              onRepairCombatSystems={handleRepairCombatSystems}
               combatRepairCost={combatRepairCost}
               canAffordCombatRepair={canAffordCombatRepair}
               needsCombatRepair={needsCombatRepair}
