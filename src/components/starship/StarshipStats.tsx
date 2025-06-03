@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -24,8 +24,6 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({
   hideActions = false,
   onOpenShipLayout
 }) => {
-  const [isEditingName, setIsEditingName] = useState(false);
-
   const getHealthColor = (current: number, max: number) => {
     const percentage = (current / max) * 100;
     if (percentage >= 70) return "bg-green-500";
@@ -46,28 +44,13 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              {!hideActions && isEditingName ? (
+              {!hideActions && onNameChange ? (
                 <ShipNameEditor
                   name={stats.name || 'Unnamed Ship'}
-                  onNameChange={(newName) => {
-                    onNameChange?.(newName);
-                    setIsEditingName(false);
-                  }}
+                  onNameChange={onNameChange}
                 />
               ) : (
-                <>
-                  <span>{stats.name || 'Unnamed Ship'}</span>
-                  {!hideActions && onNameChange && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setIsEditingName(true)}
-                      className="text-xs"
-                    >
-                      Rename
-                    </Button>
-                  )}
-                </>
+                <span>{stats.name || 'Unnamed Ship'}</span>
               )}
             </div>
             <div className="flex items-center gap-2">
