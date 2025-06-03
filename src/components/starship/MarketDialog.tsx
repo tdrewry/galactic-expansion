@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,6 +30,14 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
   onRepairCombatSystems
 }) => {
   const [cargoToSell, setCargoToSell] = useState(0);
+
+  useEffect(() => {
+    console.log('MarketDialog: Component rendered/updated');
+    console.log('MarketDialog: isOpen:', isOpen);
+    console.log('MarketDialog: marketInfo:', marketInfo);
+    console.log('MarketDialog: shipStats:', shipStats);
+    console.log('MarketDialog: onRepairCombatSystems available:', !!onRepairCombatSystems);
+  }, [isOpen, marketInfo, shipStats, onRepairCombatSystems]);
 
   const getMarketIcon = () => {
     switch (marketInfo.type) {
@@ -71,6 +80,7 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
   };
 
   const handleSellAll = () => {
+    console.log('MarketDialog: handleSellAll called');
     if (shipStats.cargo > 0) {
       onSellCargo(shipStats.cargo);
       setCargoToSell(0);
@@ -78,6 +88,7 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
   };
 
   const handleUpgrade = (system: keyof StarshipStats, cost: number, maxIncrease: number, currentIncrease?: number) => {
+    console.log('MarketDialog: handleUpgrade called for system:', system);
     onUpgradeSystem(system, cost, maxIncrease);
     // Also upgrade current value for most systems
     if (currentIncrease && system !== 'maxCargo' && system !== 'maxCrew') {
@@ -97,10 +108,38 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
   const isSpaceStation = marketInfo.type === 'station';
 
   const handleRepairCombatSystems = () => {
+    console.log('MarketDialog: handleRepairCombatSystems called');
+    console.log('MarketDialog: onRepairCombatSystems available:', !!onRepairCombatSystems);
+    console.log('MarketDialog: canAffordCombatRepair:', canAffordCombatRepair);
+    console.log('MarketDialog: needsCombatRepair:', needsCombatRepair);
+    
     if (onRepairCombatSystems && canAffordCombatRepair && needsCombatRepair) {
+      console.log('MarketDialog: Calling onRepairCombatSystems with cost:', combatRepairCost);
       onRepairCombatSystems(combatRepairCost);
+    } else {
+      console.log('MarketDialog: Combat repair conditions not met');
     }
   };
+
+  const handleRepairShip = () => {
+    console.log('MarketDialog: handleRepairShip called');
+    console.log('MarketDialog: onRepairShip available:', !!onRepairShip);
+    console.log('MarketDialog: canAffordRepair:', canAffordRepair);
+    console.log('MarketDialog: needsRepair:', needsRepair);
+    
+    if (onRepairShip && canAffordRepair && needsRepair) {
+      console.log('MarketDialog: Calling onRepairShip with cost:', repairCost);
+      onRepairShip(repairCost);
+    } else {
+      console.log('MarketDialog: Ship repair conditions not met');
+    }
+  };
+
+  // Early return if no market info is available
+  if (!marketInfo) {
+    console.log('MarketDialog: No marketInfo available');
+    return null;
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -396,7 +435,7 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                   </div>
                   
                   <Button
-                    onClick={() => onRepairShip?.(repairCost)}
+                    onClick={handleRepairShip}
                     disabled={!needsRepair || !canAffordRepair}
                     className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:text-gray-400"
                   >
