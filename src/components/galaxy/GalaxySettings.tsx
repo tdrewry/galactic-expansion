@@ -35,6 +35,7 @@ interface GalaxySettingsProps {
   setSeed: (seed: number) => void;
   onSettingsChange?: (settings: any) => void;
   onNewShip?: () => void;
+  onClose?: () => void;
 }
 
 export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
@@ -62,7 +63,8 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
   seed,
   setSeed,
   onSettingsChange,
-  onNewShip
+  onNewShip,
+  onClose
 }) => {
   const [localSettings, setLocalSettings] = React.useState({
     numSystems,
@@ -116,7 +118,7 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
 
   const handleApply = () => {
     console.log('Applying settings:', localSettings);
-    onSettingsChange(localSettings);
+    onSettingsChange?.(localSettings);
   };
 
   const handleReset = () => {
@@ -150,11 +152,11 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
       }
     };
     setLocalSettings(defaultSettings);
-    onSettingsChange(defaultSettings);
+    onSettingsChange?.(defaultSettings);
   };
 
   return (
-    <Sheet defaultOpen>
+    <Sheet defaultOpen onOpenChange={(open) => !open && onClose?.()}>
       <SheetContent side="right" className="w-96 flex flex-col">
         <SheetHeader className="flex-shrink-0 pb-4 border-b">
           <SheetTitle>Galaxy Generation Settings</SheetTitle>

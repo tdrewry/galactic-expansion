@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   Card,
@@ -133,7 +134,7 @@ export const GalaxyLayout: React.FC<GalaxyLayoutProps> = ({
           onResetExploration={onResetExploration}
           shipStats={shipStats}
           onRepairShip={onRepairShip}
-          onRepairCombatSystems={handleRepairCombatSystems}
+          onRepairCombatSystems={onRepairCombatSystems}
           onOpenMarket={onOpenMarket}
           canJumpToSelected={canJumpToSelected}
           onJumpToSystem={onJumpToSystem}
@@ -146,7 +147,6 @@ export const GalaxyLayout: React.FC<GalaxyLayoutProps> = ({
       {/* Dialogs */}
       {showSettings && (
         <GalaxySettings 
-          onClose={() => setShowSettings(false)}
           seed={seed}
           setSeed={setSeed}
           onNewShip={() => setShowShipSelection(true)}
@@ -155,6 +155,8 @@ export const GalaxyLayout: React.FC<GalaxyLayoutProps> = ({
       
       {showShipSelection && (
         <ShipSelectionDialog
+          isOpen={showShipSelection}
+          onClose={() => setShowShipSelection(false)}
           shipOptions={[]}
           onSelectShip={() => setShowShipSelection(false)}
         />
