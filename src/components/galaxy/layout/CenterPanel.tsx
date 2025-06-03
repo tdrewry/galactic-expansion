@@ -102,6 +102,8 @@ export const CenterPanel: React.FC<CenterPanelProps> = ({
   onTriggerScan,
   onRepairCombatSystems
 }) => {
+  console.log('CenterPanel: onRepairCombatSystems prop received:', !!onRepairCombatSystems);
+
   const handleCenterOnCurrentSystem = () => {
     if (currentSystemId && galaxyMapRef?.current) {
       galaxyMapRef.current.zoomToSystem(currentSystemId);

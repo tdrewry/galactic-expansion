@@ -67,6 +67,8 @@ interface GalaxyLayoutPanelsProps {
 export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => {
   const [isScanning, setIsScanning] = useState(false);
 
+  console.log('GalaxyLayoutPanels: onRepairCombatSystems prop received:', !!props.onRepairCombatSystems);
+
   const handleTriggerScan = () => {
     if (props.selectedSystem) {
       setIsScanning(true);
