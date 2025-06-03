@@ -78,7 +78,7 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => 
   return (
     <ResizablePanelGroup direction="horizontal" className="flex-1">
       {/* Left Panel - Ship Actions and Exploration Log */}
-      <ResizablePanel defaultSize={60} minSize={25} maxSize={80}>
+      <ResizablePanel defaultSize={25} minSize={25} maxSize={40}>
         <LeftPanel
           selectedSystem={props.selectedSystem}
           currentSystemId={props.currentSystemId}
@@ -147,7 +147,7 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => 
       {props.selectedSystem && (
         <>
           <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={27.9} minSize={20} maxSize={35}>
+          <ResizablePanel defaultSize={25} minSize={20} maxSize={35}>
             <RightPanel
               selectedSystem={props.selectedSystem}
               selectedStar={props.selectedStar}
