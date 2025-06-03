@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stars, Billboard } from '@react-three/drei';
 import { Galaxy, StarSystem as StarSystemType } from '../../utils/galaxyGenerator';
@@ -35,7 +35,11 @@ interface GalaxySceneProps {
   onScanComplete?: () => void;
 }
 
-export const GalaxyScene: React.FC<GalaxySceneProps> = ({ 
+export interface GalaxySceneRef {
+  zoomToSystem: (systemId: string) => void;
+}
+
+export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({ 
   galaxy, 
   selectedSystem, 
   onSystemSelect,
@@ -58,7 +62,7 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
   getScannerRangeSystemIds,
   isScanning = false,
   onScanComplete
-}) => {
+}, ref) => {
   const { camera, gl } = useThree();
   const controlsRef = useRef<any>(null);
   const targetPosition = useRef(new THREE.Vector3());
@@ -75,6 +79,25 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
   
   // Calculate scanner range for ping visualization
   const scannerRange = shipStats ? (shipStats.scanners / 100) * 50000 : 25000;
+
+  // Expose zoom functionality through ref
+  useImperativeHandle(ref, () => ({
+    zoomToSystem: (systemId: string) => {
+      const system = galaxy.starSystems.find(s => s.id === systemId);
+      if (system && controlsRef.current) {
+        console.log('Zooming to system:', systemId);
+        const [x, y, z] = system.position;
+        targetPosition.current.set(x, y, z);
+        controlsRef.current.target.copy(targetPosition.current);
+        
+        const targetDistance = 8000;
+        const direction = camera.position.clone().sub(targetPosition.current).normalize();
+        camera.position.copy(targetPosition.current).add(direction.multiplyScalar(targetDistance));
+        isMoving.current = true;
+        hasInitiallyZoomed.current = true;
+      }
+    }
+  }), [galaxy.starSystems, camera]);
 
   // Handle scanner completion - start the 15 second fade timer
   const handleScanComplete = () => {
@@ -281,4 +304,6 @@ export const GalaxyScene: React.FC<GalaxySceneProps> = ({
       />
     </>
   );
-};
+});
+
+GalaxyScene.displayName = 'GalaxyScene';

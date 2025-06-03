@@ -1,7 +1,7 @@
 
 import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { GalaxyScene } from './GalaxyScene';
+import { GalaxyScene, GalaxySceneRef } from './GalaxyScene';
 import { Galaxy, StarSystem } from '../../utils/galaxyGenerator';
 
 interface GalaxyMapCanvasProps {
@@ -52,7 +52,7 @@ export const GalaxyMapCanvas = forwardRef<GalaxyMapCanvasRef, GalaxyMapCanvasPro
   currentSystemId,
   ...sceneProps
 }, ref) => {
-  const sceneRef = useRef<any>(null);
+  const sceneRef = useRef<GalaxySceneRef>(null);
 
   // Expose zoom functionality through ref
   useImperativeHandle(ref, () => ({
