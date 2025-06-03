@@ -216,7 +216,7 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
               />
             )}
 
-            {/* Ship Repair Section - always show if repairs are needed, but enable/disable based on facilities */}
+            {/* Ship Repair Section - always show if repairs are needed */}
             {(needsRepair || needsCombatRepair) && (
               <div className="pt-2 border-t border-gray-600">
                 <p className="text-gray-300 text-xs mb-2">
@@ -236,7 +236,7 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
                   </Button>
                 )}
 
-                {/* Combat Systems Repair */}
+                {/* Combat Systems Repair - Always show if needed */}
                 {needsCombatRepair && onRepairCombatSystems && (
                   <Button
                     onClick={handleRepairCombatSystems}
