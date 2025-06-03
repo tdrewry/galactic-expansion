@@ -80,7 +80,7 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => 
 
   return (
     <ResizablePanelGroup direction="horizontal" className="flex-1">
-      {/* Left Panel - Ship Actions and Exploration Log */}
+      {/* Left Panel - Exploration Log */}
       <ResizablePanel defaultSize={25} minSize={25} maxSize={40}>
         <LeftPanel
           selectedSystem={props.selectedSystem}
@@ -104,7 +104,7 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => 
       
       <ResizableHandle withHandle />
       
-      {/* Center Panel - Galaxy Map and Ship Stats */}
+      {/* Center Panel - Galaxy Map, Ship Stats, and Actions */}
       <ResizablePanel defaultSize={50} minSize={40}>
         <CenterPanel
           galaxySeed={props.galaxySeed}
@@ -145,6 +145,9 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => 
           isScanning={isScanning}
           onScanComplete={handleScanComplete}
           galaxyMapRef={props.galaxyMapRef}
+          canJumpToSelected={props.canJumpToSelected}
+          onTriggerScan={handleTriggerScan}
+          onRepairCombatSystems={props.onRepairCombatSystems}
         />
       </ResizablePanel>
 
