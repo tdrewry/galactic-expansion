@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { StarSystem, Planet, Moon } from '../../../utils/galaxyGenerator';
 import { SystemView } from '../SystemView';
@@ -57,36 +57,58 @@ export const RightPanel: React.FC<RightPanelProps> = ({
   onRepairCombatSystems
 }) => {
   const [isMarketOpen, setIsMarketOpen] = useState(false);
+  const [marketInfo, setMarketInfo] = useState<MarketLocation | null>(null);
 
-  const handleOpenMarket = () => {
-    setIsMarketOpen(true);
-    onOpenMarket();
-  };
+  // Calculate market info and update state when dependencies change
+  useEffect(() => {
+    console.log('RightPanel: Recalculating market info');
+    console.log('RightPanel: selectedSystem:', selectedSystem?.id);
+    console.log('RightPanel: currentSystemId:', currentSystemId);
+    console.log('RightPanel: systems match:', selectedSystem?.id === currentSystemId);
 
-  const handleCloseMarket = () => {
-    setIsMarketOpen(false);
-  };
-
-  const getMarketInfo = (): MarketLocation | null => {
-    if (!selectedSystem || selectedSystem.id !== currentSystemId) return null;
+    if (!selectedSystem || selectedSystem.id !== currentSystemId) {
+      console.log('RightPanel: No market info - system mismatch or missing');
+      setMarketInfo(null);
+      return;
+    }
     
     const marketPlanet = selectedSystem.planets.find(planet => 
       planet.civilization && planet.civilization.techLevel >= 2
     );
     
     if (marketPlanet) {
-      return {
-        type: 'civilization',
+      const newMarketInfo = {
+        type: 'civilization' as const,
         techLevel: marketPlanet.civilization!.techLevel,
         hasRepair: marketPlanet.civilization!.techLevel >= 3,
         hasMarket: true
       };
+      console.log('RightPanel: Setting market info:', newMarketInfo);
+      setMarketInfo(newMarketInfo);
+    } else {
+      console.log('RightPanel: No market planet found');
+      setMarketInfo(null);
     }
+  }, [selectedSystem, currentSystemId]);
+
+  const handleOpenMarket = () => {
+    console.log('RightPanel: handleOpenMarket called');
+    console.log('RightPanel: marketInfo available:', !!marketInfo);
     
-    return null;
+    // Only open market if we have valid market info
+    if (marketInfo) {
+      console.log('RightPanel: Opening market with info:', marketInfo);
+      setIsMarketOpen(true);
+      onOpenMarket();
+    } else {
+      console.log('RightPanel: Cannot open market - no market info available');
+    }
   };
 
-  const marketInfo = getMarketInfo();
+  const handleCloseMarket = () => {
+    console.log('RightPanel: Closing market');
+    setIsMarketOpen(false);
+  };
 
   return (
     <ResizablePanelGroup direction="vertical" className="h-full">
@@ -117,6 +139,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({
         </div>
       </ResizablePanel>
 
+      {/* Only render MarketDialog when we have valid market info */}
       {marketInfo && (
         <MarketDialog
           isOpen={isMarketOpen}
