@@ -91,7 +91,6 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => 
           getSystemExplorationStatus={props.getSystemExplorationStatus}
           onBeginExploration={props.onBeginExploration}
           onResetExploration={props.onResetExploration}
-          onRepairShip={props.onRepairShip}
           onOpenMarket={props.onOpenMarket}
           onJumpToSystem={props.onJumpToSystem}
           canJumpToSelected={props.canJumpToSelected}
