@@ -385,6 +385,10 @@ const Index = () => {
         onSaveGame={handleSaveGame}
         onLoadGame={handleLoadGame}
         onNewGame={generateRandomSeed}
+        isSystemExplored={isSystemExplored}
+        canSystemBeExplored={canSystemBeExplored}
+        getSystemExplorationStatus={getSystemExplorationStatus}
+        explorationHistory={explorationHistory}
       />
 
       <footer className="bg-gray-900 p-2 border-t border-gray-700 text-center text-sm text-gray-400 flex-shrink-0">

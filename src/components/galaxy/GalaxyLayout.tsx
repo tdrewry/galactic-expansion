@@ -39,6 +39,15 @@ interface GalaxyLayoutProps {
   onSaveGame?: () => void;
   onLoadGame?: () => void;
   onNewGame?: () => void;
+  // Add missing exploration functions
+  isSystemExplored?: (system: StarSystem) => boolean;
+  canSystemBeExplored?: (system: StarSystem) => boolean;
+  getSystemExplorationStatus?: (system: StarSystem) => {
+    systemId: string;
+    explorationsCompleted: number;
+    maxExplorations: number;
+  };
+  explorationHistory?: any[];
 }
 
 export const GalaxyLayout: React.FC<GalaxyLayoutProps> = ({
@@ -62,7 +71,11 @@ export const GalaxyLayout: React.FC<GalaxyLayoutProps> = ({
   onUpdateShipName,
   onSaveGame,
   onLoadGame,
-  onNewGame
+  onNewGame,
+  isSystemExplored,
+  canSystemBeExplored,
+  getSystemExplorationStatus,
+  explorationHistory = []
 }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [showShipSelection, setShowShipSelection] = useState(false);
@@ -141,6 +154,10 @@ export const GalaxyLayout: React.FC<GalaxyLayoutProps> = ({
           onTriggerScan={onTriggerScan}
           isScanning={isScanning}
           onUpdateShipName={onUpdateShipName}
+          isSystemExplored={isSystemExplored}
+          canSystemBeExplored={canSystemBeExplored}
+          getSystemExplorationStatus={getSystemExplorationStatus}
+          explorationHistory={explorationHistory}
         />
       </div>
 
