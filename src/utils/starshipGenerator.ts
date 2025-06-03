@@ -123,6 +123,10 @@ const roomTypes = [
 ];
 
 function seededRandom(seed: number): number {
+  // Ensure seed is a valid number
+  if (!seed || isNaN(seed) || !isFinite(seed)) {
+    seed = 12345; // fallback seed
+  }
   const x = Math.sin(seed) * 10000;
   return x - Math.floor(x);
 }
@@ -259,6 +263,11 @@ function generateLayout(seed: number): StarshipLayout {
 }
 
 export function generateStarship(seed: number, shipClassIndex?: number): Starship {
+  // Validate and ensure seed is a proper number
+  if (!seed || isNaN(seed) || !isFinite(seed)) {
+    seed = 12345; // fallback seed
+  }
+  
   let currentSeed = seed;
   
   const nameIndex = Math.floor(seededRandom(currentSeed++) * shipNames.length);
@@ -268,7 +277,15 @@ export function generateStarship(seed: number, shipClassIndex?: number): Starshi
   
   // Ensure we have a valid ship class
   if (!shipClass) {
-    throw new Error(`Invalid ship class index: ${classIndex}`);
+    console.warn(`Invalid ship class index: ${classIndex}, using default class`);
+    const defaultClass = shipClasses[0]; // Use first class as fallback
+    
+    return {
+      name: shipName,
+      class: defaultClass.name,
+      stats: generateStats(currentSeed, shipName, defaultClass),
+      layout: generateLayout(currentSeed + 1000)
+    };
   }
   
   return {
