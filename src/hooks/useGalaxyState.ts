@@ -27,7 +27,7 @@ export const useGalaxyState = () => {
   const [inputSeed, setInputSeed] = useState('12345');
   
   // Galaxy settings with new defaults
-  const [appTitle, setAppTitle] = useState('Stardust Voyager');
+  const [appTitle, setAppTitle] = useState('Galactic Expansion');
   const [numSystems, setNumSystems] = useState(1000);
   const [numNebulae, setNumNebulae] = useState(50);
   const [binaryFrequency, setBinaryFrequency] = useState(0.15);
