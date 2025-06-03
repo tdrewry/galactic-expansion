@@ -134,19 +134,21 @@ export const GalaxyLayout: React.FC<GalaxyLayoutProps> = ({
       </div>
 
       {/* Dialogs */}
-      <GalaxySettings 
-        isOpen={showSettings} 
-        onClose={() => setShowSettings(false)}
-        seed={seed}
-        setSeed={setSeed}
-        onNewShip={() => setShowShipSelection(true)}
-      />
+      {showSettings && (
+        <GalaxySettings 
+          onClose={() => setShowSettings(false)}
+          seed={seed}
+          setSeed={setSeed}
+          onNewShip={() => setShowShipSelection(true)}
+        />
+      )}
       
-      <ShipSelectionDialog
-        isOpen={showShipSelection}
-        onClose={() => setShowShipSelection(false)}
-        onSelectShip={() => setShowShipSelection(false)}
-      />
+      {showShipSelection && (
+        <ShipSelectionDialog
+          shipOptions={[]}
+          onSelectShip={() => setShowShipSelection(false)}
+        />
+      )}
     </div>
   );
 };

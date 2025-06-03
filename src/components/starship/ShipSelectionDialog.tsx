@@ -13,16 +13,16 @@ import { Starship } from '../../utils/starshipGenerator';
 import { StarshipStats } from './StarshipStats';
 
 interface ShipSelectionDialogProps {
-  isOpen: boolean;
   shipOptions: Starship[];
   onSelectShip: (ship: Starship) => void;
 }
 
 export const ShipSelectionDialog: React.FC<ShipSelectionDialogProps> = ({
-  isOpen,
   shipOptions,
   onSelectShip
 }) => {
+  const isOpen = shipOptions.length > 0;
+
   return (
     <Dialog open={isOpen}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
