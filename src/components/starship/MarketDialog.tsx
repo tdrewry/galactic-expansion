@@ -37,6 +37,7 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
     console.log('MarketDialog: marketInfo:', marketInfo);
     console.log('MarketDialog: shipStats:', shipStats);
     console.log('MarketDialog: onRepairCombatSystems available:', !!onRepairCombatSystems);
+    console.log('MarketDialog: onRepairCombatSystems function:', onRepairCombatSystems);
   }, [isOpen, marketInfo, shipStats, onRepairCombatSystems]);
 
   const getMarketIcon = () => {
@@ -110,6 +111,7 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
   const handleRepairCombatSystems = () => {
     console.log('MarketDialog: handleRepairCombatSystems called');
     console.log('MarketDialog: onRepairCombatSystems available:', !!onRepairCombatSystems);
+    console.log('MarketDialog: onRepairCombatSystems function type:', typeof onRepairCombatSystems);
     console.log('MarketDialog: canAffordCombatRepair:', canAffordCombatRepair);
     console.log('MarketDialog: needsCombatRepair:', needsCombatRepair);
     
@@ -118,6 +120,9 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
       onRepairCombatSystems(combatRepairCost);
     } else {
       console.log('MarketDialog: Combat repair conditions not met');
+      console.log('MarketDialog: Missing function?', !onRepairCombatSystems);
+      console.log('MarketDialog: Insufficient credits?', !canAffordCombatRepair);
+      console.log('MarketDialog: No repair needed?', !needsCombatRepair);
     }
   };
 
@@ -457,7 +462,7 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                     
                     <Button
                       onClick={handleRepairCombatSystems}
-                      disabled={!needsCombatRepair || !canAffordCombatRepair}
+                      disabled={!needsCombatRepair || !canAffordCombatRepair || !onRepairCombatSystems}
                       className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 disabled:text-gray-400 mt-2"
                     >
                       <Shield className="h-4 w-4 mr-2" />
@@ -468,6 +473,10 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                   {(!canAffordRepair && needsRepair) || (!canAffordCombatRepair && needsCombatRepair) ? (
                     <p className="text-red-400 text-xs mt-1">Insufficient credits for some repairs</p>
                   ) : null}
+
+                  {!onRepairCombatSystems && needsCombatRepair && (
+                    <p className="text-red-400 text-xs mt-1">Combat repair function not available</p>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
