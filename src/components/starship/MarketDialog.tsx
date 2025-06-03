@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -146,15 +147,20 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
 
         <Tabs defaultValue="trade" className="w-full">
           <TabsList className="grid w-full grid-cols-4 bg-gray-800">
-            <TabsTrigger value="trade" disabled={!hasMarketFacilities}>Trade</TabsTrigger>
-            <TabsTrigger value="upgrades" disabled={!hasMarketFacilities}>Upgrades</TabsTrigger>
-            <TabsTrigger value="services" disabled={!isSpaceStation}>Services</TabsTrigger>
-            <TabsTrigger value="repair" disabled={!hasRepairFacilities}>Repair</TabsTrigger>
+            <TabsTrigger value="trade">Trade</TabsTrigger>
+            <TabsTrigger value="upgrades">Upgrades</TabsTrigger>
+            <TabsTrigger value="services">Services</TabsTrigger>
+            <TabsTrigger value="repair">Repair</TabsTrigger>
           </TabsList>
 
-          {hasMarketFacilities && (
-            <TabsContent value="trade" className="space-y-4">
-              
+          <TabsContent value="trade" className="space-y-4">
+            {!hasMarketFacilities && (
+              <div className="text-center py-8">
+                <p className="text-gray-400">Trading facilities not available at this location</p>
+              </div>
+            )}
+            
+            {hasMarketFacilities && (
               <Card className="bg-gray-800 border-gray-600">
                 <CardHeader>
                   <CardTitle className="text-white">Cargo Trading</CardTitle>
@@ -173,6 +179,7 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                       value={cargoToSell}
                       onChange={(e) => setCargoToSell(Math.min(shipStats.cargo, parseInt(e.target.value) || 0))}
                       className="w-24 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white"
+                      disabled={!hasMarketFacilities}
                     />
                     <span className="text-gray-300">units for</span>
                     <span className="text-yellow-400">₡{getCargoValue(cargoToSell).toLocaleString()}</span>
@@ -184,27 +191,32 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                         onSellCargo(cargoToSell);
                         setCargoToSell(0);
                       }}
-                      disabled={cargoToSell === 0}
-                      className="bg-blue-600 hover:bg-blue-700"
+                      disabled={cargoToSell === 0 || !hasMarketFacilities}
+                      className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:text-gray-400"
                     >
                       Sell Cargo
                     </Button>
                     <Button
                       onClick={handleSellAll}
-                      disabled={shipStats.cargo === 0}
-                      className="bg-green-600 hover:bg-green-700"
+                      disabled={shipStats.cargo === 0 || !hasMarketFacilities}
+                      className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:text-gray-400"
                     >
                       Sell All
                     </Button>
                   </div>
                 </CardContent>
               </Card>
-            </TabsContent>
-          )}
+            )}
+          </TabsContent>
 
-          {hasMarketFacilities && (
-            <TabsContent value="upgrades" className="space-y-4">
-              
+          <TabsContent value="upgrades" className="space-y-4">
+            {!hasMarketFacilities && (
+              <div className="text-center py-8">
+                <p className="text-gray-400">Upgrade facilities not available at this location</p>
+              </div>
+            )}
+            
+            {hasMarketFacilities && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Combat Power Upgrade */}
                 <Card className="bg-gray-800 border-gray-600">
@@ -220,7 +232,7 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                       <Button
                         onClick={() => handleUpgrade('maxCombatPower', getUpgradeCost('combatPower', shipStats.combatPower), 10, 10)}
                         disabled={!canAffordUpgrade('combatPower', shipStats.combatPower) || shipStats.maxCombatPower >= 200}
-                        className="w-full bg-red-600 hover:bg-red-700"
+                        className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:text-gray-400"
                         size="sm"
                       >
                         Upgrade Combat (+10)
@@ -242,7 +254,7 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                       <Button
                         onClick={() => handleUpgrade('maxScanners', getUpgradeCost('scanners', shipStats.scanners), 10, 10)}
                         disabled={!canAffordUpgrade('scanners', shipStats.scanners) || shipStats.maxScanners >= 200}
-                        className="w-full bg-cyan-600 hover:bg-cyan-700"
+                        className="w-full bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-600 disabled:text-gray-400"
                         size="sm"
                       >
                         Upgrade Scanners (+10)
@@ -264,7 +276,7 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                       <Button
                         onClick={() => onUpgradeSystem('maxCargo', getUpgradeCost('maxCargo', shipStats.maxCargo), 100)}
                         disabled={!canAffordUpgrade('maxCargo', shipStats.maxCargo) || shipStats.maxCargo >= 2000}
-                        className="w-full bg-yellow-600 hover:bg-yellow-700"
+                        className="w-full bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-600 disabled:text-gray-400"
                         size="sm"
                       >
                         Upgrade Cargo (+100)
@@ -286,7 +298,7 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                       <Button
                         onClick={() => onUpgradeSystem('maxCrew', getUpgradeCost('maxCrew', shipStats.maxCrew), 5)}
                         disabled={!canAffordUpgrade('maxCrew', shipStats.maxCrew) || shipStats.maxCrew >= 200}
-                        className="w-full bg-green-600 hover:bg-green-700"
+                        className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:text-gray-400"
                         size="sm"
                       >
                         Upgrade Quarters (+5)
@@ -295,13 +307,18 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                   </CardContent>
                 </Card>
               </div>
-            </TabsContent>
-          )}
+            )}
+          </TabsContent>
 
-          {/* Services tab for Space Stations */}
-          {isSpaceStation && (
-            <TabsContent value="services" className="space-y-4">
-              
+          {/* Services tab */}
+          <TabsContent value="services" className="space-y-4">
+            {!isSpaceStation && (
+              <div className="text-center py-8">
+                <p className="text-gray-400">Advanced services only available at space stations</p>
+              </div>
+            )}
+            
+            {isSpaceStation && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Card className="bg-gray-800 border-gray-600">
                   <CardHeader>
@@ -319,7 +336,7 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                       <Button
                         onClick={() => onUpgradeSystem('crew', 500, 1)}
                         disabled={shipStats.credits < 500 || shipStats.crew >= shipStats.maxCrew}
-                        className="w-full bg-purple-600 hover:bg-purple-700"
+                        className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 disabled:text-gray-400"
                         size="sm"
                       >
                         Hire Crew Member
@@ -344,7 +361,7 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                       <Button
                         onClick={() => onUpgradeSystem('cargo', 15, 10)}
                         disabled={shipStats.credits < 15 || shipStats.cargo >= shipStats.maxCargo}
-                        className="w-full bg-orange-600 hover:bg-orange-700"
+                        className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 disabled:text-gray-400"
                         size="sm"
                       >
                         Buy Cargo (10 units)
@@ -366,7 +383,7 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                       <Button
                         onClick={() => onUpgradeSystem('scanners', 200, Math.min(10, shipStats.maxScanners - shipStats.scanners))}
                         disabled={shipStats.credits < 200 || shipStats.scanners >= shipStats.maxScanners}
-                        className="w-full bg-cyan-600 hover:bg-cyan-700"
+                        className="w-full bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-600 disabled:text-gray-400"
                         size="sm"
                       >
                         Repair Scanner
@@ -388,7 +405,7 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                       <Button
                         onClick={() => onUpgradeSystem('combatPower', 300, Math.min(10, shipStats.maxCombatPower - shipStats.combatPower))}
                         disabled={shipStats.credits < 300 || shipStats.combatPower >= shipStats.maxCombatPower}
-                        className="w-full bg-red-600 hover:bg-red-700"
+                        className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:text-gray-400"
                         size="sm"
                       >
                         Repair Weapons
@@ -397,11 +414,17 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                   </CardContent>
                 </Card>
               </div>
-            </TabsContent>
-          )}
+            )}
+          </TabsContent>
 
-          {hasRepairFacilities && (
-            <TabsContent value="repair" className="space-y-4">
+          <TabsContent value="repair" className="space-y-4">
+            {!hasRepairFacilities && (
+              <div className="text-center py-8">
+                <p className="text-gray-400">Repair facilities not available at this location</p>
+              </div>
+            )}
+            
+            {hasRepairFacilities && (
               <Card className="bg-gray-800 border-gray-600">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
@@ -488,8 +511,8 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                   )}
                 </CardContent>
               </Card>
-            </TabsContent>
-          )}
+            )}
+          </TabsContent>
         </Tabs>
       </DialogContent>
     </Dialog>
