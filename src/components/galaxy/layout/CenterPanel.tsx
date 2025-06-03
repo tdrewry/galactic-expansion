@@ -1,9 +1,17 @@
 
-import React, { useRef } from 'react';
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
-import { StarSystem } from '../../../utils/galaxyGenerator';
+import React from 'react';
 import { GalaxyMap, GalaxyMapRef } from '../../GalaxyMap';
 import { StarshipPanel } from '../../starship/StarshipPanel';
+import { StarSystem, Planet, Moon } from '../../../utils/galaxyGenerator';
+import { Button } from '@/components/ui/button';
+import { Target } from 'lucide-react';
+
+interface ExplorationLogEntry {
+  id: string;
+  systemId: string;
+  event: any;
+  timestamp: Date;
+}
 
 interface SystemExplorationStatus {
   systemId: string;
@@ -69,7 +77,6 @@ export const CenterPanel: React.FC<CenterPanelProps> = ({
   jumpLaneOpacity,
   greenPathOpacity,
   selectedSystem,
-  selectedStar,
   exploredSystems,
   shipStats,
   currentSystemId,
@@ -77,28 +84,25 @@ export const CenterPanel: React.FC<CenterPanelProps> = ({
   travelHistory,
   getJumpableSystemIds,
   getScannerRangeSystemIds,
-  isSystemExplored,
-  canSystemBeExplored,
-  getSystemExplorationStatus,
   onSystemSelect,
-  onStarSelect,
-  onBeginExploration,
-  onResetExploration,
-  onRepairShip,
-  onOpenMarket,
-  onJumpToSystem,
   onUpdateShipName,
   isScanning,
   onScanComplete,
   galaxyMapRef
 }) => {
+  const handleCenterOnCurrentSystem = () => {
+    if (currentSystemId && galaxyMapRef?.current) {
+      galaxyMapRef.current.zoomToSystem(currentSystemId);
+    }
+  };
+
   return (
-    <ResizablePanelGroup direction="vertical" className="h-full">
+    <div className="h-full flex flex-col">
       {/* Galaxy Map */}
-      <ResizablePanel defaultSize={78} minSize={50}>
-        <GalaxyMap 
+      <div className="flex-1 relative">
+        <GalaxyMap
           ref={galaxyMapRef}
-          seed={galaxySeed} 
+          seed={galaxySeed}
           numSystems={numSystems}
           numNebulae={numNebulae}
           binaryFrequency={binaryFrequency}
@@ -113,45 +117,40 @@ export const CenterPanel: React.FC<CenterPanelProps> = ({
           cosmicDustColorIntensity={cosmicDustColorIntensity}
           jumpLaneOpacity={jumpLaneOpacity}
           greenPathOpacity={greenPathOpacity}
-          travelHistory={travelHistory}
-          onSystemSelect={onSystemSelect}
           selectedSystem={selectedSystem}
-          selectedStar={selectedStar}
-          onStarSelect={onStarSelect}
+          onSystemSelect={onSystemSelect}
           exploredSystems={exploredSystems}
           shipStats={shipStats}
           currentSystemId={currentSystemId}
           exploredSystemIds={exploredSystemIds}
+          travelHistory={travelHistory}
           getJumpableSystemIds={getJumpableSystemIds}
           getScannerRangeSystemIds={getScannerRangeSystemIds}
-          onJumpToSystem={onJumpToSystem}
           isScanning={isScanning}
           onScanComplete={onScanComplete}
         />
-      </ResizablePanel>
-      
-      <ResizableHandle withHandle />
-      
-      {/* Ship Stats */}
-      <ResizablePanel defaultSize={22} minSize={10} maxSize={40}>
-        <div className="border-t border-gray-700">
-          <StarshipPanel 
-            seed={galaxySeed}
-            selectedSystem={selectedSystem}
-            currentSystemId={currentSystemId}
-            isExplored={selectedSystem ? isSystemExplored(selectedSystem) : false}
-            canBeExplored={selectedSystem ? canSystemBeExplored(selectedSystem) : false}
-            explorationStatus={selectedSystem ? getSystemExplorationStatus(selectedSystem) : { systemId: '', explorationsCompleted: 0, maxExplorations: 0 }}
-            onBeginExploration={onBeginExploration}
-            onResetExploration={onResetExploration}
-            shipStats={shipStats}
-            onRepairShip={onRepairShip}
-            onOpenMarket={onOpenMarket}
-            onUpdateShipName={onUpdateShipName}
-            hideActions={true}
-          />
-        </div>
-      </ResizablePanel>
-    </ResizablePanelGroup>
+        
+        {/* Center Button - positioned in lower right corner */}
+        {currentSystemId && (
+          <Button
+            onClick={handleCenterOnCurrentSystem}
+            className="absolute bottom-4 right-4 bg-blue-600 hover:bg-blue-700 text-white shadow-lg z-10"
+            size="sm"
+            title="Center on current system"
+          >
+            <Target className="w-4 h-4 mr-1" />
+            Center
+          </Button>
+        )}
+      </div>
+
+      {/* Ship Stats Panel */}
+      <div className="flex-shrink-0 border-t border-gray-700">
+        <StarshipPanel 
+          shipStats={shipStats} 
+          onUpdateShipName={onUpdateShipName}
+        />
+      </div>
+    </div>
   );
 };
