@@ -18,7 +18,7 @@ export const MarketActions: React.FC<MarketActionsProps> = ({
   const isCurrentSystem = selectedSystem?.id === currentSystemId;
   
   const systemHasMarket = isCurrentSystem && selectedSystem?.planets.some(planet => 
-    planet.civilization && planet.civilization.techLevel >= 2
+    planet.civilization && planet.civilization.hasMarket
   );
 
   const handleOpenMarket = () => {

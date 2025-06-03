@@ -49,6 +49,8 @@ export interface Civilization {
   techLevel: number;
   disposition: 'hostile' | 'neutral' | 'friendly' | 'unknown';
   tradeGoods: string[];
+  hasMarket: boolean;
+  hasRepair: boolean;
 }
 
 export interface Nebula {
@@ -276,6 +278,9 @@ function generatePlanets(rng: SeededRandom, starType: StarSystem['starType'], st
     
     const moons = generateMoons(rng, `${starId}-planet-${i}`);
     
+    // Generate civilization with persistent market info
+    const civilization = rng.next() < 0.05 ? generateCivilization(rng) : undefined;
+    
     planets.push({
       id: `${starId}-planet-${i}`,
       name: generatePlanetName(rng),
@@ -289,7 +294,7 @@ function generatePlanets(rng: SeededRandom, starType: StarSystem['starType'], st
       atmosphere: rng.choice(['none', 'thin', 'thick', 'toxic', 'breathable']),
       resources: generateResources(rng),
       inhabited: rng.next() < 0.1,
-      civilization: rng.next() < 0.05 ? generateCivilization(rng) : undefined,
+      civilization,
       distanceFromStar,
       moons: moons.length > 0 ? moons : undefined
     });
@@ -390,11 +395,15 @@ function generateCivilization(rng: SeededRandom): Civilization {
   const types: ('agronarian' | 'peacfolia' | 'mercantile' | 'unknown')[] = ['agronarian', 'peacfolia', 'mercantile', 'unknown'];
   const dispositions: ('hostile' | 'neutral' | 'friendly' | 'unknown')[] = ['hostile', 'neutral', 'friendly', 'unknown'];
   
+  const techLevel = Math.floor(rng.range(1, 10));
+  
   return {
     name: rng.choice(names),
     type: rng.choice(types),
-    techLevel: Math.floor(rng.range(1, 10)),
+    techLevel,
     disposition: rng.choice(dispositions),
-    tradeGoods: generateResources(rng)
+    tradeGoods: generateResources(rng),
+    hasMarket: techLevel >= 2, // Markets available at tech level 2+
+    hasRepair: techLevel >= 3  // Repair facilities at tech level 3+
   };
 }

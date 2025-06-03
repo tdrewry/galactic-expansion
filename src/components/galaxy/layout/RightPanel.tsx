@@ -77,15 +77,15 @@ export const RightPanel: React.FC<RightPanelProps> = ({
     }
     
     const marketPlanet = selectedSystem.planets.find(planet => 
-      planet.civilization && planet.civilization.techLevel >= 2
+      planet.civilization && planet.civilization.hasMarket
     );
     
-    if (marketPlanet) {
+    if (marketPlanet && marketPlanet.civilization) {
       const newMarketInfo = {
         type: 'civilization' as const,
-        techLevel: marketPlanet.civilization!.techLevel,
-        hasRepair: marketPlanet.civilization!.techLevel >= 3,
-        hasMarket: true
+        techLevel: marketPlanet.civilization.techLevel,
+        hasRepair: marketPlanet.civilization.hasRepair,
+        hasMarket: marketPlanet.civilization.hasMarket
       };
       console.log('RightPanel: Setting market info:', newMarketInfo);
       setMarketInfo(newMarketInfo);
