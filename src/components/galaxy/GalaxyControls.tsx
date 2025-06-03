@@ -75,8 +75,6 @@ export const GalaxyControls: React.FC<GalaxyControlsProps> = ({
         setInputSeed={setInputSeed}
         galaxySeed={galaxySeed}
         setGalaxySeed={setGalaxySeed}
-        seed={galaxySeed}
-        setSeed={setGalaxySeed}
         onSettingsChange={onSettingsChange}
       />
     </div>

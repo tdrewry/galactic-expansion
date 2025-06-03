@@ -123,10 +123,6 @@ const roomTypes = [
 ];
 
 function seededRandom(seed: number): number {
-  // Ensure seed is a valid number
-  if (!seed || isNaN(seed) || !isFinite(seed)) {
-    seed = 12345; // fallback seed
-  }
   const x = Math.sin(seed) * 10000;
   return x - Math.floor(x);
 }
@@ -143,22 +139,22 @@ function generateStats(seed: number, shipName: string, shipClass: ShipClassConfi
   const baseMaxCargo = 1000;
   const baseMaxCrew = Math.floor(seededRandom(currentSeed++) * 50) + 50; // 50-100 crew capacity
   
-  // Apply class modifiers - check if shipClass is defined
-  const maxShields = Math.max(50, baseMaxShields + (shipClass?.statModifiers?.shields || 0));
-  const maxHull = Math.max(50, baseMaxHull + (shipClass?.statModifiers?.hull || 0));
-  const maxCombatPower = Math.max(20, baseMaxCombatPower + (shipClass?.statModifiers?.combatPower || 0));
+  // Apply class modifiers
+  const maxShields = Math.max(50, baseMaxShields + shipClass.statModifiers.shields);
+  const maxHull = Math.max(50, baseMaxHull + shipClass.statModifiers.hull);
+  const maxCombatPower = Math.max(20, baseMaxCombatPower + shipClass.statModifiers.combatPower);
   const maxScanners = Math.max(50, baseMaxScanners);
-  const maxCargo = Math.max(200, baseMaxCargo + (shipClass?.statModifiers?.cargo || 0));
-  const maxCrew = Math.max(20, baseMaxCrew + (shipClass?.statModifiers?.maxCrew || 0));
+  const maxCargo = Math.max(200, baseMaxCargo + shipClass.statModifiers.cargo);
+  const maxCrew = Math.max(20, baseMaxCrew + shipClass.statModifiers.maxCrew);
   
   // Current values (start at 70-90% of max)
   const shields = Math.floor(maxShields * (0.7 + seededRandom(currentSeed++) * 0.2));
   const hull = Math.floor(maxHull * (0.7 + seededRandom(currentSeed++) * 0.2));
   const combatPower = Math.floor(maxCombatPower * (0.7 + seededRandom(currentSeed++) * 0.2));
   const baseDiplomacy = Math.floor(seededRandom(currentSeed++) * 80) + 10; // 10-90
-  const diplomacy = Math.max(5, baseDiplomacy + (shipClass?.statModifiers?.diplomacy || 0));
+  const diplomacy = Math.max(5, baseDiplomacy + shipClass.statModifiers.diplomacy);
   const baseScanners = Math.floor(maxScanners * (0.7 + seededRandom(currentSeed++) * 0.2));
-  const scanners = Math.max(25, baseScanners + (shipClass?.statModifiers?.scanners || 0));
+  const scanners = Math.max(25, baseScanners + shipClass.statModifiers.scanners);
   const cargo = Math.floor(maxCargo * (0.3 + seededRandom(currentSeed++) * 0.4)); // 30-70% of max
   const credits = Math.floor(seededRandom(currentSeed++) * 5000) + 1000; // 1000-6000
   const crew = Math.floor(maxCrew * 0.8); // Start with 80% of max crew
@@ -263,30 +259,12 @@ function generateLayout(seed: number): StarshipLayout {
 }
 
 export function generateStarship(seed: number, shipClassIndex?: number): Starship {
-  // Validate and ensure seed is a proper number
-  if (!seed || isNaN(seed) || !isFinite(seed)) {
-    seed = 12345; // fallback seed
-  }
-  
   let currentSeed = seed;
   
   const nameIndex = Math.floor(seededRandom(currentSeed++) * shipNames.length);
   const classIndex = shipClassIndex !== undefined ? shipClassIndex : Math.floor(seededRandom(currentSeed++) * shipClasses.length);
-  const shipName = shipNames[nameIndex] || 'Unknown';
+  const shipName = shipNames[nameIndex];
   const shipClass = shipClasses[classIndex];
-  
-  // Ensure we have a valid ship class
-  if (!shipClass) {
-    console.warn(`Invalid ship class index: ${classIndex}, using default class`);
-    const defaultClass = shipClasses[0]; // Use first class as fallback
-    
-    return {
-      name: shipName,
-      class: defaultClass.name,
-      stats: generateStats(currentSeed, shipName, defaultClass),
-      layout: generateLayout(currentSeed + 1000)
-    };
-  }
   
   return {
     name: shipName,

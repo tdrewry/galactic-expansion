@@ -21,6 +21,8 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({
   combatRepairCost = 1500,
   hideActions = false
 }) => {
+  const [isEditingName, setIsEditingName] = useState(false);
+
   const getHealthColor = (current: number, max: number) => {
     const percentage = (current / max) * 100;
     if (percentage >= 70) return "bg-green-500";
@@ -41,13 +43,28 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              {onNameChange ? (
+              {!hideActions && isEditingName ? (
                 <ShipNameEditor
                   name={stats.name || 'Unnamed Ship'}
-                  onNameChange={onNameChange}
+                  onNameChange={(newName) => {
+                    onNameChange?.(newName);
+                    setIsEditingName(false);
+                  }}
                 />
               ) : (
-                <span>{stats.name || 'Unnamed Ship'}</span>
+                <>
+                  <span>{stats.name || 'Unnamed Ship'}</span>
+                  {!hideActions && onNameChange && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsEditingName(true)}
+                      className="text-xs"
+                    >
+                      Rename
+                    </Button>
+                  )}
+                </>
               )}
             </div>
             {stats.class && (
