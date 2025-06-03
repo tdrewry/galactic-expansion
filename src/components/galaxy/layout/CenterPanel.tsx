@@ -1,8 +1,6 @@
-
 import React from 'react';
 import { GalaxyMap, GalaxyMapRef } from '../../GalaxyMap';
 import { StarshipPanel } from '../../starship/StarshipPanel';
-import { ActionsPanel } from '../../starship/ActionsPanel';
 import { StarSystem, Planet, Moon } from '../../../utils/galaxyGenerator';
 import { Button } from '@/components/ui/button';
 import { Target } from 'lucide-react';
@@ -160,46 +158,24 @@ export const CenterPanel: React.FC<CenterPanelProps> = ({
 
       {/* Bottom section with Ship Stats and Actions */}
       <div className="flex-shrink-0 border-t border-gray-700">
-        <div className="flex">
-          {/* Ship Stats Panel */}
-          <div className="flex-1 border-r border-gray-700">
-            <StarshipPanel 
-              seed={galaxySeed}
-              selectedSystem={selectedSystem}
-              currentSystemId={currentSystemId}
-              isExplored={selectedSystem ? isSystemExplored(selectedSystem) : false}
-              canBeExplored={selectedSystem ? canSystemBeExplored(selectedSystem) : false}
-              explorationStatus={selectedSystem ? getSystemExplorationStatus(selectedSystem) : { systemId: '', explorationsCompleted: 0, maxExplorations: 0 }}
-              onBeginExploration={() => {}}
-              onResetExploration={() => {}}
-              shipStats={shipStats}
-              onUpdateShipName={onUpdateShipName}
-              onRepairCombatSystems={onRepairCombatSystems}
-              hideActions={true}
-            />
-          </div>
-
-          {/* Actions Panel */}
-          <div className="w-80 p-4">
-            <ActionsPanel
-              selectedSystem={selectedSystem}
-              currentSystemId={currentSystemId}
-              isExplored={selectedSystem ? isSystemExplored(selectedSystem) : false}
-              canBeExplored={selectedSystem ? canSystemBeExplored(selectedSystem) : false}
-              explorationStatus={selectedSystem ? getSystemExplorationStatus(selectedSystem) : { systemId: '', explorationsCompleted: 0, maxExplorations: 0 }}
-              onBeginExploration={onBeginExploration}
-              onResetExploration={onResetExploration}
-              onOpenShipLayout={() => {}}
-              needsRepair={shipStats?.shields < shipStats?.maxShields || shipStats?.hull < shipStats?.maxHull}
-              needsCombatRepair={shipStats?.combatPower < shipStats?.maxCombatPower}
-              onOpenMarket={onOpenMarket}
-              canJumpToSelected={canJumpToSelected}
-              onJumpToSystem={onJumpToSystem}
-              onTriggerScan={onTriggerScan}
-              isScanning={isScanning}
-            />
-          </div>
-        </div>
+        <StarshipPanel 
+          seed={galaxySeed}
+          selectedSystem={selectedSystem}
+          currentSystemId={currentSystemId}
+          isExplored={selectedSystem ? isSystemExplored(selectedSystem) : false}
+          canBeExplored={selectedSystem ? canSystemBeExplored(selectedSystem) : false}
+          explorationStatus={selectedSystem ? getSystemExplorationStatus(selectedSystem) : { systemId: '', explorationsCompleted: 0, maxExplorations: 0 }}
+          onBeginExploration={onBeginExploration}
+          onResetExploration={onResetExploration}
+          shipStats={shipStats}
+          onOpenMarket={onOpenMarket}
+          canJumpToSelected={canJumpToSelected}
+          onJumpToSystem={onJumpToSystem}
+          onTriggerScan={onTriggerScan}
+          isScanning={isScanning}
+          onUpdateShipName={onUpdateShipName}
+          onRepairCombatSystems={onRepairCombatSystems}
+        />
       </div>
     </div>
   );
