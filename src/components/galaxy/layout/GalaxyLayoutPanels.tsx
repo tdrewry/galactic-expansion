@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { StarSystem, Planet, Moon } from '../../../utils/galaxyGenerator';
@@ -80,31 +79,16 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => 
 
   return (
     <ResizablePanelGroup direction="horizontal" className="flex-1">
-      {/* Left Panel - Exploration Log */}
+      {/* Left Panel - Exploration Log Only */}
       <ResizablePanel defaultSize={25} minSize={25} maxSize={40}>
         <LeftPanel
-          selectedSystem={props.selectedSystem}
-          currentSystemId={props.currentSystemId}
           explorationHistory={props.explorationHistory}
-          shipStats={props.shipStats}
-          isSystemExplored={props.isSystemExplored}
-          canSystemBeExplored={props.canSystemBeExplored}
-          getSystemExplorationStatus={props.getSystemExplorationStatus}
-          onBeginExploration={props.onBeginExploration}
-          onResetExploration={props.onResetExploration}
-          onOpenMarket={props.onOpenMarket}
-          onJumpToSystem={props.onJumpToSystem}
-          canJumpToSelected={props.canJumpToSelected}
-          isScanning={isScanning}
-          onTriggerScan={handleTriggerScan}
-          onUpdateShipName={props.onUpdateShipName}
-          onRepairCombatSystems={props.onRepairCombatSystems}
         />
       </ResizablePanel>
       
       <ResizableHandle withHandle />
       
-      {/* Center Panel - Galaxy Map, Ship Stats, and Actions */}
+      {/* Center Panel - Galaxy Map */}
       <ResizablePanel defaultSize={50} minSize={40}>
         <CenterPanel
           galaxySeed={props.galaxySeed}
@@ -151,7 +135,7 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => 
         />
       </ResizablePanel>
 
-      {/* Right Panel - System Map and System Info */}
+      {/* Right Panel - System Info + Ship Actions */}
       {props.selectedSystem && (
         <>
           <ResizableHandle withHandle />
@@ -160,8 +144,22 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => 
               selectedSystem={props.selectedSystem}
               selectedStar={props.selectedStar}
               highlightedBodyId={props.highlightedBodyId}
+              currentSystemId={props.currentSystemId}
+              shipStats={props.shipStats}
+              isSystemExplored={props.isSystemExplored}
+              canSystemBeExplored={props.canSystemBeExplored}
+              getSystemExplorationStatus={props.getSystemExplorationStatus}
               onBodySelect={props.onBodySelect}
               onStarSelect={props.onStarSelect}
+              onBeginExploration={props.onBeginExploration}
+              onResetExploration={props.onResetExploration}
+              onOpenMarket={props.onOpenMarket}
+              onJumpToSystem={props.onJumpToSystem}
+              canJumpToSelected={props.canJumpToSelected}
+              isScanning={isScanning}
+              onTriggerScan={handleTriggerScan}
+              onUpdateShipName={props.onUpdateShipName}
+              onRepairCombatSystems={props.onRepairCombatSystems}
             />
           </ResizablePanel>
         </>
