@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -38,7 +37,13 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
     console.log('MarketDialog: shipStats:', shipStats);
     console.log('MarketDialog: onRepairCombatSystems available:', !!onRepairCombatSystems);
     console.log('MarketDialog: onRepairCombatSystems function:', onRepairCombatSystems);
-  }, [isOpen, marketInfo, shipStats, onRepairCombatSystems]);
+    console.log('MarketDialog: Props received:', {
+      onRepairShip: !!onRepairShip,
+      onRepairCombatSystems: !!onRepairCombatSystems,
+      onSellCargo: !!onSellCargo,
+      onUpgradeSystem: !!onUpgradeSystem
+    });
+  }, [isOpen, marketInfo, shipStats, onRepairCombatSystems, onRepairShip, onSellCargo, onUpgradeSystem]);
 
   const getMarketIcon = () => {
     switch (marketInfo.type) {
@@ -123,6 +128,11 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
       console.log('MarketDialog: Missing function?', !onRepairCombatSystems);
       console.log('MarketDialog: Insufficient credits?', !canAffordCombatRepair);
       console.log('MarketDialog: No repair needed?', !needsCombatRepair);
+      
+      // If function is missing, show an error message
+      if (!onRepairCombatSystems) {
+        console.error('MarketDialog: onRepairCombatSystems function is not provided!');
+      }
     }
   };
 
