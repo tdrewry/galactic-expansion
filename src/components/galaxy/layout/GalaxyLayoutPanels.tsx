@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { StarSystem, Planet, Moon } from '../../../utils/galaxyGenerator';
@@ -55,11 +56,12 @@ interface GalaxyLayoutPanelsProps {
   onBodySelect: (body: Planet | Moon | null) => void;
   onBeginExploration: () => void;
   onResetExploration: () => void;
-  onRepairShip: () => void;
+  onRepairHull: (cost: number) => void;
+  onRepairShields: (cost: number) => void;
+  onRepairCombatSystems: (cost: number) => void;
   onOpenMarket: () => void;
   onJumpToSystem: (systemId: string) => void;
   onUpdateShipName?: (newName: string) => void;
-  onRepairCombatSystems?: (cost: number) => void;
   canJumpToSelected?: boolean;
   galaxyMapRef?: React.RefObject<GalaxyMapRef>;
 }
@@ -124,7 +126,9 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => 
           onStarSelect={props.onStarSelect}
           onBeginExploration={props.onBeginExploration}
           onResetExploration={props.onResetExploration}
-          onRepairShip={props.onRepairShip}
+          onRepairHull={props.onRepairHull}
+          onRepairShields={props.onRepairShields}
+          onRepairCombatSystems={props.onRepairCombatSystems}
           onOpenMarket={props.onOpenMarket}
           onJumpToSystem={props.onJumpToSystem}
           onUpdateShipName={props.onUpdateShipName}
@@ -133,7 +137,6 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => 
           galaxyMapRef={props.galaxyMapRef}
           canJumpToSelected={props.canJumpToSelected}
           onTriggerScan={handleTriggerScan}
-          onRepairCombatSystems={props.onRepairCombatSystems}
         />
       </ResizablePanel>
 
@@ -161,6 +164,8 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => 
               isScanning={isScanning}
               onTriggerScan={handleTriggerScan}
               onUpdateShipName={props.onUpdateShipName}
+              onRepairHull={props.onRepairHull}
+              onRepairShields={props.onRepairShields}
               onRepairCombatSystems={props.onRepairCombatSystems}
             />
           </ResizablePanel>

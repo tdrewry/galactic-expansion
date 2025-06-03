@@ -56,7 +56,9 @@ interface GalaxyLayoutProps {
   onBodySelect: (body: Planet | Moon | null) => void;
   onBeginExploration: () => void;
   onResetExploration: () => void;
-  onRepairShip: () => void;
+  onRepairHull: (cost: number) => void;
+  onRepairShields: (cost: number) => void;
+  onRepairCombatSystems: (cost: number) => void;
   onOpenMarket: () => void;
   onJumpToSystem: (systemId: string) => void;
   onUpdateShipName?: (newName: string) => void;
