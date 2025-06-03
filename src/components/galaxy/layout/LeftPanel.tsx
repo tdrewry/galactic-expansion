@@ -62,6 +62,14 @@ export const LeftPanel: React.FC<LeftPanelProps> = ({
   const needsRepair = shipStats && (shipStats.shields < shipStats.maxShields || shipStats.hull < shipStats.maxHull);
   const needsCombatRepair = shipStats && shipStats.combatPower < shipStats.maxCombatPower;
 
+  const handleRepairCombatSystems = (cost: number) => {
+    console.log('LeftPanel: handleRepairCombatSystems called with cost:', cost);
+    console.log('LeftPanel: onRepairCombatSystems available:', !!onRepairCombatSystems);
+    if (onRepairCombatSystems) {
+      onRepairCombatSystems(cost);
+    }
+  };
+
   return (
     <ResizablePanelGroup direction="vertical" className="h-full">
       {/* Ship Actions */}
@@ -85,7 +93,7 @@ export const LeftPanel: React.FC<LeftPanelProps> = ({
               canAffordRepair={canAffordRepair}
               needsRepair={needsRepair}
               onRepairShip={onRepairShip}
-              onRepairCombatSystems={onRepairCombatSystems}
+              onRepairCombatSystems={handleRepairCombatSystems}
               combatRepairCost={combatRepairCost}
               canAffordCombatRepair={canAffordCombatRepair}
               needsCombatRepair={needsCombatRepair}
