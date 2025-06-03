@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { GalaxyScene } from './GalaxyScene';
 import { Galaxy, StarSystem } from '../../utils/galaxyGenerator';
@@ -35,7 +35,11 @@ interface GalaxyMapCanvasProps {
   onCanvasError: (error: string) => void;
 }
 
-export const GalaxyMapCanvas: React.FC<GalaxyMapCanvasProps> = ({
+export interface GalaxyMapCanvasRef {
+  zoomToSystem: (systemId: string) => void;
+}
+
+export const GalaxyMapCanvas = forwardRef<GalaxyMapCanvasRef, GalaxyMapCanvasProps>(({
   galaxy,
   selectedSystem,
   onSystemSelect,
@@ -47,7 +51,18 @@ export const GalaxyMapCanvas: React.FC<GalaxyMapCanvasProps> = ({
   travelHistory,
   currentSystemId,
   ...sceneProps
-}) => {
+}, ref) => {
+  const sceneRef = useRef<any>(null);
+
+  // Expose zoom functionality through ref
+  useImperativeHandle(ref, () => ({
+    zoomToSystem: (systemId: string) => {
+      if (sceneRef.current && sceneRef.current.zoomToSystem) {
+        sceneRef.current.zoomToSystem(systemId);
+      }
+    }
+  }), []);
+
   return (
     <Canvas 
       camera={{ 
@@ -67,6 +82,7 @@ export const GalaxyMapCanvas: React.FC<GalaxyMapCanvasProps> = ({
       }}
     >
       <GalaxyScene 
+        ref={sceneRef}
         galaxy={galaxy}
         selectedSystem={selectedSystem}
         onSystemSelect={onSystemSelect}
@@ -80,4 +96,6 @@ export const GalaxyMapCanvas: React.FC<GalaxyMapCanvasProps> = ({
       />
     </Canvas>
   );
-};
+});
+
+GalaxyMapCanvas.displayName = 'GalaxyMapCanvas';

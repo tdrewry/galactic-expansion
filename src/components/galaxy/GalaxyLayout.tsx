@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { StarSystem, Planet, Moon } from '../../utils/galaxyGenerator';
 import { ExplorationDialog } from './ExplorationDialog';
 import { GalaxyLayoutPanels } from './layout/GalaxyLayoutPanels';
+import { GalaxyMapRef } from '../GalaxyMap';
 
 interface ExplorationLogEntry {
   id: string;
@@ -62,6 +63,7 @@ interface GalaxyLayoutProps {
   handleCompleteExploration: () => void;
   handleContinueExploration: () => void;
   canJumpToSelected?: boolean;
+  onZoomToStarterSystem?: () => void;
 }
 
 export const GalaxyLayout: React.FC<GalaxyLayoutProps> = ({
@@ -70,11 +72,21 @@ export const GalaxyLayout: React.FC<GalaxyLayoutProps> = ({
   canContinueExploration,
   handleCompleteExploration,
   handleContinueExploration,
+  onZoomToStarterSystem,
   ...panelProps
 }) => {
+  const galaxyMapRef = useRef<GalaxyMapRef>(null);
+
+  // Expose zoom functionality to parent
+  React.useImperativeHandle(onZoomToStarterSystem, () => {
+    if (galaxyMapRef.current && panelProps.currentSystemId) {
+      galaxyMapRef.current.zoomToSystem(panelProps.currentSystemId);
+    }
+  }, [panelProps.currentSystemId]);
+
   return (
     <div className="flex-1 min-h-0 flex flex-col">
-      <GalaxyLayoutPanels {...panelProps} />
+      <GalaxyLayoutPanels {...panelProps} galaxyMapRef={galaxyMapRef} />
 
       <ExplorationDialog
         isOpen={isExplorationDialogOpen}

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useRef } from 'react';
 import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
 import { ExplorationDialog } from '../components/galaxy/ExplorationDialog';
 import { useExploration } from '../components/exploration/useExploration';
@@ -74,6 +75,7 @@ const Index = () => {
   // Ship selection state
   const [isShipSelectionOpen, setIsShipSelectionOpen] = useState(false);
   const [shipOptions, setShipOptions] = useState<Starship[]>([]);
+  const [shouldZoomToStarter, setShouldZoomToStarter] = useState(false);
 
   // Market dialog state
   const [isMarketDialogOpen, setIsMarketDialogOpen] = useState(false);
@@ -121,9 +123,15 @@ const Index = () => {
       if (startingSystem) {
         jumpToSystem(startingSystem.id, false); // No interrupt for initial placement
         setSelectedSystem(startingSystem);
+        
+        // Set flag to zoom to starter system after ship selection
+        if (shouldZoomToStarter) {
+          setShouldZoomToStarter(false);
+          // Zoom will be triggered in the next effect
+        }
       }
     }
-  }, [galaxySeed, numSystems, numNebulae, binaryFrequency, trinaryFrequency, currentSystemId, jumpToSystem]);
+  }, [galaxySeed, numSystems, numNebulae, binaryFrequency, trinaryFrequency, currentSystemId, jumpToSystem, shouldZoomToStarter]);
 
   // Show ship selection on first load
   React.useEffect(() => {
@@ -163,6 +171,7 @@ const Index = () => {
   const handleSelectShip = (selectedShip: Starship) => {
     resetStats(selectedShip.stats);
     setIsShipSelectionOpen(false);
+    setShouldZoomToStarter(true); // Set flag to zoom after starting system is set
   };
 
   const handleSaveGame = () => {
@@ -284,6 +293,11 @@ const Index = () => {
     const repairCost = 1000;
     repairShip(repairCost);
   };
+
+  // Create a ref function to handle zoom to starter system
+  const handleZoomToStarterSystem = React.useCallback(() => {
+    // This will be called by GalaxyLayout when it needs to zoom
+  }, []);
 
   if (isGameOver) {
     return (
@@ -408,6 +422,7 @@ const Index = () => {
         onUpdateShipName={updateShipName}
         handleCompleteExploration={handleCompleteExploration}
         handleContinueExploration={handleContinueExploration}
+        onZoomToStarterSystem={handleZoomToStarterSystem}
       />
 
       <footer className="bg-gray-900 p-2 border-t border-gray-700 text-center text-sm text-gray-400 flex-shrink-0">

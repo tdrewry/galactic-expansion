@@ -1,8 +1,8 @@
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { StarSystem } from '../../../utils/galaxyGenerator';
-import { GalaxyMap } from '../../GalaxyMap';
+import { GalaxyMap, GalaxyMapRef } from '../../GalaxyMap';
 import { StarshipPanel } from '../../starship/StarshipPanel';
 
 interface SystemExplorationStatus {
@@ -49,6 +49,7 @@ interface CenterPanelProps {
   onUpdateShipName?: (newName: string) => void;
   isScanning: boolean;
   onScanComplete: () => void;
+  galaxyMapRef?: React.RefObject<GalaxyMapRef>;
 }
 
 export const CenterPanel: React.FC<CenterPanelProps> = ({
@@ -88,13 +89,15 @@ export const CenterPanel: React.FC<CenterPanelProps> = ({
   onJumpToSystem,
   onUpdateShipName,
   isScanning,
-  onScanComplete
+  onScanComplete,
+  galaxyMapRef
 }) => {
   return (
     <ResizablePanelGroup direction="vertical" className="h-full">
       {/* Galaxy Map */}
       <ResizablePanel defaultSize={78} minSize={50}>
         <GalaxyMap 
+          ref={galaxyMapRef}
           seed={galaxySeed} 
           numSystems={numSystems}
           numNebulae={numNebulae}

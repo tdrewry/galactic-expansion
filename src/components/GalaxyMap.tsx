@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useRef, useImperativeHandle, forwardRef } from 'react';
 import { generateGalaxy, Galaxy, StarSystem } from '../utils/galaxyGenerator';
 import { GalaxyMapCanvas } from './galaxy/GalaxyMapCanvas';
 import { GalaxyMapError } from './galaxy/GalaxyMapError';
@@ -43,7 +43,11 @@ interface GalaxyMapProps {
   onScanComplete?: () => void;
 }
 
-export const GalaxyMap: React.FC<GalaxyMapProps> = ({ 
+export interface GalaxyMapRef {
+  zoomToSystem: (systemId: string) => void;
+}
+
+export const GalaxyMap = forwardRef<GalaxyMapRef, GalaxyMapProps>(({ 
   seed = 12345,
   numSystems = 1000,
   numNebulae = 50,
@@ -63,10 +67,11 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
   jumpLaneOpacity = 0.3,
   greenPathOpacity = 0.6,
   ...canvasProps
-}) => {
+}, ref) => {
   const [selectedSystem, setSelectedSystem] = useState<StarSystem | null>(null);
   const [selectedStar, setSelectedStar] = useState<'primary' | 'binary' | 'trinary'>('primary');
   const [canvasError, setCanvasError] = useState<string | null>(null);
+  const canvasRef = useRef<any>(null);
   
   // Use props if provided, otherwise use internal state
   const currentSelectedSystem = propSelectedSystem || selectedSystem;
@@ -101,6 +106,15 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
       starSystems: enhancedStarSystems
     };
   }, [galaxy, exploredSystems]);
+
+  // Expose zoom functionality through ref
+  useImperativeHandle(ref, () => ({
+    zoomToSystem: (systemId: string) => {
+      if (canvasRef.current && canvasRef.current.zoomToSystem) {
+        canvasRef.current.zoomToSystem(systemId);
+      }
+    }
+  }), []);
   
   const handleSystemSelect = useCallback((system: StarSystem | null) => {
     console.log('Selected system:', system?.id || 'none');
@@ -128,6 +142,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
   return (
     <div className="w-full h-full relative bg-black">
       <GalaxyMapCanvas
+        ref={canvasRef}
         galaxy={enhancedGalaxy}
         selectedSystem={currentSelectedSystem}
         onSystemSelect={handleSystemSelect}
@@ -144,4 +159,6 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({
       />
     </div>
   );
-};
+});
+
+GalaxyMap.displayName = 'GalaxyMap';

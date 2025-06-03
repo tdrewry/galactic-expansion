@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { StarSystem, Planet, Moon } from '../../../utils/galaxyGenerator';
 import { LeftPanel } from './LeftPanel';
 import { CenterPanel } from './CenterPanel';
 import { RightPanel } from './RightPanel';
+import { GalaxyMapRef } from '../../GalaxyMap';
 
 interface ExplorationLogEntry {
   id: string;
@@ -60,6 +61,7 @@ interface GalaxyLayoutPanelsProps {
   onJumpToSystem: (systemId: string) => void;
   onUpdateShipName?: (newName: string) => void;
   canJumpToSelected?: boolean;
+  galaxyMapRef?: React.RefObject<GalaxyMapRef>;
 }
 
 export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => {
@@ -140,6 +142,7 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => 
           onUpdateShipName={props.onUpdateShipName}
           isScanning={isScanning}
           onScanComplete={handleScanComplete}
+          galaxyMapRef={props.galaxyMapRef}
         />
       </ResizablePanel>
 
