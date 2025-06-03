@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -43,6 +44,18 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
       onSellCargo: !!onSellCargo,
       onUpgradeSystem: !!onUpgradeSystem
     });
+    
+    // Additional debugging for prop tracing
+    console.log('MarketDialog: All props keys:', Object.keys({
+      isOpen,
+      onClose,
+      marketInfo,
+      shipStats,
+      onSellCargo,
+      onUpgradeSystem,
+      onRepairShip,
+      onRepairCombatSystems
+    }));
   }, [isOpen, marketInfo, shipStats, onRepairCombatSystems, onRepairShip, onSellCargo, onUpgradeSystem]);
 
   const getMarketIcon = () => {
@@ -132,6 +145,7 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
       // If function is missing, show an error message
       if (!onRepairCombatSystems) {
         console.error('MarketDialog: onRepairCombatSystems function is not provided!');
+        console.error('MarketDialog: This suggests the prop is not being passed down correctly from the parent component');
       }
     }
   };

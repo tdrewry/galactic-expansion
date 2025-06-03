@@ -52,6 +52,9 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
   const starship = useMemo(() => generateStarship(seed), [seed]);
   const [isShipLayoutOpen, setIsShipLayoutOpen] = useState(false);
 
+  console.log('StarshipPanel: onRepairCombatSystems prop received:', !!onRepairCombatSystems);
+  console.log('StarshipPanel: onOpenMarket prop received:', !!onOpenMarket);
+
   // Merge ship stats with ship name and class, prioritizing saved name over generated name
   const currentStats = shipStats ? {
     ...shipStats,
@@ -98,6 +101,7 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
               onJumpToSystem={onJumpToSystem}
               onTriggerScan={onTriggerScan}
               isScanning={isScanning}
+              onRepairCombatSystems={onRepairCombatSystems}
             />
           </div>
         )}
