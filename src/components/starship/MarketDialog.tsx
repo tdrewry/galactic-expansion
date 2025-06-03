@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -35,28 +34,12 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
     console.log('MarketDialog: Component rendered/updated');
     console.log('MarketDialog: isOpen:', isOpen);
     console.log('MarketDialog: marketInfo:', marketInfo);
-    console.log('MarketDialog: shipStats:', shipStats);
+    console.log('MarketDialog: marketInfo.hasRepair:', marketInfo?.hasRepair);
+    console.log('MarketDialog: marketInfo.techLevel:', marketInfo?.techLevel);
     console.log('MarketDialog: onRepairCombatSystems available:', !!onRepairCombatSystems);
     console.log('MarketDialog: onRepairCombatSystems function:', onRepairCombatSystems);
-    console.log('MarketDialog: Props received:', {
-      onRepairShip: !!onRepairShip,
-      onRepairCombatSystems: !!onRepairCombatSystems,
-      onSellCargo: !!onSellCargo,
-      onUpgradeSystem: !!onUpgradeSystem
-    });
-    
-    // Additional debugging for prop tracing
-    console.log('MarketDialog: All props keys:', Object.keys({
-      isOpen,
-      onClose,
-      marketInfo,
-      shipStats,
-      onSellCargo,
-      onUpgradeSystem,
-      onRepairShip,
-      onRepairCombatSystems
-    }));
-  }, [isOpen, marketInfo, shipStats, onRepairCombatSystems, onRepairShip, onSellCargo, onUpgradeSystem]);
+    console.log('MarketDialog: isSpaceStation check (marketInfo.type === "station"):', marketInfo?.type === 'station');
+  }, [isOpen, marketInfo, onRepairCombatSystems]);
 
   const getMarketIcon = () => {
     switch (marketInfo.type) {
@@ -124,7 +107,18 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
   const combatRepairCost = 1500;
   const canAffordRepair = shipStats.credits >= repairCost;
   const canAffordCombatRepair = shipStats.credits >= combatRepairCost;
-  const isSpaceStation = marketInfo.type === 'station';
+  
+  // Fix the space station check and repair availability
+  const isSpaceStation = marketInfo?.type === 'station';
+  const hasRepairFacilities = marketInfo?.hasRepair === true;
+  const hasMarketFacilities = marketInfo?.hasMarket === true;
+
+  console.log('MarketDialog: Calculated values:', {
+    isSpaceStation,
+    hasRepairFacilities,
+    hasMarketFacilities,
+    techLevel: marketInfo?.techLevel
+  });
 
   const handleRepairCombatSystems = () => {
     console.log('MarketDialog: handleRepairCombatSystems called');
@@ -142,7 +136,6 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
       console.log('MarketDialog: Insufficient credits?', !canAffordCombatRepair);
       console.log('MarketDialog: No repair needed?', !needsCombatRepair);
       
-      // If function is missing, show an error message
       if (!onRepairCombatSystems) {
         console.error('MarketDialog: onRepairCombatSystems function is not provided!');
         console.error('MarketDialog: This suggests the prop is not being passed down correctly from the parent component');
@@ -183,14 +176,15 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
 
         <Tabs defaultValue="trade" className="w-full">
           <TabsList className="grid w-full grid-cols-4 bg-gray-800">
-            <TabsTrigger value="trade" disabled={!marketInfo.hasMarket}>Trade</TabsTrigger>
-            <TabsTrigger value="upgrades" disabled={!marketInfo.hasMarket}>Upgrades</TabsTrigger>
+            <TabsTrigger value="trade" disabled={!hasMarketFacilities}>Trade</TabsTrigger>
+            <TabsTrigger value="upgrades" disabled={!hasMarketFacilities}>Upgrades</TabsTrigger>
             <TabsTrigger value="services" disabled={!isSpaceStation}>Services</TabsTrigger>
-            <TabsTrigger value="repair" disabled={!marketInfo.hasRepair}>Repair</TabsTrigger>
+            <TabsTrigger value="repair" disabled={!hasRepairFacilities}>Repair</TabsTrigger>
           </TabsList>
 
-          {marketInfo.hasMarket && (
+          {hasMarketFacilities && (
             <TabsContent value="trade" className="space-y-4">
+              
               <Card className="bg-gray-800 border-gray-600">
                 <CardHeader>
                   <CardTitle className="text-white">Cargo Trading</CardTitle>
@@ -238,8 +232,9 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
             </TabsContent>
           )}
 
-          {marketInfo.hasMarket && (
+          {hasMarketFacilities && (
             <TabsContent value="upgrades" className="space-y-4">
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Combat Power Upgrade */}
                 <Card className="bg-gray-800 border-gray-600">
@@ -264,7 +259,7 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                   </CardContent>
                 </Card>
 
-                {/* Scanner Upgrade */}
+                {/* ... keep existing code (other upgrade cards) */}
                 <Card className="bg-gray-800 border-gray-600">
                   <CardHeader>
                     <CardTitle className="text-white text-sm">Scanner Arrays</CardTitle>
@@ -287,7 +282,6 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                   </CardContent>
                 </Card>
 
-                {/* Cargo Upgrade */}
                 <Card className="bg-gray-800 border-gray-600">
                   <CardHeader>
                     <CardTitle className="text-white text-sm">Cargo Holds</CardTitle>
@@ -310,7 +304,6 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                   </CardContent>
                 </Card>
 
-                {/* Crew Quarters Upgrade */}
                 <Card className="bg-gray-800 border-gray-600">
                   <CardHeader>
                     <CardTitle className="text-white text-sm">Crew Quarters</CardTitle>
@@ -339,8 +332,8 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
           {/* Services tab for Space Stations */}
           {isSpaceStation && (
             <TabsContent value="services" className="space-y-4">
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Hire Crew */}
                 <Card className="bg-gray-800 border-gray-600">
                   <CardHeader>
                     <CardTitle className="text-white text-sm flex items-center gap-2">
@@ -366,7 +359,6 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                   </CardContent>
                 </Card>
 
-                {/* Buy Cargo */}
                 <Card className="bg-gray-800 border-gray-600">
                   <CardHeader>
                     <CardTitle className="text-white text-sm flex items-center gap-2">
@@ -392,7 +384,6 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                   </CardContent>
                 </Card>
 
-                {/* Repair Scanner */}
                 <Card className="bg-gray-800 border-gray-600">
                   <CardHeader>
                     <CardTitle className="text-white text-sm">Repair Scanner</CardTitle>
@@ -415,7 +406,6 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                   </CardContent>
                 </Card>
 
-                {/* Repair Weapons */}
                 <Card className="bg-gray-800 border-gray-600">
                   <CardHeader>
                     <CardTitle className="text-white text-sm">Repair Weapons</CardTitle>
@@ -441,7 +431,7 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
             </TabsContent>
           )}
 
-          {marketInfo.hasRepair && (
+          {hasRepairFacilities && (
             <TabsContent value="repair" className="space-y-4">
               <Card className="bg-gray-800 border-gray-600">
                 <CardHeader>
