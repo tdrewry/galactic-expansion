@@ -11,7 +11,7 @@ export const SystemPOIIndicator: React.FC<SystemPOIIndicatorProps> = ({ position
   return (
     <Billboard position={position}>
       <mesh position={[0, 0, 1]}>
-        <ringGeometry args={[80, 90, 32]} />
+        <ringGeometry args={[95, 105, 32]} />
         <meshBasicMaterial 
           color="#ffff00" 
           transparent 
