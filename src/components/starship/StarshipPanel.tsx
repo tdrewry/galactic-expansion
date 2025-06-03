@@ -27,6 +27,8 @@ interface StarshipPanelProps {
   onTriggerScan?: () => void;
   isScanning?: boolean;
   onUpdateShipName?: (newName: string) => void;
+  onRepairHull?: (cost: number) => void;
+  onRepairShields?: (cost: number) => void;
   onRepairCombatSystems?: (cost: number) => void;
 }
 
@@ -47,11 +49,15 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
   onTriggerScan,
   isScanning = false,
   onUpdateShipName,
+  onRepairHull,
+  onRepairShields,
   onRepairCombatSystems
 }) => {
   const starship = useMemo(() => generateStarship(seed), [seed]);
   const [isShipLayoutOpen, setIsShipLayoutOpen] = useState(false);
 
+  console.log('StarshipPanel: onRepairHull prop received:', !!onRepairHull);
+  console.log('StarshipPanel: onRepairShields prop received:', !!onRepairShields);
   console.log('StarshipPanel: onRepairCombatSystems prop received:', !!onRepairCombatSystems);
   console.log('StarshipPanel: onOpenMarket prop received:', !!onOpenMarket);
 

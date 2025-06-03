@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StarshipStats } from '../../utils/starshipGenerator';
 import { MarketLocation } from '../../utils/explorationGenerator';
-import { Wrench, Currency, Building, Settings, Users, Package, Shield } from 'lucide-react';
+import { Wrench, Currency, Building, Settings, Users, Package, Shield, Heart, Zap } from 'lucide-react';
 
 interface MarketDialogProps {
   isOpen: boolean;
@@ -14,7 +14,8 @@ interface MarketDialogProps {
   shipStats: StarshipStats;
   onSellCargo: (amount: number) => void;
   onUpgradeSystem: (system: keyof StarshipStats, cost: number, amount: number) => void;
-  onRepairShip?: (cost: number) => void;
+  onRepairHull?: (cost: number) => void;
+  onRepairShields?: (cost: number) => void;
   onRepairCombatSystems?: (cost: number) => void;
 }
 
@@ -25,7 +26,8 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
   shipStats,
   onSellCargo,
   onUpgradeSystem,
-  onRepairShip,
+  onRepairHull,
+  onRepairShields,
   onRepairCombatSystems
 }) => {
   const [cargoToSell, setCargoToSell] = useState(0);
@@ -36,10 +38,10 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
     console.log('MarketDialog: marketInfo:', marketInfo);
     console.log('MarketDialog: marketInfo.hasRepair:', marketInfo?.hasRepair);
     console.log('MarketDialog: marketInfo.techLevel:', marketInfo?.techLevel);
+    console.log('MarketDialog: onRepairHull available:', !!onRepairHull);
+    console.log('MarketDialog: onRepairShields available:', !!onRepairShields);
     console.log('MarketDialog: onRepairCombatSystems available:', !!onRepairCombatSystems);
-    console.log('MarketDialog: onRepairCombatSystems function:', onRepairCombatSystems);
-    console.log('MarketDialog: isSpaceStation check (marketInfo.type === "station"):', marketInfo?.type === 'station');
-  }, [isOpen, marketInfo, onRepairCombatSystems]);
+  }, [isOpen, marketInfo, onRepairHull, onRepairShields, onRepairCombatSystems]);
 
   const getMarketIcon = () => {
     switch (marketInfo.type) {
@@ -101,11 +103,16 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
     }
   };
 
-  const needsRepair = shipStats.shields < shipStats.maxShields || shipStats.hull < shipStats.maxHull;
+  const needsHullRepair = shipStats.hull < shipStats.maxHull;
+  const needsShieldsRepair = shipStats.shields < shipStats.maxShields;
   const needsCombatRepair = shipStats.combatPower < shipStats.maxCombatPower;
-  const repairCost = 1000;
+  
+  const hullRepairCost = 800;
+  const shieldsRepairCost = 600;
   const combatRepairCost = 1500;
-  const canAffordRepair = shipStats.credits >= repairCost;
+  
+  const canAffordHullRepair = shipStats.credits >= hullRepairCost;
+  const canAffordShieldsRepair = shipStats.credits >= shieldsRepairCost;
   const canAffordCombatRepair = shipStats.credits >= combatRepairCost;
   
   // Fix the space station check and repair availability
@@ -119,43 +126,6 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
     hasMarketFacilities,
     techLevel: marketInfo?.techLevel
   });
-
-  const handleRepairCombatSystems = () => {
-    console.log('MarketDialog: handleRepairCombatSystems called');
-    console.log('MarketDialog: onRepairCombatSystems available:', !!onRepairCombatSystems);
-    console.log('MarketDialog: onRepairCombatSystems function type:', typeof onRepairCombatSystems);
-    console.log('MarketDialog: canAffordCombatRepair:', canAffordCombatRepair);
-    console.log('MarketDialog: needsCombatRepair:', needsCombatRepair);
-    
-    if (onRepairCombatSystems && canAffordCombatRepair && needsCombatRepair) {
-      console.log('MarketDialog: Calling onRepairCombatSystems with cost:', combatRepairCost);
-      onRepairCombatSystems(combatRepairCost);
-    } else {
-      console.log('MarketDialog: Combat repair conditions not met');
-      console.log('MarketDialog: Missing function?', !onRepairCombatSystems);
-      console.log('MarketDialog: Insufficient credits?', !canAffordCombatRepair);
-      console.log('MarketDialog: No repair needed?', !needsCombatRepair);
-      
-      if (!onRepairCombatSystems) {
-        console.error('MarketDialog: onRepairCombatSystems function is not provided!');
-        console.error('MarketDialog: This suggests the prop is not being passed down correctly from the parent component');
-      }
-    }
-  };
-
-  const handleRepairShip = () => {
-    console.log('MarketDialog: handleRepairShip called');
-    console.log('MarketDialog: onRepairShip available:', !!onRepairShip);
-    console.log('MarketDialog: canAffordRepair:', canAffordRepair);
-    console.log('MarketDialog: needsRepair:', needsRepair);
-    
-    if (onRepairShip && canAffordRepair && needsRepair) {
-      console.log('MarketDialog: Calling onRepairShip with cost:', repairCost);
-      onRepairShip(repairCost);
-    } else {
-      console.log('MarketDialog: Ship repair conditions not met');
-    }
-  };
 
   // Early return if no market info is available
   if (!marketInfo) {
@@ -259,7 +229,6 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                   </CardContent>
                 </Card>
 
-                {/* ... keep existing code (other upgrade cards) */}
                 <Card className="bg-gray-800 border-gray-600">
                   <CardHeader>
                     <CardTitle className="text-white text-sm">Scanner Arrays</CardTitle>
@@ -441,50 +410,76 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* Hull Repair */}
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-gray-300">Hull Integrity: {shipStats.hull}/{shipStats.maxHull}</span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-300">Hull Repair Cost:</span>
+                      <span className="text-yellow-400">₡{hullRepairCost.toLocaleString()}</span>
+                    </div>
+                    
+                    <Button
+                      onClick={() => onRepairHull && onRepairHull(hullRepairCost)}
+                      disabled={!needsHullRepair || !canAffordHullRepair || !onRepairHull}
+                      className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:text-gray-400"
+                    >
+                      <Heart className="h-4 w-4 mr-2" />
+                      {needsHullRepair ? 'Repair Hull' : 'Hull Fully Repaired'}
+                    </Button>
+                  </div>
+
+                  {/* Shields Repair */}
+                  <div className="pt-2 border-t border-gray-600 space-y-2">
+                    <div className="flex justify-between">
                       <span className="text-gray-300">Shields: {shipStats.shields}/{shipStats.maxShields}</span>
                     </div>
                     
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-300">Hull & Shields Repair Cost:</span>
-                      <span className="text-yellow-400">₡{repairCost.toLocaleString()}</span>
-                    </div>
-                  </div>
-                  
-                  <Button
-                    onClick={handleRepairShip}
-                    disabled={!needsRepair || !canAffordRepair}
-                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:text-gray-400"
-                  >
-                    {needsRepair ? 'Repair Hull & Shields' : 'Hull & Shields Fully Repaired'}
-                  </Button>
-
-                  {/* Combat Systems Repair */}
-                  <div className="pt-2 border-t border-gray-600">
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-gray-300">Combat Systems: {shipStats.combatPower}/{shipStats.maxCombatPower}</span>
-                      </div>
-                      
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-300">Combat Systems Repair Cost:</span>
-                        <span className="text-yellow-400">₡{combatRepairCost.toLocaleString()}</span>
-                      </div>
+                      <span className="text-gray-300">Shields Repair Cost:</span>
+                      <span className="text-yellow-400">₡{shieldsRepairCost.toLocaleString()}</span>
                     </div>
                     
                     <Button
-                      onClick={handleRepairCombatSystems}
-                      disabled={!needsCombatRepair || !canAffordCombatRepair || !onRepairCombatSystems}
-                      className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 disabled:text-gray-400 mt-2"
+                      onClick={() => onRepairShields && onRepairShields(shieldsRepairCost)}
+                      disabled={!needsShieldsRepair || !canAffordShieldsRepair || !onRepairShields}
+                      className="w-full bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-600 disabled:text-gray-400"
                     >
                       <Shield className="h-4 w-4 mr-2" />
+                      {needsShieldsRepair ? 'Repair Shields' : 'Shields Fully Repaired'}
+                    </Button>
+                  </div>
+
+                  {/* Combat Systems Repair */}
+                  <div className="pt-2 border-t border-gray-600 space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-300">Combat Systems: {shipStats.combatPower}/{shipStats.maxCombatPower}</span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-300">Combat Systems Repair Cost:</span>
+                      <span className="text-yellow-400">₡{combatRepairCost.toLocaleString()}</span>
+                    </div>
+                    
+                    <Button
+                      onClick={() => {
+                        console.log('MarketDialog: Combat repair button clicked');
+                        console.log('MarketDialog: onRepairCombatSystems function:', onRepairCombatSystems);
+                        if (onRepairCombatSystems) {
+                          onRepairCombatSystems(combatRepairCost);
+                        }
+                      }}
+                      disabled={!needsCombatRepair || !canAffordCombatRepair || !onRepairCombatSystems}
+                      className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 disabled:text-gray-400"
+                    >
+                      <Zap className="h-4 w-4 mr-2" />
                       {needsCombatRepair ? 'Repair Combat Systems' : 'Combat Systems Fully Repaired'}
                     </Button>
                   </div>
 
-                  {(!canAffordRepair && needsRepair) || (!canAffordCombatRepair && needsCombatRepair) ? (
+                  {(!canAffordHullRepair && needsHullRepair) || (!canAffordShieldsRepair && needsShieldsRepair) || (!canAffordCombatRepair && needsCombatRepair) ? (
                     <p className="text-red-400 text-xs mt-1">Insufficient credits for some repairs</p>
                   ) : null}
 

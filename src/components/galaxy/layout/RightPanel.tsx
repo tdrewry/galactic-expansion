@@ -32,6 +32,8 @@ interface RightPanelProps {
   isScanning: boolean;
   onTriggerScan: () => void;
   onUpdateShipName?: (newName: string) => void;
+  onRepairHull?: (cost: number) => void;
+  onRepairShields?: (cost: number) => void;
   onRepairCombatSystems?: (cost: number) => void;
 }
 
@@ -54,6 +56,8 @@ export const RightPanel: React.FC<RightPanelProps> = ({
   isScanning,
   onTriggerScan,
   onUpdateShipName,
+  onRepairHull,
+  onRepairShields,
   onRepairCombatSystems
 }) => {
   const [isMarketOpen, setIsMarketOpen] = useState(false);
@@ -94,6 +98,8 @@ export const RightPanel: React.FC<RightPanelProps> = ({
   const handleOpenMarket = () => {
     console.log('RightPanel: handleOpenMarket called');
     console.log('RightPanel: marketInfo available:', !!marketInfo);
+    console.log('RightPanel: onRepairHull prop available:', !!onRepairHull);
+    console.log('RightPanel: onRepairShields prop available:', !!onRepairShields);
     console.log('RightPanel: onRepairCombatSystems prop available:', !!onRepairCombatSystems);
     
     // Only open market if we have valid market info
@@ -149,7 +155,8 @@ export const RightPanel: React.FC<RightPanelProps> = ({
           shipStats={shipStats}
           onSellCargo={() => {}}
           onUpgradeSystem={() => {}}
-          onRepairShip={undefined}
+          onRepairHull={onRepairHull}
+          onRepairShields={onRepairShields}
           onRepairCombatSystems={onRepairCombatSystems}
         />
       )}

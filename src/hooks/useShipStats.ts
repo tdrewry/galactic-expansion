@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { StarshipStats } from '../utils/starshipGenerator';
 import { ExplorationEvent } from '../components/galaxy/ExplorationDialog';
@@ -128,45 +127,29 @@ export const useShipStats = (initialStats: StarshipStats) => {
     });
   }, []);
 
-  const repairShip = useCallback((cost: number) => {
-    setStats(prevStats => {
-      if (prevStats.credits >= cost) {
-        const newStats = { ...prevStats };
-        
-        // Calculate tech level reduction based on repair location's tech level
-        const techLevelDiff = Math.max(0, prevStats.techLevel - 5); // Example: repair location is tech level 5
-        const damageRepaired = (100 - prevStats.hull) + (100 - prevStats.shields);
-        const techLevelReduction = Math.floor((techLevelDiff * damageRepaired) / 100);
-        
-        return {
-          ...newStats,
-          shields: newStats.maxShields,
-          hull: newStats.maxHull,
-          techLevel: Math.max(1, newStats.techLevel - techLevelReduction),
-          credits: newStats.credits - cost
-        };
-      }
-      return prevStats;
-    });
-  }, []);
-
-  const repairCombatSystems = useCallback((cost: number) => {
-    console.log('useShipStats: repairCombatSystems called with cost:', cost);
+  const repairSystem = useCallback((target: 'hull' | 'shields' | 'combat', cost: number) => {
+    console.log(`useShipStats: repairSystem called for ${target} with cost:`, cost);
     console.log('useShipStats: current stats before repair:', stats);
     
     setStats(prevStats => {
       console.log('useShipStats: prevStats in setStats:', prevStats);
       if (prevStats.credits >= cost) {
-        const repairAmount = prevStats.maxCombatPower - prevStats.combatPower;
-        console.log('useShipStats: repair amount calculated:', repairAmount);
+        const newStats = { ...prevStats };
         
-        const newStats = {
-          ...prevStats,
-          combatPower: prevStats.maxCombatPower,
-          credits: prevStats.credits - cost
-        };
+        switch (target) {
+          case 'hull':
+            newStats.hull = newStats.maxHull;
+            break;
+          case 'shields':
+            newStats.shields = newStats.maxShields;
+            break;
+          case 'combat':
+            newStats.combatPower = newStats.maxCombatPower;
+            break;
+        }
         
-        console.log('useShipStats: new stats after repair:', newStats);
+        newStats.credits = newStats.credits - cost;
+        console.log(`useShipStats: new stats after ${target} repair:`, newStats);
         return newStats;
       }
       console.log('useShipStats: insufficient credits for repair');
@@ -174,10 +157,22 @@ export const useShipStats = (initialStats: StarshipStats) => {
     });
     
     toast({
-      title: "Combat Systems Repaired",
-      description: "Combat effectiveness has been restored.",
+      title: `${target.charAt(0).toUpperCase() + target.slice(1)} Repaired`,
+      description: `${target.charAt(0).toUpperCase() + target.slice(1)} has been restored.`,
     });
   }, [toast]);
+
+  const repairHull = useCallback((cost: number) => {
+    repairSystem('hull', cost);
+  }, [repairSystem]);
+
+  const repairShields = useCallback((cost: number) => {
+    repairSystem('shields', cost);
+  }, [repairSystem]);
+
+  const repairCombatSystems = useCallback((cost: number) => {
+    repairSystem('combat', cost);
+  }, [repairSystem]);
 
   const saveGame = useCallback((galaxySeed: number) => {
     saveGameData(stats, currentSystemId, exploredSystemIds, travelHistory, galaxySeed);
@@ -227,7 +222,9 @@ export const useShipStats = (initialStats: StarshipStats) => {
     travelHistory,
     isJumping,
     updateStatsFromExploration,
-    repairShip,
+    repairShip: repairHull, // Keep backward compatibility
+    repairHull,
+    repairShields,
     repairCombatSystems,
     upgradeSystem,
     sellCargo,
