@@ -30,6 +30,7 @@ interface ActionsPanelProps {
   isScanning?: boolean;
   canJumpToSelected?: boolean;
   onJumpToSystem?: (systemId: string) => void;
+  onRepairCombatSystems?: (cost: number) => void;
 }
 
 export const ActionsPanel: React.FC<ActionsPanelProps> = ({
@@ -47,7 +48,8 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
   onTriggerScan,
   isScanning = false,
   canJumpToSelected = false,
-  onJumpToSystem
+  onJumpToSystem,
+  onRepairCombatSystems
 }) => {
   return (
     <div className="bg-gray-800 border border-gray-600 rounded-lg h-full w-full p-3 flex flex-col">
@@ -91,6 +93,7 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
               currentSystemId={currentSystemId}
               needsRepair={needsRepair}
               needsCombatRepair={needsCombatRepair}
+              onRepairCombatSystems={onRepairCombatSystems}
             />
 
             <MarketActions
