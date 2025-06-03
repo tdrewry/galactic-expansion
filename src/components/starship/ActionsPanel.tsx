@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -103,12 +104,13 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
 
   console.log('ActionsPanel render:');
   console.log('- isCurrentSystem:', isCurrentSystem);
+  console.log('- systemHasRepairShop:', systemHasRepairShop);
   console.log('- systemHasMarket:', systemHasMarket);
-  console.log('- selectedSystem planets:', selectedSystem?.planets?.map(p => ({ 
-    name: p.name, 
-    civilization: p.civilization,
-    techLevel: p.civilization?.techLevel 
-  })));
+  console.log('- needsRepair:', needsRepair);
+  console.log('- needsCombatRepair:', needsCombatRepair);
+  console.log('- canAffordRepair:', canAffordRepair);
+  console.log('- canAffordCombatRepair:', canAffordCombatRepair);
+  console.log('- onRepairCombatSystems available:', !!onRepairCombatSystems);
 
   return (
     <Card className="bg-gray-800 border-gray-600 h-full w-full">
@@ -190,7 +192,7 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
               />
             )}
 
-            {/* Ship Repair Section - only for current system */}
+            {/* Ship Repair Section - only for current system with repair facilities */}
             {systemHasRepairShop && (needsRepair || needsCombatRepair) && (
               <div className="pt-2 border-t border-gray-600">
                 <p className="text-gray-300 text-xs mb-2">
@@ -198,7 +200,7 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
                 </p>
                 
                 {/* Hull/Shields Repair */}
-                {needsRepair && (
+                {needsRepair && onRepairShip && (
                   <Button
                     onClick={handleRepairShip}
                     disabled={!canAffordRepair}
@@ -223,7 +225,7 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
                   </Button>
                 )}
 
-                {(!canAffordRepair && needsRepair) || (!canAffordCombatRepair && needsCombatRepair) ? (
+                {(!canAffordRepair && needsRepair && onRepairShip) || (!canAffordCombatRepair && needsCombatRepair && onRepairCombatSystems) ? (
                   <p className="text-red-400 text-xs mt-1">Insufficient credits for some repairs</p>
                 ) : null}
               </div>
