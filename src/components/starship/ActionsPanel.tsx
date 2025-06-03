@@ -216,18 +216,18 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
               />
             )}
 
-            {/* Ship Repair Section - only for current system with repair facilities */}
-            {systemHasRepairShop && (needsRepair || needsCombatRepair) && (
+            {/* Ship Repair Section - always show if repairs are needed, but enable/disable based on facilities */}
+            {(needsRepair || needsCombatRepair) && (
               <div className="pt-2 border-t border-gray-600">
                 <p className="text-gray-300 text-xs mb-2">
-                  Repair facilities available
+                  {systemHasRepairShop ? 'Repair facilities available' : 'No repair facilities in this system'}
                 </p>
                 
                 {/* Hull/Shields Repair */}
                 {needsRepair && onRepairShip && (
                   <Button
                     onClick={handleRepairShip}
-                    disabled={!canAffordRepair}
+                    disabled={!systemHasRepairShop || !canAffordRepair}
                     className="w-full bg-green-600 hover:bg-green-700 text-white disabled:bg-gray-600 disabled:text-gray-400 mb-2"
                     size="sm"
                   >
@@ -240,7 +240,7 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
                 {needsCombatRepair && onRepairCombatSystems && (
                   <Button
                     onClick={handleRepairCombatSystems}
-                    disabled={!canAffordCombatRepair}
+                    disabled={!systemHasRepairShop || !canAffordCombatRepair}
                     className="w-full bg-orange-600 hover:bg-orange-700 text-white disabled:bg-gray-600 disabled:text-gray-400"
                     size="sm"
                   >
@@ -249,9 +249,13 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
                   </Button>
                 )}
 
-                {(!canAffordRepair && needsRepair && onRepairShip) || (!canAffordCombatRepair && needsCombatRepair && onRepairCombatSystems) ? (
+                {!systemHasRepairShop && (
+                  <p className="text-yellow-400 text-xs mt-1">Travel to a system with repair facilities</p>
+                )}
+                
+                {systemHasRepairShop && ((!canAffordRepair && needsRepair) || (!canAffordCombatRepair && needsCombatRepair)) && (
                   <p className="text-red-400 text-xs mt-1">Insufficient credits for some repairs</p>
-                ) : null}
+                )}
               </div>
             )}
 
