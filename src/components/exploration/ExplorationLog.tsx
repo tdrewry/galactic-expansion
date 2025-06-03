@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -16,11 +15,13 @@ interface ExplorationLogEntry {
 interface ExplorationLogProps {
   explorationHistory: ExplorationLogEntry[];
   onClearLog?: () => void;
+  className?: string;
 }
 
 export const ExplorationLog: React.FC<ExplorationLogProps> = ({
   explorationHistory,
-  onClearLog
+  onClearLog,
+  className
 }) => {
   const getEventIcon = (type: string) => {
     switch (type) {
@@ -49,7 +50,7 @@ export const ExplorationLog: React.FC<ExplorationLogProps> = ({
   };
 
   return (
-    <div className="h-full bg-gray-900 border-r border-gray-700 flex flex-col">
+    <div className={`h-full bg-gray-900 border-r border-gray-700 flex flex-col ${className || ''}`}>
       <div className="flex-shrink-0 p-4 border-b border-gray-600">
         <Card className="bg-gray-800 border-gray-600">
           <CardHeader>

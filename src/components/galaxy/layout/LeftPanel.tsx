@@ -3,9 +3,15 @@ import React, { useState } from 'react';
 import { StarshipPanel } from '../../starship/StarshipPanel';
 import { ExplorationLog } from '../../exploration/ExplorationLog';
 import { MarketDialog } from '../../starship/MarketDialog';
-import { ExplorationLogEntry } from '../../galaxy/ExplorationDialog';
 import { StarSystem } from '../../../utils/galaxyGenerator';
 import { MarketLocation } from '../../../utils/explorationGenerator';
+
+interface ExplorationLogEntry {
+  id: string;
+  systemId: string;
+  event: any;
+  timestamp: Date;
+}
 
 interface LeftPanelProps {
   selectedSystem: StarSystem | null;
@@ -108,7 +114,6 @@ export const LeftPanel: React.FC<LeftPanelProps> = ({
       <div className="flex-1 min-h-0 border-t border-gray-700">
         <ExplorationLog 
           explorationHistory={explorationHistory}
-          className="h-full"
         />
       </div>
 

@@ -142,7 +142,6 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => 
           onOpenMarket={props.onOpenMarket}
           onJumpToSystem={props.onJumpToSystem}
           onUpdateShipName={props.onUpdateShipName}
-          onRepairCombatSystems={props.onRepairCombatSystems}
           isScanning={isScanning}
           onScanComplete={handleScanComplete}
           galaxyMapRef={props.galaxyMapRef}
