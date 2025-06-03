@@ -364,50 +364,27 @@ const Index = () => {
       </header>
 
       <GalaxyLayout
-        galaxySeed={galaxySeed}
-        numSystems={numSystems}
-        numNebulae={numNebulae}
-        binaryFrequency={binaryFrequency}
-        trinaryFrequency={trinaryFrequency}
-        showDustLanes={showDustLanes}
-        showCosmicDust={showCosmicDust}
-        dustLaneParticles={dustLaneParticles}
-        cosmicDustParticles={cosmicDustParticles}
-        dustLaneOpacity={dustLaneOpacity}
-        cosmicDustOpacity={cosmicDustOpacity}
-        dustLaneColorIntensity={dustLaneColorIntensity}
-        cosmicDustColorIntensity={cosmicDustColorIntensity}
-        jumpLaneOpacity={jumpLaneOpacity}
-        greenPathOpacity={greenPathOpacity}
+        seed={galaxySeed}
+        setSeed={setGalaxySeed}
         selectedSystem={selectedSystem}
-        selectedStar={selectedStar}
-        exploredSystems={exploredSystems}
-        explorationHistory={explorationHistory}
-        highlightedBodyId={highlightedBodyId}
-        isExplorationDialogOpen={isExplorationDialogOpen}
-        explorationEvent={explorationEvent}
-        canContinueExploration={canContinueExploration}
-        shipStats={shipStats}
         currentSystemId={currentSystemId}
-        exploredSystemIds={exploredSystemIds}
-        travelHistory={travelHistory}
-        isSystemExplored={isSystemExplored}
-        canSystemBeExplored={canSystemBeExplored}
-        getSystemExplorationStatus={getSystemExplorationStatus}
-        getJumpableSystemIds={getJumpableSystemIds}
-        getScannerRangeSystemIds={getScannerRangeSystemIds}
-        canJumpToSelected={canJumpToSelected}
-        onSystemSelect={handleSystemSelect}
-        onStarSelect={handleStarSelect}
-        onBodySelect={handleBodySelect}
+        isExplored={selectedSystem ? isSystemExplored(selectedSystem) : false}
+        canBeExplored={selectedSystem ? canSystemBeExplored(selectedSystem) : false}
+        explorationStatus={selectedSystem ? getSystemExplorationStatus(selectedSystem) : { systemId: '', explorationsCompleted: 0, maxExplorations: 0 }}
         onBeginExploration={handleBeginExploration}
         onResetExploration={handleResetExploration}
+        shipStats={shipStats}
         onRepairShip={handleRepairShip}
+        onRepairCombatSystems={(cost) => repairShip(cost)}
         onOpenMarket={handleOpenMarket}
+        canJumpToSelected={canJumpToSelected}
         onJumpToSystem={handleJumpToSystem}
+        onTriggerScan={() => {}}
+        isScanning={false}
         onUpdateShipName={updateShipName}
-        handleCompleteExploration={handleCompleteExploration}
-        handleContinueExploration={handleContinueExploration}
+        onSaveGame={handleSaveGame}
+        onLoadGame={handleLoadGame}
+        onNewGame={generateRandomSeed}
       />
 
       <footer className="bg-gray-900 p-2 border-t border-gray-700 text-center text-sm text-gray-400 flex-shrink-0">
@@ -415,7 +392,6 @@ const Index = () => {
       </footer>
 
       <ShipSelectionDialog
-        isOpen={isShipSelectionOpen}
         shipOptions={shipOptions}
         onSelectShip={handleSelectShip}
       />

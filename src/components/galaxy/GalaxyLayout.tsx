@@ -1,7 +1,11 @@
-
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Save, Upload, RotateCcw, Settings } from 'lucide-react';
 import { StarSystem } from '../../utils/galaxyGenerator';
 import { GalaxySettings } from './GalaxySettings';
@@ -61,6 +65,12 @@ export const GalaxyLayout: React.FC<GalaxyLayoutProps> = ({
 }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [showShipSelection, setShowShipSelection] = useState(false);
+
+  const handleRepairCombatSystems = () => {
+    if (onRepairCombatSystems) {
+      onRepairCombatSystems(1500); // Fixed cost for combat system repairs
+    }
+  };
 
   return (
     <div className="h-screen flex flex-col bg-gray-900">
@@ -123,7 +133,7 @@ export const GalaxyLayout: React.FC<GalaxyLayoutProps> = ({
           onResetExploration={onResetExploration}
           shipStats={shipStats}
           onRepairShip={onRepairShip}
-          onRepairCombatSystems={onRepairCombatSystems}
+          onRepairCombatSystems={handleRepairCombatSystems}
           onOpenMarket={onOpenMarket}
           canJumpToSelected={canJumpToSelected}
           onJumpToSystem={onJumpToSystem}

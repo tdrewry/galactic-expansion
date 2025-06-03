@@ -10,10 +10,10 @@ import { Slider } from '@/components/ui/slider';
 import { Settings } from 'lucide-react';
 
 interface GalaxySettingsProps {
-  numSystems: number;
-  numNebulae: number;
-  binaryFrequency: number;
-  trinaryFrequency: number;
+  numSystems?: number;
+  numNebulae?: number;
+  binaryFrequency?: number;
+  trinaryFrequency?: number;
   showDustLanes?: boolean;
   showCosmicDust?: boolean;
   appTitle?: string;
@@ -27,21 +27,24 @@ interface GalaxySettingsProps {
   greenPathOpacity?: number;
   visitedJumpLaneOpacity?: number;
   defaultShipStats?: any;
-  inputSeed: string;
-  setInputSeed: (seed: string) => void;
-  galaxySeed: number;
-  setGalaxySeed: (seed: number) => void;
-  onSettingsChange: (settings: any) => void;
+  inputSeed?: string;
+  setInputSeed?: (seed: string) => void;
+  galaxySeed?: number;
+  setGalaxySeed?: (seed: number) => void;
+  seed: number;
+  setSeed: (seed: number) => void;
+  onSettingsChange?: (settings: any) => void;
+  onNewShip?: () => void;
 }
 
 export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
-  numSystems,
-  numNebulae,
-  binaryFrequency,
-  trinaryFrequency,
+  numSystems = 1000,
+  numNebulae = 50,
+  binaryFrequency = 0.15,
+  trinaryFrequency = 0.03,
   showDustLanes = true,
   showCosmicDust = true,
-  appTitle = 'Stardust Voyager',
+  appTitle = 'Galactic Expansion',
   dustLaneParticles = 15000,
   cosmicDustParticles = 10000,
   dustLaneOpacity = 0.2,
@@ -56,7 +59,10 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
   setInputSeed,
   galaxySeed,
   setGalaxySeed,
-  onSettingsChange
+  seed,
+  setSeed,
+  onSettingsChange,
+  onNewShip
 }) => {
   const [localSettings, setLocalSettings] = React.useState({
     numSystems,
@@ -101,9 +107,11 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
     });
   }, [numSystems, numNebulae, binaryFrequency, trinaryFrequency, showDustLanes, showCosmicDust, appTitle, dustLaneParticles, cosmicDustParticles, dustLaneOpacity, cosmicDustOpacity, dustLaneColorIntensity, cosmicDustColorIntensity, jumpLaneOpacity, greenPathOpacity, visitedJumpLaneOpacity, defaultShipStats]);
 
+  const [localInputSeed, setLocalInputSeed] = React.useState(seed.toString());
+
   const handleSeedChange = () => {
-    const newSeed = parseInt(inputSeed) || 12345;
-    setGalaxySeed(newSeed);
+    const newSeed = parseInt(localInputSeed) || 12345;
+    setSeed(newSeed);
   };
 
   const handleApply = () => {
@@ -146,13 +154,7 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
   };
 
   return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button variant="secondary" size="sm" className="flex items-center gap-2">
-          <Settings className="h-4 w-4" />
-          Settings
-        </Button>
-      </SheetTrigger>
+    <Sheet defaultOpen>
       <SheetContent side="right" className="w-96 flex flex-col">
         <SheetHeader className="flex-shrink-0 pb-4 border-b">
           <SheetTitle>Galaxy Generation Settings</SheetTitle>
@@ -203,8 +205,8 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
                     <Input
                       id="seed-input"
                       type="number"
-                      value={inputSeed}
-                      onChange={(e) => setInputSeed(e.target.value)}
+                      value={localInputSeed}
+                      onChange={(e) => setLocalInputSeed(e.target.value)}
                       placeholder="Seed"
                     />
                     <Button onClick={handleSeedChange} variant="secondary" size="sm">
@@ -212,6 +214,14 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
                     </Button>
                   </div>
                 </div>
+                
+                {onNewShip && (
+                  <div className="space-y-2">
+                    <Button onClick={onNewShip} variant="outline" className="w-full">
+                      Generate New Ship
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
