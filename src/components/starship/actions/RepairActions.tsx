@@ -7,13 +7,15 @@ interface RepairActionsProps {
   currentSystemId: string | null;
   needsRepair?: boolean;
   needsCombatRepair?: boolean;
+  onRepairCombatSystems?: (cost: number) => void;
 }
 
 export const RepairActions: React.FC<RepairActionsProps> = ({
   selectedSystem,
   currentSystemId,
   needsRepair = false,
-  needsCombatRepair = false
+  needsCombatRepair = false,
+  onRepairCombatSystems
 }) => {
   const isCurrentSystem = selectedSystem?.id === currentSystemId;
   
