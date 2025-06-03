@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
 import { ExplorationDialog } from '../components/galaxy/ExplorationDialog';
@@ -58,7 +57,9 @@ const Index = () => {
     exploredSystemIds,
     travelHistory,
     updateStatsFromExploration,
-    repairShip,
+    repairHull,
+    repairShields,
+    repairCombatSystems,
     upgradeSystem,
     sellCargo,
     getJumpableSystemIds,
@@ -289,9 +290,19 @@ const Index = () => {
     jumpToSystem(systemId);
   };
 
-  const handleRepairShip = () => {
-    const repairCost = 1000;
-    repairShip(repairCost);
+  const handleRepairHull = () => {
+    const repairCost = 800;
+    repairHull(repairCost);
+  };
+
+  const handleRepairShields = () => {
+    const repairCost = 600;
+    repairShields(repairCost);
+  };
+
+  const handleRepairCombatSystems = () => {
+    const repairCost = 1500;
+    repairCombatSystems(repairCost);
   };
 
   // Create a ref function to handle zoom to starter system
@@ -416,7 +427,9 @@ const Index = () => {
         onBodySelect={handleBodySelect}
         onBeginExploration={handleBeginExploration}
         onResetExploration={handleResetExploration}
-        onRepairShip={handleRepairShip}
+        onRepairHull={handleRepairHull}
+        onRepairShields={handleRepairShields}
+        onRepairCombatSystems={handleRepairCombatSystems}
         onOpenMarket={handleOpenMarket}
         onJumpToSystem={handleJumpToSystem}
         onUpdateShipName={updateShipName}
@@ -448,7 +461,9 @@ const Index = () => {
           shipStats={shipStats}
           onSellCargo={(amount) => sellCargo(amount, true)}
           onUpgradeSystem={upgradeSystem}
-          onRepairShip={repairShip}
+          onRepairHull={repairHull}
+          onRepairShields={repairShields}
+          onRepairCombatSystems={repairCombatSystems}
         />
       )}
     </div>
