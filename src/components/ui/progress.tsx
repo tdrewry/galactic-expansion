@@ -8,8 +8,9 @@ const Progress = React.forwardRef<
   React.ElementRef<typeof ProgressPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> & {
     inverted?: boolean;
+    damageValue?: number; // Percentage of damage to show as red
   }
->(({ className, value, inverted = false, ...props }, ref) => {
+>(({ className, value, inverted = false, damageValue = 0, ...props }, ref) => {
   const getProgressColor = (percentage: number, isInverted: boolean) => {
     if (isInverted) {
       // Inverted: green when low (empty), red when high (full)
@@ -42,6 +43,12 @@ const Progress = React.forwardRef<
         )}
         style={{ transform: `translateX(-${100 - progressValue}%)` }}
       />
+      {damageValue > 0 && (
+        <div
+          className="absolute top-0 right-0 h-full bg-red-600/80 transition-all"
+          style={{ width: `${damageValue}%` }}
+        />
+      )}
     </ProgressPrimitive.Root>
   )
 })

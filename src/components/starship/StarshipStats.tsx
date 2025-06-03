@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -38,6 +37,19 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({
     return "bg-red-500";
   };
 
+  // Helper function to get current shield maximum
+  const getCurrentShieldMax = () => {
+    return stats.reducedShieldMax ? Math.min(stats.reducedShieldMax, stats.maxShields) : stats.maxShields;
+  };
+
+  const currentShieldMax = getCurrentShieldMax();
+  const hasShieldDamage = stats.reducedShieldMax && stats.reducedShieldMax < stats.maxShields;
+  
+  // Calculate damage percentage for the red fill
+  const shieldDamagePercentage = hasShieldDamage 
+    ? ((stats.maxShields - currentShieldMax) / stats.maxShields) * 100 
+    : 0;
+
   return (
     <div className="space-y-4">
       <Card>
@@ -76,12 +88,21 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({
             <div>
               <div className="flex justify-between text-sm">
                 <span>Shields</span>
-                <span>{stats.shields}/{stats.maxShields}</span>
+                <span className={hasShieldDamage ? "text-orange-400" : ""}>
+                  {stats.shields}/{currentShieldMax}
+                  {hasShieldDamage && <span className="text-gray-500">/{stats.maxShields}</span>}
+                </span>
               </div>
               <Progress 
-                value={(stats.shields / stats.maxShields) * 100} 
+                value={(stats.shields / currentShieldMax) * 100} 
+                damageValue={shieldDamagePercentage}
                 className="h-2"
               />
+              {hasShieldDamage && (
+                <div className="text-xs text-orange-400 mt-1">
+                  Shield generators damaged
+                </div>
+              )}
             </div>
             <div>
               <div className="flex justify-between text-sm">
