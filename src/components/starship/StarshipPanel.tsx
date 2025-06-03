@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState } from 'react';
 import { generateStarship } from '../../utils/starshipGenerator';
 import { ActionsPanel } from './ActionsPanel';
@@ -109,6 +110,10 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
               canAffordRepair={canAffordRepair}
               needsRepair={needsRepair}
               onRepairShip={onRepairShip}
+              onRepairCombatSystems={onRepairCombatSystems}
+              combatRepairCost={combatRepairCost}
+              canAffordCombatRepair={canAffordCombatRepair}
+              needsCombatRepair={needsCombatRepair}
               onOpenMarket={onOpenMarket}
               canJumpToSelected={canJumpToSelected}
               onJumpToSystem={onJumpToSystem}
