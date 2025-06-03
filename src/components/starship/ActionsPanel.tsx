@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Ship, Wrench, Currency, Zap } from 'lucide-react';
+import { Ship, Wrench, Currency, Zap, Shield } from 'lucide-react';
 import { StarSystem } from '../../utils/galaxyGenerator';
 import { ScannerButton } from '../galaxy/scanner/ScannerButton';
 
@@ -24,6 +23,10 @@ interface ActionsPanelProps {
   canAffordRepair?: boolean;
   needsRepair?: boolean;
   onRepairShip?: (cost: number) => void;
+  onRepairCombatSystems?: (cost: number) => void;
+  combatRepairCost?: number;
+  canAffordCombatRepair?: boolean;
+  needsCombatRepair?: boolean;
   onOpenMarket?: () => void;
   onTriggerScan?: () => void;
   isScanning?: boolean;
@@ -45,6 +48,10 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
   canAffordRepair = false,
   needsRepair = false,
   onRepairShip,
+  onRepairCombatSystems,
+  combatRepairCost = 1500,
+  canAffordCombatRepair = false,
+  needsCombatRepair = false,
   onOpenMarket,
   onTriggerScan,
   isScanning = false,
@@ -54,6 +61,12 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
   const handleRepairShip = () => {
     if (onRepairShip && canAffordRepair && needsRepair) {
       onRepairShip(repairCost);
+    }
+  };
+
+  const handleRepairCombatSystems = () => {
+    if (onRepairCombatSystems && canAffordCombatRepair && needsCombatRepair) {
+      onRepairCombatSystems(combatRepairCost);
     }
   };
 
@@ -178,23 +191,41 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
             )}
 
             {/* Ship Repair Section - only for current system */}
-            {systemHasRepairShop && needsRepair && (
+            {systemHasRepairShop && (needsRepair || needsCombatRepair) && (
               <div className="pt-2 border-t border-gray-600">
                 <p className="text-gray-300 text-xs mb-2">
                   Repair facilities available
                 </p>
-                <Button
-                  onClick={handleRepairShip}
-                  disabled={!canAffordRepair}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white disabled:bg-gray-600 disabled:text-gray-400"
-                  size="sm"
-                >
-                  <Wrench className="h-4 w-4 mr-2" />
-                  Repair Ship (₡{repairCost.toLocaleString()})
-                </Button>
-                {!canAffordRepair && (
-                  <p className="text-red-400 text-xs mt-1">Insufficient credits</p>
+                
+                {/* Hull/Shields Repair */}
+                {needsRepair && (
+                  <Button
+                    onClick={handleRepairShip}
+                    disabled={!canAffordRepair}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white disabled:bg-gray-600 disabled:text-gray-400 mb-2"
+                    size="sm"
+                  >
+                    <Wrench className="h-4 w-4 mr-2" />
+                    Repair Hull & Shields (₡{repairCost.toLocaleString()})
+                  </Button>
                 )}
+
+                {/* Combat Systems Repair */}
+                {needsCombatRepair && onRepairCombatSystems && (
+                  <Button
+                    onClick={handleRepairCombatSystems}
+                    disabled={!canAffordCombatRepair}
+                    className="w-full bg-orange-600 hover:bg-orange-700 text-white disabled:bg-gray-600 disabled:text-gray-400"
+                    size="sm"
+                  >
+                    <Shield className="h-4 w-4 mr-2" />
+                    Repair Combat Systems (₡{combatRepairCost.toLocaleString()})
+                  </Button>
+                )}
+
+                {(!canAffordRepair && needsRepair) || (!canAffordCombatRepair && needsCombatRepair) ? (
+                  <p className="text-red-400 text-xs mt-1">Insufficient credits for some repairs</p>
+                ) : null}
               </div>
             )}
 

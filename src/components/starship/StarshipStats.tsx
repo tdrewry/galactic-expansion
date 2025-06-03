@@ -99,19 +99,7 @@ export const StarshipStats: React.FC<StarshipStatsProps> = ({
           <div>
             <div className="flex justify-between items-center text-sm">
               <span>Combat Systems</span>
-              <div className="flex items-center gap-2">
-                <span>{stats.combatPower}/{stats.maxCombatPower}</span>
-                {!hideActions && onRepairCombatSystems && stats.combatPower < stats.maxCombatPower && stats.credits >= combatRepairCost && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => onRepairCombatSystems(combatRepairCost)}
-                    className="text-xs py-1 px-2 h-auto"
-                  >
-                    Repair ({combatRepairCost} credits)
-                  </Button>
-                )}
-              </div>
+              <span>{stats.combatPower}/{stats.maxCombatPower}</span>
             </div>
             <Progress 
               value={(stats.combatPower / stats.maxCombatPower) * 100} 

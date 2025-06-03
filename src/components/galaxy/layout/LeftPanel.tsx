@@ -29,6 +29,7 @@ interface LeftPanelProps {
   onBeginExploration: () => void;
   onResetExploration: () => void;
   onRepairShip: () => void;
+  onRepairCombatSystems?: (cost: number) => void;
   onOpenMarket: () => void;
   onJumpToSystem: (systemId: string) => void;
   canJumpToSelected?: boolean;
@@ -47,12 +48,20 @@ export const LeftPanel: React.FC<LeftPanelProps> = ({
   onBeginExploration,
   onResetExploration,
   onRepairShip,
+  onRepairCombatSystems,
   onOpenMarket,
   onJumpToSystem,
   canJumpToSelected = false,
   isScanning,
   onTriggerScan
 }) => {
+  const repairCost = 1000;
+  const combatRepairCost = 1500;
+  const canAffordRepair = (shipStats?.credits || 0) >= repairCost;
+  const canAffordCombatRepair = (shipStats?.credits || 0) >= combatRepairCost;
+  const needsRepair = shipStats && (shipStats.shields < shipStats.maxShields || shipStats.hull < shipStats.maxHull);
+  const needsCombatRepair = shipStats && shipStats.combatPower < shipStats.maxCombatPower;
+
   return (
     <ResizablePanelGroup direction="vertical" className="h-full">
       {/* Ship Actions */}
@@ -72,10 +81,14 @@ export const LeftPanel: React.FC<LeftPanelProps> = ({
                 planet.civilization && 
                 planet.civilization.techLevel >= (shipStats?.techLevel || 1)
               )}
-              repairCost={1000}
-              canAffordRepair={(shipStats?.credits || 0) >= 1000}
-              needsRepair={shipStats && (shipStats.shields < shipStats.maxShields || shipStats.hull < shipStats.maxHull)}
+              repairCost={repairCost}
+              canAffordRepair={canAffordRepair}
+              needsRepair={needsRepair}
               onRepairShip={onRepairShip}
+              onRepairCombatSystems={onRepairCombatSystems}
+              combatRepairCost={combatRepairCost}
+              canAffordCombatRepair={canAffordCombatRepair}
+              needsCombatRepair={needsCombatRepair}
               onOpenMarket={onOpenMarket}
               onTriggerScan={onTriggerScan}
               isScanning={isScanning}
