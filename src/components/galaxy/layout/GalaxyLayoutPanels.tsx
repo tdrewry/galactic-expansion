@@ -2,12 +2,9 @@
 import React, { useState } from 'react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { StarSystem, Planet, Moon } from '../../../utils/galaxyGenerator';
-import { ExplorationLog } from '../../exploration/ExplorationLog';
-import { GalaxyMap } from '../../GalaxyMap';
-import { StarshipPanel } from '../../starship/StarshipPanel';
-import { SystemView } from '../SystemView';
-import { ActionsPanel } from '../../starship/ActionsPanel';
-import { SystemInfoCard } from '../SystemInfoCard';
+import { LeftPanel } from './LeftPanel';
+import { CenterPanel } from './CenterPanel';
+import { RightPanel } from './RightPanel';
 
 interface ExplorationLogEntry {
   id: string;
@@ -65,51 +62,11 @@ interface GalaxyLayoutPanelsProps {
   canJumpToSelected?: boolean;
 }
 
-export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
-  galaxySeed,
-  numSystems,
-  numNebulae,
-  binaryFrequency,
-  trinaryFrequency,
-  showDustLanes,
-  showCosmicDust,
-  dustLaneParticles,
-  cosmicDustParticles,
-  dustLaneOpacity,
-  cosmicDustOpacity,
-  dustLaneColorIntensity,
-  cosmicDustColorIntensity,
-  jumpLaneOpacity,
-  greenPathOpacity,
-  selectedSystem,
-  selectedStar,
-  exploredSystems,
-  explorationHistory,
-  highlightedBodyId,
-  shipStats,
-  currentSystemId,
-  exploredSystemIds,
-  travelHistory,
-  getJumpableSystemIds,
-  getScannerRangeSystemIds,
-  isSystemExplored,
-  canSystemBeExplored,
-  getSystemExplorationStatus,
-  onSystemSelect,
-  onStarSelect,
-  onBodySelect,
-  onBeginExploration,
-  onResetExploration,
-  onRepairShip,
-  onOpenMarket,
-  onJumpToSystem,
-  onUpdateShipName,
-  canJumpToSelected = false
-}) => {
+export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => {
   const [isScanning, setIsScanning] = useState(false);
 
   const handleTriggerScan = () => {
-    if (selectedSystem) {
+    if (props.selectedSystem) {
       setIsScanning(true);
     }
   };
@@ -122,147 +79,82 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = ({
     <ResizablePanelGroup direction="horizontal" className="flex-1">
       {/* Left Panel - Ship Actions and Exploration Log */}
       <ResizablePanel defaultSize={25} minSize={25} maxSize={40}>
-        <ResizablePanelGroup direction="vertical" className="h-full">
-          {/* Ship Actions */}
-          <ResizablePanel defaultSize={60} minSize={40}>
-            <div className="h-full bg-gray-900 border-r border-gray-700 p-4">
-              {selectedSystem ? (
-                <ActionsPanel
-                  selectedSystem={selectedSystem}
-                  currentSystemId={currentSystemId}
-                  isExplored={selectedSystem ? isSystemExplored(selectedSystem) : false}
-                  canBeExplored={selectedSystem ? canSystemBeExplored(selectedSystem) : false}
-                  explorationStatus={selectedSystem ? getSystemExplorationStatus(selectedSystem) : { systemId: '', explorationsCompleted: 0, maxExplorations: 0 }}
-                  onBeginExploration={onBeginExploration}
-                  onResetExploration={onResetExploration}
-                  onOpenShipLayout={() => {}}
-                  canRepairShip={selectedSystem && selectedSystem.planets.some(planet => 
-                    planet.civilization && 
-                    planet.civilization.techLevel >= (shipStats?.techLevel || 1)
-                  )}
-                  repairCost={1000}
-                  canAffordRepair={(shipStats?.credits || 0) >= 1000}
-                  needsRepair={shipStats && (shipStats.shields < shipStats.maxShields || shipStats.hull < shipStats.maxHull)}
-                  onRepairShip={onRepairShip}
-                  onOpenMarket={onOpenMarket}
-                  onTriggerScan={handleTriggerScan}
-                  isScanning={isScanning}
-                  canJumpToSelected={canJumpToSelected}
-                  onJumpToSystem={onJumpToSystem}
-                />
-              ) : (
-                <div className="text-gray-400 text-sm">Select a star system to begin operations</div>
-              )}
-            </div>
-          </ResizablePanel>
-          
-          <ResizableHandle withHandle />
-          
-          {/* Exploration Log */}
-          <ResizablePanel defaultSize={40} minSize={30}>
-            <ExplorationLog explorationHistory={explorationHistory} />
-          </ResizablePanel>
-        </ResizablePanelGroup>
+        <LeftPanel
+          selectedSystem={props.selectedSystem}
+          currentSystemId={props.currentSystemId}
+          explorationHistory={props.explorationHistory}
+          shipStats={props.shipStats}
+          isSystemExplored={props.isSystemExplored}
+          canSystemBeExplored={props.canSystemBeExplored}
+          getSystemExplorationStatus={props.getSystemExplorationStatus}
+          onBeginExploration={props.onBeginExploration}
+          onResetExploration={props.onResetExploration}
+          onRepairShip={props.onRepairShip}
+          onOpenMarket={props.onOpenMarket}
+          onJumpToSystem={props.onJumpToSystem}
+          canJumpToSelected={props.canJumpToSelected}
+          isScanning={isScanning}
+          onTriggerScan={handleTriggerScan}
+        />
       </ResizablePanel>
       
       <ResizableHandle withHandle />
       
       {/* Center Panel - Galaxy Map and Ship Stats */}
       <ResizablePanel defaultSize={50} minSize={40}>
-        <ResizablePanelGroup direction="vertical" className="h-full">
-          {/* Galaxy Map */}
-          <ResizablePanel defaultSize={65} minSize={50}>
-            <GalaxyMap 
-              seed={galaxySeed} 
-              numSystems={numSystems}
-              numNebulae={numNebulae}
-              binaryFrequency={binaryFrequency}
-              trinaryFrequency={trinaryFrequency}
-              showDustLanes={showDustLanes}
-              showCosmicDust={showCosmicDust}
-              dustLaneParticles={dustLaneParticles}
-              cosmicDustParticles={cosmicDustParticles}
-              dustLaneOpacity={dustLaneOpacity}
-              cosmicDustOpacity={cosmicDustOpacity}
-              dustLaneColorIntensity={dustLaneColorIntensity}
-              cosmicDustColorIntensity={cosmicDustColorIntensity}
-              jumpLaneOpacity={jumpLaneOpacity}
-              greenPathOpacity={greenPathOpacity}
-              travelHistory={travelHistory}
-              onSystemSelect={onSystemSelect}
-              selectedSystem={selectedSystem}
-              selectedStar={selectedStar}
-              onStarSelect={onStarSelect}
-              exploredSystems={exploredSystems}
-              shipStats={shipStats}
-              currentSystemId={currentSystemId}
-              exploredSystemIds={exploredSystemIds}
-              getJumpableSystemIds={getJumpableSystemIds}
-              getScannerRangeSystemIds={getScannerRangeSystemIds}
-              onJumpToSystem={onJumpToSystem}
-              isScanning={isScanning}
-              onScanComplete={handleScanComplete}
-            />
-          </ResizablePanel>
-          
-          <ResizableHandle withHandle />
-          
-          {/* Ship Stats */}
-          <ResizablePanel defaultSize={22} minSize={10} maxSize={40}>
-            <div className="border-t border-gray-700">
-              <StarshipPanel 
-                seed={galaxySeed}
-                selectedSystem={selectedSystem}
-                currentSystemId={currentSystemId}
-                isExplored={selectedSystem ? isSystemExplored(selectedSystem) : false}
-                canBeExplored={selectedSystem ? canSystemBeExplored(selectedSystem) : false}
-                explorationStatus={selectedSystem ? getSystemExplorationStatus(selectedSystem) : { systemId: '', explorationsCompleted: 0, maxExplorations: 0 }}
-                onBeginExploration={onBeginExploration}
-                onResetExploration={onResetExploration}
-                shipStats={shipStats}
-                onRepairShip={onRepairShip}
-                onOpenMarket={onOpenMarket}
-                onUpdateShipName={onUpdateShipName}
-                hideActions={true}
-              />
-            </div>
-          </ResizablePanel>
-        </ResizablePanelGroup>
+        <CenterPanel
+          galaxySeed={props.galaxySeed}
+          numSystems={props.numSystems}
+          numNebulae={props.numNebulae}
+          binaryFrequency={props.binaryFrequency}
+          trinaryFrequency={props.trinaryFrequency}
+          showDustLanes={props.showDustLanes}
+          showCosmicDust={props.showCosmicDust}
+          dustLaneParticles={props.dustLaneParticles}
+          cosmicDustParticles={props.cosmicDustParticles}
+          dustLaneOpacity={props.dustLaneOpacity}
+          cosmicDustOpacity={props.cosmicDustOpacity}
+          dustLaneColorIntensity={props.dustLaneColorIntensity}
+          cosmicDustColorIntensity={props.cosmicDustColorIntensity}
+          jumpLaneOpacity={props.jumpLaneOpacity}
+          greenPathOpacity={props.greenPathOpacity}
+          selectedSystem={props.selectedSystem}
+          selectedStar={props.selectedStar}
+          exploredSystems={props.exploredSystems}
+          shipStats={props.shipStats}
+          currentSystemId={props.currentSystemId}
+          exploredSystemIds={props.exploredSystemIds}
+          travelHistory={props.travelHistory}
+          getJumpableSystemIds={props.getJumpableSystemIds}
+          getScannerRangeSystemIds={props.getScannerRangeSystemIds}
+          isSystemExplored={props.isSystemExplored}
+          canSystemBeExplored={props.canSystemBeExplored}
+          getSystemExplorationStatus={props.getSystemExplorationStatus}
+          onSystemSelect={props.onSystemSelect}
+          onStarSelect={props.onStarSelect}
+          onBeginExploration={props.onBeginExploration}
+          onResetExploration={props.onResetExploration}
+          onRepairShip={props.onRepairShip}
+          onOpenMarket={props.onOpenMarket}
+          onJumpToSystem={props.onJumpToSystem}
+          onUpdateShipName={props.onUpdateShipName}
+          isScanning={isScanning}
+          onScanComplete={handleScanComplete}
+        />
       </ResizablePanel>
 
       {/* Right Panel - System Map and System Info */}
-      {selectedSystem && (
+      {props.selectedSystem && (
         <>
           <ResizableHandle withHandle />
           <ResizablePanel defaultSize={25} minSize={20} maxSize={35}>
-            <ResizablePanelGroup direction="vertical" className="h-full">
-              {/* System Map */}
-              <ResizablePanel defaultSize={70} minSize={50}>
-                <div className="h-full bg-gray-900 border-l border-gray-700 overflow-y-auto">
-                  <div className="p-4">
-                    <SystemView 
-                      system={selectedSystem} 
-                      selectedStar={selectedStar}
-                      onBodySelect={onBodySelect}
-                      highlightedBodyId={highlightedBodyId}
-                    />
-                  </div>
-                </div>
-              </ResizablePanel>
-              
-              <ResizableHandle withHandle />
-              
-              {/* System Info */}
-              <ResizablePanel defaultSize={30} minSize={25}>
-                <div className="h-full bg-gray-900 border-l border-gray-700 p-4">
-                  <SystemInfoCard
-                    system={selectedSystem}
-                    selectedStar={selectedStar}
-                    onStarSelect={onStarSelect}
-                  />
-                </div>
-              </ResizablePanel>
-            </ResizablePanelGroup>
+            <RightPanel
+              selectedSystem={props.selectedSystem}
+              selectedStar={props.selectedStar}
+              highlightedBodyId={props.highlightedBodyId}
+              onBodySelect={props.onBodySelect}
+              onStarSelect={props.onStarSelect}
+            />
           </ResizablePanel>
         </>
       )}
