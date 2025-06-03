@@ -64,13 +64,10 @@ export const LeftPanel: React.FC<LeftPanelProps> = ({
 
   const handleRepairCombatSystems = (cost: number) => {
     console.log('LeftPanel: handleRepairCombatSystems called with cost:', cost);
-    console.log('LeftPanel: onRepairCombatSystems available:', !!onRepairCombatSystems);
-    
-    if (onRepairCombatSystems) {
+    // console.log('LeftPanel: onRepairCombatSystems available:', !!onRepairCombatSystems);
+    // if (onRepairCombatSystems) {
       onRepairCombatSystems(cost);
-    } else {
-      console.error('LeftPanel: onRepairCombatSystems function is not available');
-    }
+    // }
   };
 
   return (
@@ -96,7 +93,7 @@ export const LeftPanel: React.FC<LeftPanelProps> = ({
               canAffordRepair={canAffordRepair}
               needsRepair={needsRepair}
               onRepairShip={onRepairShip}
-              onRepairCombatSystems={onRepairCombatSystems ? handleRepairCombatSystems : undefined}
+              onRepairCombatSystems={handleRepairCombatSystems}
               combatRepairCost={combatRepairCost}
               canAffordCombatRepair={canAffordCombatRepair}
               needsCombatRepair={needsCombatRepair}
