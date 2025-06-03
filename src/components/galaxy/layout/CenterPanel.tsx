@@ -84,6 +84,9 @@ export const CenterPanel: React.FC<CenterPanelProps> = ({
   travelHistory,
   getJumpableSystemIds,
   getScannerRangeSystemIds,
+  isSystemExplored,
+  canSystemBeExplored,
+  getSystemExplorationStatus,
   onSystemSelect,
   onUpdateShipName,
   isScanning,
@@ -147,8 +150,17 @@ export const CenterPanel: React.FC<CenterPanelProps> = ({
       {/* Ship Stats Panel */}
       <div className="flex-shrink-0 border-t border-gray-700">
         <StarshipPanel 
-          shipStats={shipStats} 
+          seed={galaxySeed}
+          selectedSystem={selectedSystem}
+          currentSystemId={currentSystemId}
+          isExplored={selectedSystem ? isSystemExplored(selectedSystem) : false}
+          canBeExplored={selectedSystem ? canSystemBeExplored(selectedSystem) : false}
+          explorationStatus={selectedSystem ? getSystemExplorationStatus(selectedSystem) : { systemId: '', explorationsCompleted: 0, maxExplorations: 0 }}
+          onBeginExploration={() => {}}
+          onResetExploration={() => {}}
+          shipStats={shipStats}
           onUpdateShipName={onUpdateShipName}
+          hideActions={true}
         />
       </div>
     </div>
