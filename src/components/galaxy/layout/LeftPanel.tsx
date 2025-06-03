@@ -64,8 +64,8 @@ export const LeftPanel: React.FC<LeftPanelProps> = ({
 
   console.log('LeftPanel: onRepairCombatSystems prop available:', !!onRepairCombatSystems);
 
-  const handleRepairShip = () => {
-    console.log('LeftPanel: handleRepairShip called');
+  const handleRepairShip = (cost: number) => {
+    console.log('LeftPanel: handleRepairShip called with cost:', cost);
     if (onRepairShip) {
       onRepairShip();
     }
