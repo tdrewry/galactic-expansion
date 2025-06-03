@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { GalaxyMap, GalaxyMapRef } from '../../GalaxyMap';
 import { StarshipPanel } from '../../starship/StarshipPanel';
@@ -50,7 +51,9 @@ interface CenterPanelProps {
   onStarSelect: (star: 'primary' | 'binary' | 'trinary') => void;
   onBeginExploration: () => void;
   onResetExploration: () => void;
-  onRepairShip: () => void;
+  onRepairHull: (cost: number) => void;
+  onRepairShields: (cost: number) => void;
+  onRepairCombatSystems: (cost: number) => void;
   onOpenMarket: () => void;
   onJumpToSystem: (systemId: string) => void;
   onUpdateShipName?: (newName: string) => void;
@@ -59,7 +62,6 @@ interface CenterPanelProps {
   galaxyMapRef?: React.RefObject<GalaxyMapRef>;
   canJumpToSelected?: boolean;
   onTriggerScan?: () => void;
-  onRepairCombatSystems?: (cost: number) => void;
 }
 
 export const CenterPanel: React.FC<CenterPanelProps> = ({
@@ -96,11 +98,13 @@ export const CenterPanel: React.FC<CenterPanelProps> = ({
   galaxyMapRef,
   onBeginExploration,
   onResetExploration,
+  onRepairHull,
+  onRepairShields,
+  onRepairCombatSystems,
   onOpenMarket,
   onJumpToSystem,
   canJumpToSelected,
-  onTriggerScan,
-  onRepairCombatSystems
+  onTriggerScan
 }) => {
   console.log('CenterPanel: onRepairCombatSystems prop received:', !!onRepairCombatSystems);
 
@@ -176,6 +180,8 @@ export const CenterPanel: React.FC<CenterPanelProps> = ({
           onTriggerScan={onTriggerScan}
           isScanning={isScanning}
           onUpdateShipName={onUpdateShipName}
+          onRepairHull={onRepairHull}
+          onRepairShields={onRepairShields}
           onRepairCombatSystems={onRepairCombatSystems}
         />
       </div>
