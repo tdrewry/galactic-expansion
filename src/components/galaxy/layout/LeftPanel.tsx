@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { StarshipPanel } from '../../starship/StarshipPanel';
 import { ExplorationLog } from '../../exploration/ExplorationLog';
 import { MarketDialog } from '../../starship/MarketDialog';
 import { StarSystem } from '../../../utils/galaxyGenerator';
@@ -39,11 +40,21 @@ export const LeftPanel: React.FC<LeftPanelProps> = ({
   currentSystemId,
   explorationHistory,
   shipStats,
+  isSystemExplored,
+  canSystemBeExplored,
+  getSystemExplorationStatus,
+  onBeginExploration,
+  onResetExploration,
   onOpenMarket,
+  onJumpToSystem,
+  canJumpToSelected,
+  isScanning,
+  onTriggerScan,
+  onUpdateShipName,
+  onRepairCombatSystems,
   onSellCargo,
   onUpgradeSystem,
-  onRepairShip,
-  onRepairCombatSystems
+  onRepairShip
 }) => {
   const [isMarketOpen, setIsMarketOpen] = useState(false);
 
@@ -80,6 +91,27 @@ export const LeftPanel: React.FC<LeftPanelProps> = ({
   return (
     <div className="h-full flex flex-col bg-gray-900">
       <div className="flex-1 min-h-0">
+        <StarshipPanel
+          seed={shipStats?.seed || 12345}
+          selectedSystem={selectedSystem}
+          currentSystemId={currentSystemId}
+          isExplored={selectedSystem ? isSystemExplored(selectedSystem) : false}
+          canBeExplored={selectedSystem ? canSystemBeExplored(selectedSystem) : false}
+          explorationStatus={selectedSystem ? getSystemExplorationStatus(selectedSystem) : { systemId: '', explorationsCompleted: 0, maxExplorations: 0 }}
+          onBeginExploration={onBeginExploration}
+          onResetExploration={onResetExploration}
+          shipStats={shipStats}
+          onOpenMarket={handleOpenMarket}
+          canJumpToSelected={canJumpToSelected}
+          onJumpToSystem={onJumpToSystem}
+          onTriggerScan={onTriggerScan}
+          isScanning={isScanning}
+          onUpdateShipName={onUpdateShipName}
+          onRepairCombatSystems={onRepairCombatSystems}
+        />
+      </div>
+      
+      <div className="flex-1 min-h-0 border-t border-gray-700">
         <ExplorationLog 
           explorationHistory={explorationHistory}
         />

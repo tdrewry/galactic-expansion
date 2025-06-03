@@ -2,7 +2,6 @@
 import React from 'react';
 import { GalaxyMap, GalaxyMapRef } from '../../GalaxyMap';
 import { StarshipPanel } from '../../starship/StarshipPanel';
-import { ActionsPanel } from '../../starship/ActionsPanel';
 import { StarSystem, Planet, Moon } from '../../../utils/galaxyGenerator';
 import { Button } from '@/components/ui/button';
 import { Target } from 'lucide-react';
@@ -59,9 +58,6 @@ interface CenterPanelProps {
   isScanning: boolean;
   onScanComplete: () => void;
   galaxyMapRef?: React.RefObject<GalaxyMapRef>;
-  canJumpToSelected?: boolean;
-  onTriggerScan?: () => void;
-  onRepairCombatSystems?: (cost: number) => void;
 }
 
 export const CenterPanel: React.FC<CenterPanelProps> = ({
@@ -95,14 +91,7 @@ export const CenterPanel: React.FC<CenterPanelProps> = ({
   onUpdateShipName,
   isScanning,
   onScanComplete,
-  galaxyMapRef,
-  onBeginExploration,
-  onResetExploration,
-  onOpenMarket,
-  onJumpToSystem,
-  canJumpToSelected,
-  onTriggerScan,
-  onRepairCombatSystems
+  galaxyMapRef
 }) => {
   const handleCenterOnCurrentSystem = () => {
     if (currentSystemId && galaxyMapRef?.current) {
@@ -158,48 +147,21 @@ export const CenterPanel: React.FC<CenterPanelProps> = ({
         )}
       </div>
 
-      {/* Bottom section with Ship Stats and Actions */}
+      {/* Ship Stats Panel */}
       <div className="flex-shrink-0 border-t border-gray-700">
-        <div className="flex">
-          {/* Ship Stats Panel */}
-          <div className="flex-1 border-r border-gray-700">
-            <StarshipPanel 
-              seed={galaxySeed}
-              selectedSystem={selectedSystem}
-              currentSystemId={currentSystemId}
-              isExplored={selectedSystem ? isSystemExplored(selectedSystem) : false}
-              canBeExplored={selectedSystem ? canSystemBeExplored(selectedSystem) : false}
-              explorationStatus={selectedSystem ? getSystemExplorationStatus(selectedSystem) : { systemId: '', explorationsCompleted: 0, maxExplorations: 0 }}
-              onBeginExploration={() => {}}
-              onResetExploration={() => {}}
-              shipStats={shipStats}
-              onUpdateShipName={onUpdateShipName}
-              onRepairCombatSystems={onRepairCombatSystems}
-              hideActions={true}
-            />
-          </div>
-
-          {/* Actions Panel */}
-          <div className="w-80 p-4">
-            <ActionsPanel
-              selectedSystem={selectedSystem}
-              currentSystemId={currentSystemId}
-              isExplored={selectedSystem ? isSystemExplored(selectedSystem) : false}
-              canBeExplored={selectedSystem ? canSystemBeExplored(selectedSystem) : false}
-              explorationStatus={selectedSystem ? getSystemExplorationStatus(selectedSystem) : { systemId: '', explorationsCompleted: 0, maxExplorations: 0 }}
-              onBeginExploration={onBeginExploration}
-              onResetExploration={onResetExploration}
-              onOpenShipLayout={() => {}}
-              needsRepair={shipStats?.shields < shipStats?.maxShields || shipStats?.hull < shipStats?.maxHull}
-              needsCombatRepair={shipStats?.combatPower < shipStats?.maxCombatPower}
-              onOpenMarket={onOpenMarket}
-              canJumpToSelected={canJumpToSelected}
-              onJumpToSystem={onJumpToSystem}
-              onTriggerScan={onTriggerScan}
-              isScanning={isScanning}
-            />
-          </div>
-        </div>
+        <StarshipPanel 
+          seed={galaxySeed}
+          selectedSystem={selectedSystem}
+          currentSystemId={currentSystemId}
+          isExplored={selectedSystem ? isSystemExplored(selectedSystem) : false}
+          canBeExplored={selectedSystem ? canSystemBeExplored(selectedSystem) : false}
+          explorationStatus={selectedSystem ? getSystemExplorationStatus(selectedSystem) : { systemId: '', explorationsCompleted: 0, maxExplorations: 0 }}
+          onBeginExploration={() => {}}
+          onResetExploration={() => {}}
+          shipStats={shipStats}
+          onUpdateShipName={onUpdateShipName}
+          hideActions={true}
+        />
       </div>
     </div>
   );
