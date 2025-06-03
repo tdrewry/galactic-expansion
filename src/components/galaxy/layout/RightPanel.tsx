@@ -94,6 +94,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({
   const handleOpenMarket = () => {
     console.log('RightPanel: handleOpenMarket called');
     console.log('RightPanel: marketInfo available:', !!marketInfo);
+    console.log('RightPanel: onRepairCombatSystems prop available:', !!onRepairCombatSystems);
     
     // Only open market if we have valid market info
     if (marketInfo) {
