@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { StarshipStats } from '../utils/starshipGenerator';
 import { ExplorationEvent } from '../components/galaxy/ExplorationDialog';
@@ -150,16 +151,25 @@ export const useShipStats = (initialStats: StarshipStats) => {
   }, []);
 
   const repairCombatSystems = useCallback((cost: number) => {
+    console.log('useShipStats: repairCombatSystems called with cost:', cost);
+    console.log('useShipStats: current stats before repair:', stats);
+    
     setStats(prevStats => {
+      console.log('useShipStats: prevStats in setStats:', prevStats);
       if (prevStats.credits >= cost) {
-        const repairAmount = Math.min(20, prevStats.maxCombatPower - prevStats.combatPower);
+        const repairAmount = prevStats.maxCombatPower - prevStats.combatPower;
+        console.log('useShipStats: repair amount calculated:', repairAmount);
         
-        return {
+        const newStats = {
           ...prevStats,
-          combatPower: Math.min(prevStats.maxCombatPower, prevStats.combatPower + repairAmount),
+          combatPower: prevStats.maxCombatPower,
           credits: prevStats.credits - cost
         };
+        
+        console.log('useShipStats: new stats after repair:', newStats);
+        return newStats;
       }
+      console.log('useShipStats: insufficient credits for repair');
       return prevStats;
     });
     

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StarshipStats } from '../../utils/starshipGenerator';
 import { MarketLocation } from '../../utils/explorationGenerator';
-import { Wrench, Currency, Building, Settings, Users, Package } from 'lucide-react';
+import { Wrench, Currency, Building, Settings, Users, Package, Shield } from 'lucide-react';
 
 interface MarketDialogProps {
   isOpen: boolean;
@@ -16,6 +15,7 @@ interface MarketDialogProps {
   onSellCargo: (amount: number) => void;
   onUpgradeSystem: (system: keyof StarshipStats, cost: number, amount: number) => void;
   onRepairShip?: (cost: number) => void;
+  onRepairCombatSystems?: (cost: number) => void;
 }
 
 export const MarketDialog: React.FC<MarketDialogProps> = ({
@@ -25,7 +25,8 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
   shipStats,
   onSellCargo,
   onUpgradeSystem,
-  onRepairShip
+  onRepairShip,
+  onRepairCombatSystems
 }) => {
   const [cargoToSell, setCargoToSell] = useState(0);
 
@@ -88,8 +89,18 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
   };
 
   const needsRepair = shipStats.shields < shipStats.maxShields || shipStats.hull < shipStats.maxHull;
+  const needsCombatRepair = shipStats.combatPower < shipStats.maxCombatPower;
   const repairCost = 1000;
+  const combatRepairCost = 1500;
+  const canAffordRepair = shipStats.credits >= repairCost;
+  const canAffordCombatRepair = shipStats.credits >= combatRepairCost;
   const isSpaceStation = marketInfo.type === 'station';
+
+  const handleRepairCombatSystems = () => {
+    if (onRepairCombatSystems && canAffordCombatRepair && needsCombatRepair) {
+      onRepairCombatSystems(combatRepairCost);
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -379,18 +390,45 @@ export const MarketDialog: React.FC<MarketDialogProps> = ({
                     </div>
                     
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-300">Full Repair Cost:</span>
+                      <span className="text-gray-300">Hull & Shields Repair Cost:</span>
                       <span className="text-yellow-400">₡{repairCost.toLocaleString()}</span>
                     </div>
                   </div>
                   
                   <Button
                     onClick={() => onRepairShip?.(repairCost)}
-                    disabled={!needsRepair || shipStats.credits < repairCost}
-                    className="w-full bg-blue-600 hover:bg-blue-700"
+                    disabled={!needsRepair || !canAffordRepair}
+                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:text-gray-400"
                   >
-                    {needsRepair ? 'Repair Ship' : 'Ship Fully Repaired'}
+                    {needsRepair ? 'Repair Hull & Shields' : 'Hull & Shields Fully Repaired'}
                   </Button>
+
+                  {/* Combat Systems Repair */}
+                  <div className="pt-2 border-t border-gray-600">
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Combat Systems: {shipStats.combatPower}/{shipStats.maxCombatPower}</span>
+                      </div>
+                      
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-300">Combat Systems Repair Cost:</span>
+                        <span className="text-yellow-400">₡{combatRepairCost.toLocaleString()}</span>
+                      </div>
+                    </div>
+                    
+                    <Button
+                      onClick={handleRepairCombatSystems}
+                      disabled={!needsCombatRepair || !canAffordCombatRepair}
+                      className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 disabled:text-gray-400 mt-2"
+                    >
+                      <Shield className="h-4 w-4 mr-2" />
+                      {needsCombatRepair ? 'Repair Combat Systems' : 'Combat Systems Fully Repaired'}
+                    </Button>
+                  </div>
+
+                  {(!canAffordRepair && needsRepair) || (!canAffordCombatRepair && needsCombatRepair) ? (
+                    <p className="text-red-400 text-xs mt-1">Insufficient credits for some repairs</p>
+                  ) : null}
                 </CardContent>
               </Card>
             </TabsContent>
