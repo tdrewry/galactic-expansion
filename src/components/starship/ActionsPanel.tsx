@@ -101,19 +101,6 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
           </>
         )}
       </div>
-      
-      {/* Ship Layout Button at the bottom */}
-      <div className="flex-shrink-0 pt-2 border-t border-gray-600">
-        <Button
-          onClick={onOpenShipLayout}
-          variant="ghost"
-          size="sm"
-          className="w-full text-blue-400 hover:text-blue-300 hover:bg-blue-900/20"
-        >
-          <Ship className="h-4 w-4 mr-2" />
-          Ship Layout
-        </Button>
-      </div>
     </div>
   );
 };

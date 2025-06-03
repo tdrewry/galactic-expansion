@@ -76,6 +76,7 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
             onNameChange={onUpdateShipName}
             onRepairCombatSystems={onRepairCombatSystems}
             hideActions={hideActions}
+            onOpenShipLayout={hideActions ? undefined : () => setIsShipLayoutOpen(true)}
           />
         </div>
 
