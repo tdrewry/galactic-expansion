@@ -1,87 +1,151 @@
 
-import React from 'react';
-import { StarSystem, Planet, Moon } from '../../utils/galaxyGenerator';
-import { ExplorationDialog } from './ExplorationDialog';
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Save, Upload, RotateCcw, Settings } from 'lucide-react';
+import { StarSystem } from '../../utils/galaxyGenerator';
+import { GalaxySettings } from './GalaxySettings';
+import { ShipSelectionDialog } from '../starship/ShipSelectionDialog';
 import { GalaxyLayoutPanels } from './layout/GalaxyLayoutPanels';
 
-interface ExplorationLogEntry {
-  id: string;
-  systemId: string;
-  event: any;
-  timestamp: Date;
-}
-
-interface SystemExplorationStatus {
-  systemId: string;
-  explorationsCompleted: number;
-  maxExplorations: number;
-}
-
 interface GalaxyLayoutProps {
-  galaxySeed: number;
-  numSystems: number;
-  numNebulae: number;
-  binaryFrequency: number;
-  trinaryFrequency: number;
-  showDustLanes: boolean;
-  showCosmicDust: boolean;
-  dustLaneParticles: number;
-  cosmicDustParticles: number;
-  dustLaneOpacity: number;
-  cosmicDustOpacity: number;
-  dustLaneColorIntensity: number;
-  cosmicDustColorIntensity: number;
-  jumpLaneOpacity: number;
-  greenPathOpacity: number;
+  seed: number;
+  setSeed: (seed: number) => void;
   selectedSystem: StarSystem | null;
-  selectedStar: 'primary' | 'binary' | 'trinary';
-  exploredSystems: Set<string>;
-  explorationHistory: ExplorationLogEntry[];
-  highlightedBodyId: string | null;
-  isExplorationDialogOpen: boolean;
-  explorationEvent: any;
-  canContinueExploration: boolean;
-  shipStats: any;
   currentSystemId: string | null;
-  exploredSystemIds: Set<string>;
-  travelHistory: string[];
-  getJumpableSystemIds: (fromSystem: StarSystem, allSystems: StarSystem[]) => string[];
-  getScannerRangeSystemIds: (fromSystem: StarSystem, allSystems: StarSystem[]) => string[];
-  isSystemExplored: (system: StarSystem) => boolean;
-  canSystemBeExplored: (system: StarSystem) => boolean;
-  getSystemExplorationStatus: (system: StarSystem) => SystemExplorationStatus;
-  onSystemSelect: (system: StarSystem) => void;
-  onStarSelect: (star: 'primary' | 'binary' | 'trinary') => void;
-  onBodySelect: (body: Planet | Moon | null) => void;
+  isExplored: boolean;
+  canBeExplored: boolean;
+  explorationStatus: {
+    systemId: string;
+    explorationsCompleted: number;
+    maxExplorations: number;
+  };
   onBeginExploration: () => void;
   onResetExploration: () => void;
-  onRepairShip: () => void;
-  onOpenMarket: () => void;
-  onJumpToSystem: (systemId: string) => void;
-  onUpdateShipName?: (newName: string) => void;
-  handleCompleteExploration: () => void;
-  handleContinueExploration: () => void;
+  shipStats?: any;
+  onRepairShip?: (cost: number) => void;
+  onRepairCombatSystems?: (cost: number) => void;
+  onOpenMarket?: () => void;
   canJumpToSelected?: boolean;
+  onJumpToSystem?: (systemId: string) => void;
+  onTriggerScan?: () => void;
+  isScanning?: boolean;
+  onUpdateShipName?: (newName: string) => void;
+  onSaveGame?: () => void;
+  onLoadGame?: () => void;
+  onNewGame?: () => void;
 }
 
 export const GalaxyLayout: React.FC<GalaxyLayoutProps> = ({
-  isExplorationDialogOpen,
-  explorationEvent,
-  canContinueExploration,
-  handleCompleteExploration,
-  handleContinueExploration,
-  ...panelProps
+  seed,
+  setSeed,
+  selectedSystem,
+  currentSystemId,
+  isExplored,
+  canBeExplored,
+  explorationStatus,
+  onBeginExploration,
+  onResetExploration,
+  shipStats,
+  onRepairShip,
+  onRepairCombatSystems,
+  onOpenMarket,
+  canJumpToSelected,
+  onJumpToSystem,
+  onTriggerScan,
+  isScanning,
+  onUpdateShipName,
+  onSaveGame,
+  onLoadGame,
+  onNewGame
 }) => {
-  return (
-    <div className="flex-1 min-h-0 flex flex-col">
-      <GalaxyLayoutPanels {...panelProps} />
+  const [showSettings, setShowSettings] = useState(false);
+  const [showShipSelection, setShowShipSelection] = useState(false);
 
-      <ExplorationDialog
-        isOpen={isExplorationDialogOpen}
-        onClose={handleCompleteExploration}
-        onContinue={canContinueExploration ? handleContinueExploration : undefined}
-        canContinue={canContinueExploration}
-        event={explorationEvent}
+  return (
+    <div className="h-screen flex flex-col bg-gray-900">
+      {/* Top Bar */}
+      <div className="bg-gray-800 border-b border-gray-700 p-4 flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-white">Galactic Expansion</h1>
+        
+        <div className="flex gap-2">
+          <Button
+            onClick={onSaveGame}
+            variant="outline"
+            size="sm"
+            className="text-white border-gray-600 hover:bg-gray-700"
+          >
+            <Save className="h-4 w-4 mr-2" />
+            Save
+          </Button>
+          
+          <Button
+            onClick={onLoadGame}
+            variant="outline"
+            size="sm"
+            className="text-white border-gray-600 hover:bg-gray-700"
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            Load
+          </Button>
+          
+          <Button
+            onClick={onNewGame}
+            variant="outline"
+            size="sm"
+            className="text-white border-gray-600 hover:bg-gray-700"
+          >
+            <RotateCcw className="h-4 w-4 mr-2" />
+            New Game
+          </Button>
+          
+          <Button
+            onClick={() => setShowSettings(true)}
+            variant="outline"
+            size="sm"
+            className="text-white border-gray-600 hover:bg-gray-700"
+          >
+            <Settings className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex overflow-hidden">
+        <GalaxyLayoutPanels
+          seed={seed}
+          selectedSystem={selectedSystem}
+          currentSystemId={currentSystemId}
+          isExplored={isExplored}
+          canBeExplored={canBeExplored}
+          explorationStatus={explorationStatus}
+          onBeginExploration={onBeginExploration}
+          onResetExploration={onResetExploration}
+          shipStats={shipStats}
+          onRepairShip={onRepairShip}
+          onRepairCombatSystems={onRepairCombatSystems}
+          onOpenMarket={onOpenMarket}
+          canJumpToSelected={canJumpToSelected}
+          onJumpToSystem={onJumpToSystem}
+          onTriggerScan={onTriggerScan}
+          isScanning={isScanning}
+          onUpdateShipName={onUpdateShipName}
+        />
+      </div>
+
+      {/* Dialogs */}
+      <GalaxySettings 
+        isOpen={showSettings} 
+        onClose={() => setShowSettings(false)}
+        seed={seed}
+        setSeed={setSeed}
+        onNewShip={() => setShowShipSelection(true)}
+      />
+      
+      <ShipSelectionDialog
+        isOpen={showShipSelection}
+        onClose={() => setShowShipSelection(false)}
+        onSelectShip={() => setShowShipSelection(false)}
       />
     </div>
   );
