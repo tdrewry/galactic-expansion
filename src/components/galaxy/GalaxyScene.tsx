@@ -8,6 +8,7 @@ import { InterstellarMaterial } from './InterstellarMaterial';
 import { JumpRangeVisualizer } from './JumpRangeVisualizer';
 import { ScannerRangeIcons } from './ScannerRangeIcons';
 import { ScannerPing } from './scanner/ScannerPing';
+import { SystemPOIIndicator } from './scanner/SystemPOIIndicator';
 import * as THREE from 'three';
 
 interface GalaxySceneProps {
@@ -73,12 +74,23 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
   // Scanner state management
   const [showScannerIcons, setShowScannerIcons] = useState(false);
   const [scannerFadeTimer, setScannerFadeTimer] = useState<NodeJS.Timeout | null>(null);
+  const [revealedPOISystems, setRevealedPOISystems] = useState<Set<string>>(new Set());
   
   // Find the actual current system object
   const currentSystem = currentSystemId ? galaxy.starSystems.find(s => s.id === currentSystemId) : null;
   
   // Calculate scanner range for ping visualization
   const scannerRange = shipStats ? (shipStats.scanners / 100) * 50000 : 25000;
+
+  // Function to check if a system has points of interest
+  const systemHasPOI = (system: StarSystemType): boolean => {
+    return system.planets.some(planet => 
+      (planet.civilization && planet.civilization.techLevel >= 2) ||
+      (planet as any).features?.some((feature: any) => 
+        feature.type === 'station' || feature.type === 'ruins'
+      )
+    );
+  };
 
   // Expose zoom functionality through ref
   useImperativeHandle(ref, () => ({
@@ -99,9 +111,24 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
     }
   }), [galaxy.starSystems, camera]);
 
-  // Handle scanner completion - start the 15 second fade timer
+  // Handle scanner completion - start the 15 second fade timer and reveal POI systems
   const handleScanComplete = () => {
     setShowScannerIcons(true);
+    
+    // Find systems in scanner range that have POIs and mark them as revealed
+    if (currentSystem && getScannerRangeSystemIds) {
+      const scannerRangeIds = getScannerRangeSystemIds(currentSystem, galaxy.starSystems);
+      const newRevealedPOIs = new Set(revealedPOISystems);
+      
+      scannerRangeIds.forEach(systemId => {
+        const system = galaxy.starSystems.find(s => s.id === systemId);
+        if (system && systemHasPOI(system)) {
+          newRevealedPOIs.add(systemId);
+        }
+      });
+      
+      setRevealedPOISystems(newRevealedPOIs);
+    }
     
     // Clear any existing timer
     if (scannerFadeTimer) {
@@ -252,6 +279,16 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
           isSelected={selectedSystem?.id === system.id}
           onSelect={onSystemSelect}
         />
+      ))}
+      
+      {/* POI Indicators - persistent yellow circles around systems with points of interest */}
+      {galaxy.starSystems.map((system) => (
+        revealedPOISystems.has(system.id) && (
+          <SystemPOIIndicator
+            key={`poi-${system.id}`}
+            position={system.position}
+          />
+        )
       ))}
       
       {/* Scanner Icons - show for all systems in scanner range after scan completion (15 second fade) */}
