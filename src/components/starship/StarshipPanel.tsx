@@ -101,7 +101,6 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
               onJumpToSystem={onJumpToSystem}
               onTriggerScan={onTriggerScan}
               isScanning={isScanning}
-              onRepairCombatSystems={onRepairCombatSystems}
             />
           </div>
         )}
