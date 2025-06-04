@@ -136,7 +136,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({
       {/* <ResizableHandle withHandle /> */}
 
       {/* System Info */}
-      <ResizablePanel defaultSize={30} minSize={20} maxSize={40}>
+      <ResizablePanel defaultSize={50} minSize={50} maxSize={50}>
         <div className="h-full bg-gray-900 border-l border-gray-700 p-4">
           <SystemInfoCard
             system={selectedSystem}
