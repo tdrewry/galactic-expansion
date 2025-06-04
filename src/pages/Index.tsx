@@ -114,6 +114,18 @@ const Index = () => {
     setIsShipSelectionOpen(true);
   };
 
+  // Check for existing game on first load and trigger new game if needed
+  React.useEffect(() => {
+    const hasExistingGame = currentSystemId || localStorage.getItem('galaxyExplorerSave');
+    const hasShownSelection = localStorage.getItem('hasShownShipSelection');
+    
+    if (!hasExistingGame && !hasShownSelection) {
+      // No existing game and no previous selection shown - start new game
+      generateRandomSeed();
+      localStorage.setItem('hasShownShipSelection', 'true');
+    }
+  }, []); // Only run on mount
+
   // Initialize starting system
   React.useEffect(() => {
     if (!currentSystemId && numSystems > 0) {
@@ -137,13 +149,14 @@ const Index = () => {
   // Show ship selection on first load
   React.useEffect(() => {
     const hasShownSelection = localStorage.getItem('hasShownShipSelection');
-    if (!hasShownSelection && numSystems > 0) {
+    if (!hasShownSelection && numSystems > 0 && currentSystemId) {
+      // Only show if we have a current system (game already started)
       const options = generateShipOptions(galaxySeed);
       setShipOptions(options);
       setIsShipSelectionOpen(true);
       localStorage.setItem('hasShownShipSelection', 'true');
     }
-  }, [galaxySeed, numSystems]);
+  }, [galaxySeed, numSystems, currentSystemId]);
 
   // Update selected system when selectedSystemId changes
   React.useEffect(() => {
