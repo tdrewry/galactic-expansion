@@ -119,6 +119,19 @@ export const RightPanel: React.FC<RightPanelProps> = ({
 
   return (
     <ResizablePanelGroup direction="vertical" className="h-full">
+      {/* System Info */}
+      <ResizablePanel defaultSize={50} minSize={50} maxSize={50}>
+        <div className="h-full bg-gray-900 border-l border-gray-700 p-4">
+          <SystemInfoCard
+            system={selectedSystem}
+            selectedStar={selectedStar}
+            onStarSelect={onStarSelect}
+          />
+        </div>
+      </ResizablePanel>
+
+      {/* <ResizableHandle withHandle /> */}
+
       {/* System Map */}
       <ResizablePanel defaultSize={50} minSize={10}>
         <div className="h-full bg-gray-900 border-l border-gray-700 overflow-y-auto">
@@ -130,19 +143,6 @@ export const RightPanel: React.FC<RightPanelProps> = ({
               highlightedBodyId={highlightedBodyId}
             />
           </div>
-        </div>
-      </ResizablePanel>
-
-      {/* <ResizableHandle withHandle /> */}
-
-      {/* System Info */}
-      <ResizablePanel defaultSize={50} minSize={50} maxSize={50}>
-        <div className="h-full bg-gray-900 border-l border-gray-700 p-4">
-          <SystemInfoCard
-            system={selectedSystem}
-            selectedStar={selectedStar}
-            onStarSelect={onStarSelect}
-          />
         </div>
       </ResizablePanel>
 
