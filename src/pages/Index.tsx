@@ -18,17 +18,12 @@ import { ShipSelectionDialog } from '../components/starship/ShipSelectionDialog'
 const Index = () => {
   // Trigger new game flow on application load
   useEffect(() => {
-    const hasExistingGame = localStorage.getItem('galaxyExplorerSave');
-    const hasShownSelection = localStorage.getItem('hasShownShipSelection');
-    
-    if (!hasExistingGame && !hasShownSelection) {
       // Trigger new game logic after a short delay to ensure UI is ready
       setTimeout(() => {
         const newSeed = Math.floor(Math.random() * 1000000);
         const gameStartEvent = new CustomEvent('startNewGame', { detail: { seed: newSeed } });
         window.dispatchEvent(gameStartEvent);
       }, 100);
-    }
   }, []);
 
   const {
