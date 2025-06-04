@@ -43,6 +43,22 @@ export const ExplorationDialog: React.FC<ExplorationDialogProps> = ({ isOpen, on
         <DialogHeader>
           <DialogTitle className="text-white">{event.title}</DialogTitle>
           <DialogDescription className="text-gray-400">{event.description}</DialogDescription>
+          <div className="flex justify-end space-x-2 pt-2">
+            {onContinue && canContinue && (
+              <button
+                className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-blue-600 text-gray-100 hover:bg-blue-700 h-9 px-4 py-2"
+                onClick={onContinue}
+              >
+                Continue Exploration
+              </button>
+            )}
+            <button
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-gray-700 text-gray-100 hover:bg-gray-600 h-9 px-4 py-2"
+              onClick={onClose}
+            >
+              Complete Exploration
+            </button>
+          </div>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="flex items-center space-x-2">
@@ -70,22 +86,6 @@ export const ExplorationDialog: React.FC<ExplorationDialogProps> = ({ isOpen, on
               </ul>
             </div>
           )}
-        </div>
-        <div className="flex justify-end space-x-2">
-          {onContinue && canContinue && (
-            <button
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-blue-600 text-gray-100 hover:bg-blue-700 h-9 px-4 py-2"
-              onClick={onContinue}
-            >
-              Continue Exploration
-            </button>
-          )}
-          <button
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-gray-700 text-gray-100 hover:bg-gray-600 h-9 px-4 py-2"
-            onClick={onClose}
-          >
-            Complete Exploration
-          </button>
         </div>
       </DialogContent>
     </Dialog>
