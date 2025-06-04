@@ -130,10 +130,10 @@ export const RightPanel: React.FC<RightPanelProps> = ({
         </div>
       </ResizablePanel>
       
-      <ResizableHandle withHandle />
+      {/* <ResizableHandle withHandle /> */}
       
       {/* System Map */}
-      <ResizablePanel defaultSize={50} minSize={10}>
+      {/* <ResizablePanel defaultSize={50} minSize={10}> */}
         <div className="h-full bg-gray-900 border-l border-gray-700 overflow-y-auto">
           <div className="p-4">
             <SystemView 
@@ -144,7 +144,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({
             />
           </div>
         </div>
-      </ResizablePanel>
+      {/* </ResizablePanel> */}
 
       {/* Only render MarketDialog when we have valid market info */}
       {marketInfo && (
