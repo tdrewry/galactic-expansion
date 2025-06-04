@@ -133,7 +133,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({
       <ResizableHandle withHandle />
       
       {/* System Map */}
-      <ResizablePanel defaultSize={70} minSize={60}>
+      <ResizablePanel defaultSize={50} minSize={10}>
         <div className="h-full bg-gray-900 border-l border-gray-700 overflow-y-auto">
           <div className="p-4">
             <SystemView 
