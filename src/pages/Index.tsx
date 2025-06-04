@@ -17,7 +17,18 @@ import { ShipSelectionDialog } from '../components/starship/ShipSelectionDialog'
 
 const App = () => {
   useEffect(() => {
-    // set new game flag here and use it later to determine if we should launch new game logic after the game and UI is initialized.
+    // Trigger new game flow on application load
+    const hasExistingGame = localStorage.getItem('galaxyExplorerSave');
+    const hasShownSelection = localStorage.getItem('hasShownShipSelection');
+    
+    if (!hasExistingGame && !hasShownSelection) {
+      // Trigger new game logic after a short delay to ensure UI is ready
+      setTimeout(() => {
+        const newSeed = Math.floor(Math.random() * 1000000);
+        const gameStartEvent = new CustomEvent('startNewGame', { detail: { seed: newSeed } });
+        window.dispatchEvent(gameStartEvent);
+      }, 100);
+    }
   }, []);
 
 const Index = () => {
@@ -119,15 +130,37 @@ const Index = () => {
     setIsShipSelectionOpen(true);
   };
 
+  // Listen for custom new game event
+  React.useEffect(() => {
+    const handleStartNewGame = (event: CustomEvent) => {
+      const { seed } = event.detail;
+      setGalaxySeed(seed);
+      setInputSeed(seed.toString());
+      setSelectedSystem(null);
+      setSelectedBody(null);
+      resetAllExploration();
+      
+      // Show ship selection dialog for new game
+      const options = generateShipOptions(seed);
+      setShipOptions(options);
+      setIsShipSelectionOpen(true);
+      localStorage.setItem('hasShownShipSelection', 'true');
+    };
+
+    window.addEventListener('startNewGame', handleStartNewGame as EventListener);
+    return () => {
+      window.removeEventListener('startNewGame', handleStartNewGame as EventListener);
+    };
+  }, [setGalaxySeed, setInputSeed, setSelectedSystem, setSelectedBody, resetAllExploration]);
+
+  // Remove the old first load check since we're handling it with the custom event
   // Check for existing game on first load and trigger new game if needed
   React.useEffect(() => {
     const hasExistingGame = currentSystemId || localStorage.getItem('galaxyExplorerSave');
-    const hasShownSelection = localStorage.getItem('hasShownShipSelection');
     
-    if (!hasExistingGame && !hasShownSelection) {
-      // No existing game and no previous selection shown - start new game
-      generateRandomSeed();
-      localStorage.setItem('hasShownShipSelection', 'true');
+    if (hasExistingGame) {
+      // Only handle existing game loading here, new game is handled by the custom event
+      return;
     }
   }, []); // Only run on mount
 
