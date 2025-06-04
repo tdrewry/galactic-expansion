@@ -128,7 +128,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({
             onStarSelect={onStarSelect}
           />
         </div>
-      </ResizablePanel>
+      {/* </ResizablePanel> */}
       
       {/* <ResizableHandle withHandle /> */}
       
@@ -144,7 +144,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({
             />
           </div>
         </div>
-      {/* </ResizablePanel> */}
+      </ResizablePanel>
 
       {/* Only render MarketDialog when we have valid market info */}
       {marketInfo && (
