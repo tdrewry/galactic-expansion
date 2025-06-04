@@ -29,7 +29,7 @@ export const SystemView: React.FC<SystemViewProps> = ({
   useEffect(() => {
     setSelectedBody(null);
     onBodySelect(null);
-  }, [system.id, onBodySelect]);
+  }, [system.id]); // Remove onBodySelect from dependencies to prevent unnecessary clears
 
   // Get the current star's data and planets
   const getCurrentStarData = () => {
