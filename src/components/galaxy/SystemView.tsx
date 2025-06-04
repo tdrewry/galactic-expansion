@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { StarSystem, Planet, Moon } from '../../utils/galaxyGenerator';
 import { SystemViewHeader } from './system-view/SystemViewHeader';
@@ -25,6 +24,12 @@ export const SystemView: React.FC<SystemViewProps> = ({
   const [lastPointerPos, setLastPointerPos] = useState({ x: 0, y: 0 });
 
   console.log('SystemView rendering with system:', system.id, 'selectedStar:', selectedStar);
+
+  // Clear selected body when system changes
+  useEffect(() => {
+    setSelectedBody(null);
+    onBodySelect(null);
+  }, [system.id, onBodySelect]);
 
   // Get the current star's data and planets
   const getCurrentStarData = () => {
