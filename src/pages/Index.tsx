@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
 import { ExplorationDialog } from '../components/galaxy/ExplorationDialog';
 import { useExploration } from '../components/exploration/useExploration';
@@ -14,6 +14,11 @@ import { selectStartingSystem } from '../utils/startingSystemSelector';
 import { MarketDialog } from '../components/starship/MarketDialog';
 import { getSystemMarketInfo, MarketLocation } from '../utils/explorationGenerator';
 import { ShipSelectionDialog } from '../components/starship/ShipSelectionDialog';
+
+const App = () => {
+  useEffect(() => {
+    // set new game flag here and use it later to determine if we should launch new game logic after the game and UI is initialized.
+  }, []);
 
 const Index = () => {
   const {
