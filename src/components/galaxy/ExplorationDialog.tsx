@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Dialog,
@@ -38,7 +39,7 @@ export const ExplorationDialog: React.FC<ExplorationDialogProps> = ({ isOpen, on
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] bg-gray-900 border-gray-700">
+      <DialogContent className="sm:max-w-[425px] bg-gray-900 border-gray-700 fixed left-[50%] top-[20%] translate-x-[-50%] translate-y-0">
         <DialogHeader>
           <DialogTitle className="text-white">{event.title}</DialogTitle>
           <DialogDescription className="text-gray-400">{event.description}</DialogDescription>
