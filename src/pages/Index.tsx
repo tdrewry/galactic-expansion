@@ -15,9 +15,9 @@ import { MarketDialog } from '../components/starship/MarketDialog';
 import { getSystemMarketInfo, MarketLocation } from '../utils/explorationGenerator';
 import { ShipSelectionDialog } from '../components/starship/ShipSelectionDialog';
 
-const App = () => {
+const Index = () => {
+  // Trigger new game flow on application load
   useEffect(() => {
-    // Trigger new game flow on application load
     const hasExistingGame = localStorage.getItem('galaxyExplorerSave');
     const hasShownSelection = localStorage.getItem('hasShownShipSelection');
     
@@ -31,7 +31,6 @@ const App = () => {
     }
   }, []);
 
-const Index = () => {
   const {
     galaxySeed,
     setGalaxySeed,
