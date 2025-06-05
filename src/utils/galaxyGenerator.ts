@@ -1,7 +1,7 @@
 export interface StarSystem {
   id: string;
   position: [number, number, number];
-  starType: 'main-sequence' | 'red-giant' | 'white-dwarf' | 'neutron' | 'magnetar' | 'pulsar' | 'quasar' | 'black-hole';
+  starType: 'main-sequence' | 'red-giant' | 'white-dwarf' | 'neutron' | 'magnetar' | 'pulsar' | 'quasar';
   temperature: number;
   mass: number;
   explored: boolean;
@@ -127,7 +127,7 @@ export function generateGalaxy(
 
   // Generate star systems based on galaxy type
   
-  // Define star types with proper typing - added black-hole
+  // Define star types with proper typing - removed black-hole since they're generated separately
   const starTypes: StarSystem['starType'][] = [
     'main-sequence', 'main-sequence', 'main-sequence', 'main-sequence',
     'red-giant', 'white-dwarf', 'neutron', 'magnetar', 'pulsar', 'quasar'
@@ -368,8 +368,7 @@ function getStarTemperature(starType: StarSystem['starType'], rng: SeededRandom)
     'neutron': [600000, 1000000],
     'magnetar': [1000000, 10000000],
     'pulsar': [1000000, 1000000],
-    'quasar': [10000000, 100000000],
-    'black-hole': [0, 0] // Black holes don't emit light
+    'quasar': [10000000, 100000000]
   };
   const range = temps[starType] || [5000, 6000];
   return rng.range(range[0], range[1]);
@@ -383,8 +382,7 @@ function getStarMass(starType: StarSystem['starType'], rng: SeededRandom): numbe
     'neutron': [1.4, 2],
     'magnetar': [1.4, 2],
     'pulsar': [1.4, 2],
-    'quasar': [1000000, 10000000000],
-    'black-hole': [3, 1000] // Stellar to supermassive black holes
+    'quasar': [1000000, 10000000000]
   };
   const range = masses[starType] || [1, 1];
   return rng.range(range[0], range[1]);
