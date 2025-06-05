@@ -29,6 +29,7 @@ interface GalaxyLayoutPanelsProps {
   trinaryFrequency: number;
   showDustLanes: boolean;
   showCosmicDust: boolean;
+  showBlackHoles: boolean;
   dustLaneParticles: number;
   cosmicDustParticles: number;
   dustLaneOpacity: number;
@@ -102,6 +103,7 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => 
           trinaryFrequency={props.trinaryFrequency}
           showDustLanes={props.showDustLanes}
           showCosmicDust={props.showCosmicDust}
+          showBlackHoles={props.showBlackHoles}
           dustLaneParticles={props.dustLaneParticles}
           cosmicDustParticles={props.cosmicDustParticles}
           dustLaneOpacity={props.dustLaneOpacity}

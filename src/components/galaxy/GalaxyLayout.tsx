@@ -26,6 +26,7 @@ interface GalaxyLayoutProps {
   trinaryFrequency: number;
   showDustLanes: boolean;
   showCosmicDust: boolean;
+  showBlackHoles: boolean;
   dustLaneParticles: number;
   cosmicDustParticles: number;
   dustLaneOpacity: number;
