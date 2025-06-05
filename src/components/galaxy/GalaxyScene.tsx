@@ -10,6 +10,7 @@ import { ScannerRangeIcons } from './ScannerRangeIcons';
 import { ScannerPing } from './scanner/ScannerPing';
 import { SystemPOIIndicator } from './scanner/SystemPOIIndicator';
 import * as THREE from 'three';
+import { BlackHole } from './BlackHole';
 
 interface GalaxySceneProps {
   galaxy: Galaxy;
@@ -278,6 +279,20 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
           system={system}
           isSelected={selectedSystem?.id === system.id}
           onSelect={onSystemSelect}
+        />
+      ))}
+      
+      {/* Render Black Holes */}
+      {galaxy.blackHoles?.map((blackHole) => (
+        <BlackHole
+          key={blackHole.id}
+          position={blackHole.position}
+          size={blackHole.size}
+          isSelected={false}
+          onSelect={() => {
+            console.log('Black hole selected:', blackHole.id);
+            // Black holes could have special interactions in the future
+          }}
         />
       ))}
       

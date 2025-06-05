@@ -81,7 +81,7 @@ export const GalaxyMap = forwardRef<GalaxyMapRef, GalaxyMapProps>(({
     console.log('Generating galaxy with seed:', seed, 'systems:', numSystems, 'nebulae:', numNebulae);
     try {
       const newGalaxy = generateGalaxy(seed, numSystems, numNebulae, binaryFrequency, trinaryFrequency);
-      console.log('Generated galaxy with', newGalaxy.starSystems.length, 'systems');
+      console.log('Generated galaxy with', newGalaxy.starSystems.length, 'systems and', newGalaxy.blackHoles?.length || 0, 'black holes');
       return newGalaxy;
     } catch (error) {
       console.error('Error generating galaxy:', error);

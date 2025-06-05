@@ -1,7 +1,7 @@
 export interface StarSystem {
   id: string;
   position: [number, number, number];
-  starType: 'main-sequence' | 'red-giant' | 'white-dwarf' | 'neutron' | 'magnetar' | 'pulsar' | 'quasar';
+  starType: 'main-sequence' | 'red-giant' | 'white-dwarf' | 'neutron' | 'magnetar' | 'pulsar' | 'quasar' | 'black-hole';
   temperature: number;
   mass: number;
   explored: boolean;
@@ -61,10 +61,18 @@ export interface Nebula {
   color: string;
 }
 
+export interface BlackHole {
+  id: string;
+  position: [number, number, number];
+  mass: number;
+  size: number;
+}
+
 export interface Galaxy {
   seed: number;
   starSystems: StarSystem[];
   nebulae: Nebula[];
+  blackHoles: BlackHole[];
   galacticCenter: [number, number, number];
   playerPosition: [number, number, number];
   galaxyType: 'spiral' | 'barred-spiral' | 'globular' | 'elliptical';
@@ -102,6 +110,7 @@ export function generateGalaxy(
   const galaxyRadius = 50000; // Light years
   const starSystems: StarSystem[] = [];
   const nebulae: Nebula[] = [];
+  const blackHoles: BlackHole[] = [];
   
   // Choose galaxy type - keep all types for seed consistency but substitute unsupported ones
   const galaxyTypes: Galaxy['galaxyType'][] = ['spiral', 'barred-spiral', 'globular', 'elliptical'];
@@ -118,7 +127,7 @@ export function generateGalaxy(
 
   // Generate star systems based on galaxy type
   
-  // Define star types with proper typing
+  // Define star types with proper typing - added black-hole
   const starTypes: StarSystem['starType'][] = [
     'main-sequence', 'main-sequence', 'main-sequence', 'main-sequence',
     'red-giant', 'white-dwarf', 'neutron', 'magnetar', 'pulsar', 'quasar'
@@ -181,6 +190,30 @@ export function generateGalaxy(
     });
   }
 
+  // Generate black holes (rare cosmic objects)
+  const numBlackHoles = Math.floor(numSystems * 0.001); // 0.1% of systems have black holes
+  for (let i = 0; i < numBlackHoles; i++) {
+    let position: [number, number, number];
+    
+    switch (galaxyType) {
+      case 'spiral':
+        position = generateSpiralPosition(rng, i, numBlackHoles, galaxyRadius * 0.8);
+        break;
+      case 'globular':
+        position = generateGlobularPosition(rng, galaxyRadius * 0.6);
+        break;
+      default:
+        position = generateSpiralPosition(rng, i, numBlackHoles, galaxyRadius * 0.8);
+    }
+    
+    blackHoles.push({
+      id: `blackhole-${i}`,
+      position,
+      mass: rng.range(10, 100), // Solar masses
+      size: rng.range(1500, 3000) // Visual size
+    });
+  }
+
   // Generate nebulae
   for (let i = 0; i < numNebulae; i++) {
     const angle = rng.next() * Math.PI * 2;
@@ -202,6 +235,7 @@ export function generateGalaxy(
     seed,
     starSystems,
     nebulae,
+    blackHoles,
     galacticCenter: [0, 0, 0],
     playerPosition: starSystems[0]?.position || [0, 0, 0],
     galaxyType
@@ -334,7 +368,8 @@ function getStarTemperature(starType: StarSystem['starType'], rng: SeededRandom)
     'neutron': [600000, 1000000],
     'magnetar': [1000000, 10000000],
     'pulsar': [1000000, 1000000],
-    'quasar': [10000000, 100000000]
+    'quasar': [10000000, 100000000],
+    'black-hole': [0, 0] // Black holes don't emit light
   };
   const range = temps[starType] || [5000, 6000];
   return rng.range(range[0], range[1]);
@@ -348,7 +383,8 @@ function getStarMass(starType: StarSystem['starType'], rng: SeededRandom): numbe
     'neutron': [1.4, 2],
     'magnetar': [1.4, 2],
     'pulsar': [1.4, 2],
-    'quasar': [1000000, 10000000000]
+    'quasar': [1000000, 10000000000],
+    'black-hole': [3, 1000] // Stellar to supermassive black holes
   };
   const range = masses[starType] || [1, 1];
   return rng.range(range[0], range[1]);
