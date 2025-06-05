@@ -27,6 +27,7 @@ interface CenterPanelProps {
   trinaryFrequency: number;
   showDustLanes: boolean;
   showCosmicDust: boolean;
+  showBlackHoles: boolean;
   dustLaneParticles: number;
   cosmicDustParticles: number;
   dustLaneOpacity: number;
@@ -72,6 +73,7 @@ export const CenterPanel: React.FC<CenterPanelProps> = ({
   trinaryFrequency,
   showDustLanes,
   showCosmicDust,
+  showBlackHoles,
   dustLaneParticles,
   cosmicDustParticles,
   dustLaneOpacity,
@@ -127,6 +129,7 @@ export const CenterPanel: React.FC<CenterPanelProps> = ({
           trinaryFrequency={trinaryFrequency}
           showDustLanes={showDustLanes}
           showCosmicDust={showCosmicDust}
+          showBlackHoles={showBlackHoles}
           dustLaneParticles={dustLaneParticles}
           cosmicDustParticles={cosmicDustParticles}
           dustLaneOpacity={dustLaneOpacity}
