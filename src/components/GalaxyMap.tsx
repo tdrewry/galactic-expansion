@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useMemo, useRef, useImperativeHandle, forwardRef } from 'react';
 import { generateGalaxy, Galaxy, StarSystem } from '../utils/galaxyGenerator';
 import { GalaxyMapCanvas } from './galaxy/GalaxyMapCanvas';
@@ -16,6 +15,7 @@ interface GalaxyMapProps {
   showDustLanes?: boolean;
   showStarFormingRegions?: boolean;
   showCosmicDust?: boolean;
+  showBlackHoles?: boolean;
   dustLaneParticles?: number;
   starFormingParticles?: number;
   cosmicDustParticles?: number;
@@ -53,6 +53,7 @@ export const GalaxyMap = forwardRef<GalaxyMapRef, GalaxyMapProps>(({
   numNebulae = 50,
   binaryFrequency = 0.15,
   trinaryFrequency = 0.03,
+  showBlackHoles = false,
   onSystemSelect,
   selectedSystem: propSelectedSystem = null,
   selectedStar: propSelectedStar = 'primary',
@@ -154,6 +155,7 @@ export const GalaxyMap = forwardRef<GalaxyMapRef, GalaxyMapProps>(({
         onScanComplete={onScanComplete}
         jumpLaneOpacity={jumpLaneOpacity}
         greenPathOpacity={greenPathOpacity}
+        showBlackHoles={showBlackHoles}
         onCanvasError={setCanvasError}
         {...canvasProps}
       />

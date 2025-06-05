@@ -13,6 +13,7 @@ interface GalaxyMapCanvasProps {
   showDustLanes?: boolean;
   showStarFormingRegions?: boolean;
   showCosmicDust?: boolean;
+  showBlackHoles?: boolean;
   dustLaneParticles?: number;
   starFormingParticles?: number;
   cosmicDustParticles?: number;
@@ -50,6 +51,7 @@ export const GalaxyMapCanvas = forwardRef<GalaxyMapCanvasRef, GalaxyMapCanvasPro
   greenPathOpacity,
   travelHistory,
   currentSystemId,
+  showBlackHoles,
   ...sceneProps
 }, ref) => {
   const sceneRef = useRef<GalaxySceneRef>(null);
@@ -92,6 +94,7 @@ export const GalaxyMapCanvas = forwardRef<GalaxyMapCanvasRef, GalaxyMapCanvasPro
         greenPathOpacity={greenPathOpacity}
         travelHistory={travelHistory}
         currentSystemId={currentSystemId}
+        showBlackHoles={showBlackHoles}
         {...sceneProps}
       />
     </Canvas>
