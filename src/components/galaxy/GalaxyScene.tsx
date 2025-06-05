@@ -18,6 +18,7 @@ interface GalaxySceneProps {
   onSystemSelect: (system: StarSystemType | null) => void;
   showDustLanes?: boolean;
   showCosmicDust?: boolean;
+  showBlackHoles?: boolean;
   dustLaneParticles?: number;
   cosmicDustParticles?: number;
   dustLaneOpacity?: number;
@@ -47,6 +48,7 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
   onSystemSelect,
   showDustLanes = true,
   showCosmicDust = true,
+  showBlackHoles = false,
   dustLaneParticles = 15000,
   cosmicDustParticles = 10000,
   dustLaneOpacity = 0.2,
@@ -93,7 +95,6 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
     );
   };
 
-  // Expose zoom functionality through ref
   useImperativeHandle(ref, () => ({
     zoomToSystem: (systemId: string) => {
       const system = galaxy.starSystems.find(s => s.id === systemId);
@@ -112,11 +113,9 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
     }
   }), [galaxy.starSystems, camera]);
 
-  // Handle scanner completion - start the 15 second fade timer and reveal POI systems
   const handleScanComplete = () => {
     setShowScannerIcons(true);
     
-    // Find systems in scanner range that have POIs and mark them as revealed
     if (currentSystem && getScannerRangeSystemIds) {
       const scannerRangeIds = getScannerRangeSystemIds(currentSystem, galaxy.starSystems);
       const newRevealedPOIs = new Set(revealedPOISystems);
@@ -131,25 +130,21 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
       setRevealedPOISystems(newRevealedPOIs);
     }
     
-    // Clear any existing timer
     if (scannerFadeTimer) {
       clearTimeout(scannerFadeTimer);
     }
     
-    // Set new timer for 15 seconds
     const timer = setTimeout(() => {
       setShowScannerIcons(false);
     }, 15000);
     
     setScannerFadeTimer(timer);
     
-    // Call the original onScanComplete if provided
     if (onScanComplete) {
       onScanComplete();
     }
   };
 
-  // Clean up timer on unmount
   useEffect(() => {
     return () => {
       if (scannerFadeTimer) {
@@ -159,7 +154,6 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
   }, [scannerFadeTimer]);
   
   useEffect(() => {
-    // Only set initial camera position on first mount, don't reset during exploration
     if (!preserveCameraPosition.current) {
       camera.position.set(0, 20000, 40000);
       camera.lookAt(0, 0, 0);
@@ -282,8 +276,8 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
         />
       ))}
       
-      {/* Render Black Holes */}
-      {galaxy.blackHoles?.map((blackHole) => (
+      {/* Render Black Holes - conditionally based on setting */}
+      {showBlackHoles && galaxy.blackHoles?.map((blackHole) => (
         <BlackHole
           key={blackHole.id}
           position={blackHole.position}
@@ -291,12 +285,10 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
           isSelected={false}
           onSelect={() => {
             console.log('Black hole selected:', blackHole.id);
-            // Black holes could have special interactions in the future
           }}
         />
       ))}
       
-      {/* POI Indicators - persistent yellow circles around systems with points of interest */}
       {galaxy.starSystems.map((system) => (
         revealedPOISystems.has(system.id) && (
           <SystemPOIIndicator
@@ -306,7 +298,6 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
         )
       ))}
       
-      {/* Scanner Icons - show for all systems in scanner range after scan completion (15 second fade) */}
       {shouldShowScannerIcons && (
         <>
           {galaxy.starSystems.map((system) => (
@@ -319,7 +310,6 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
         </>
       )}
       
-      {/* Selected System Icons - show only for manually selected system in scanner range */}
       {shouldShowSelectedSystemIcons && (
         <ScannerRangeIcons
           key={`scanner-selected-${selectedSystem.id}`}

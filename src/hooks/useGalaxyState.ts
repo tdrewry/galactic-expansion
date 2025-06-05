@@ -9,6 +9,7 @@ export interface GalaxySettings {
   trinaryFrequency: number;
   showDustLanes: boolean;
   showCosmicDust: boolean;
+  showBlackHoles: boolean;
   appTitle: string;
   dustLaneParticles: number;
   cosmicDustParticles: number;
@@ -34,6 +35,7 @@ export const useGalaxyState = () => {
   const [trinaryFrequency, setTrinaryFrequency] = useState(0.03);
   const [showDustLanes, setShowDustLanes] = useState(true);
   const [showCosmicDust, setShowCosmicDust] = useState(true);
+  const [showBlackHoles, setShowBlackHoles] = useState(false);
   const [dustLaneParticles, setDustLaneParticles] = useState(15000);
   const [cosmicDustParticles, setCosmicDustParticles] = useState(10000);
   const [dustLaneOpacity, setDustLaneOpacity] = useState(0.2);
@@ -70,6 +72,7 @@ export const useGalaxyState = () => {
     if (newSettings.trinaryFrequency !== undefined) setTrinaryFrequency(newSettings.trinaryFrequency);
     if (newSettings.showDustLanes !== undefined) setShowDustLanes(newSettings.showDustLanes);
     if (newSettings.showCosmicDust !== undefined) setShowCosmicDust(newSettings.showCosmicDust);
+    if (newSettings.showBlackHoles !== undefined) setShowBlackHoles(newSettings.showBlackHoles);
     if (newSettings.dustLaneParticles !== undefined) setDustLaneParticles(newSettings.dustLaneParticles);
     if (newSettings.cosmicDustParticles !== undefined) setCosmicDustParticles(newSettings.cosmicDustParticles);
     if (newSettings.dustLaneOpacity !== undefined) setDustLaneOpacity(newSettings.dustLaneOpacity);
@@ -94,6 +97,7 @@ export const useGalaxyState = () => {
     trinaryFrequency,
     showDustLanes,
     showCosmicDust,
+    showBlackHoles,
     dustLaneParticles,
     cosmicDustParticles,
     dustLaneOpacity,

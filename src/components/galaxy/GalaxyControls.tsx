@@ -9,6 +9,7 @@ interface GalaxyControlsProps {
   trinaryFrequency: number;
   showDustLanes: boolean;
   showCosmicDust: boolean;
+  showBlackHoles: boolean;
   appTitle: string;
   dustLaneParticles: number;
   cosmicDustParticles: number;
@@ -34,6 +35,7 @@ export const GalaxyControls: React.FC<GalaxyControlsProps> = ({
   trinaryFrequency,
   showDustLanes,
   showCosmicDust,
+  showBlackHoles,
   appTitle,
   dustLaneParticles,
   cosmicDustParticles,
@@ -60,6 +62,7 @@ export const GalaxyControls: React.FC<GalaxyControlsProps> = ({
         trinaryFrequency={trinaryFrequency}
         showDustLanes={showDustLanes}
         showCosmicDust={showCosmicDust}
+        showBlackHoles={showBlackHoles}
         appTitle={appTitle}
         dustLaneParticles={dustLaneParticles}
         cosmicDustParticles={cosmicDustParticles}

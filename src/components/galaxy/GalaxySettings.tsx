@@ -16,6 +16,7 @@ interface GalaxySettingsProps {
   trinaryFrequency: number;
   showDustLanes?: boolean;
   showCosmicDust?: boolean;
+  showBlackHoles?: boolean;
   appTitle?: string;
   dustLaneParticles?: number;
   cosmicDustParticles?: number;
@@ -41,6 +42,7 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
   trinaryFrequency,
   showDustLanes = true,
   showCosmicDust = true,
+  showBlackHoles = false,
   appTitle = 'Galactic Expansion',
   dustLaneParticles = 15000,
   cosmicDustParticles = 10000,
@@ -65,6 +67,7 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
     trinaryFrequency,
     showDustLanes,
     showCosmicDust,
+    showBlackHoles,
     appTitle,
     dustLaneParticles,
     cosmicDustParticles,
@@ -87,6 +90,7 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
       trinaryFrequency,
       showDustLanes,
       showCosmicDust,
+      showBlackHoles,
       appTitle,
       dustLaneParticles,
       cosmicDustParticles,
@@ -99,7 +103,7 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
       visitedJumpLaneOpacity,
       defaultShipStats
     });
-  }, [numSystems, numNebulae, binaryFrequency, trinaryFrequency, showDustLanes, showCosmicDust, appTitle, dustLaneParticles, cosmicDustParticles, dustLaneOpacity, cosmicDustOpacity, dustLaneColorIntensity, cosmicDustColorIntensity, jumpLaneOpacity, greenPathOpacity, visitedJumpLaneOpacity, defaultShipStats]);
+  }, [numSystems, numNebulae, binaryFrequency, trinaryFrequency, showDustLanes, showCosmicDust, showBlackHoles, appTitle, dustLaneParticles, cosmicDustParticles, dustLaneOpacity, cosmicDustOpacity, dustLaneColorIntensity, cosmicDustColorIntensity, jumpLaneOpacity, greenPathOpacity, visitedJumpLaneOpacity, defaultShipStats]);
 
   const handleSeedChange = () => {
     const newSeed = parseInt(inputSeed) || 12345;
@@ -119,6 +123,7 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
       trinaryFrequency: 0.03,
       showDustLanes: true,
       showCosmicDust: true,
+      showBlackHoles: false,
       appTitle: 'Galactic Expansion',
       dustLaneParticles: 15000,
       cosmicDustParticles: 10000,
@@ -374,6 +379,18 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
                     onCheckedChange={(checked) => setLocalSettings(prev => ({
                       ...prev,
                       showCosmicDust: checked
+                    }))}
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="black-holes">Black Holes</Label>
+                  <Switch
+                    id="black-holes"
+                    checked={localSettings.showBlackHoles}
+                    onCheckedChange={(checked) => setLocalSettings(prev => ({
+                      ...prev,
+                      showBlackHoles: checked
                     }))}
                   />
                 </div>
