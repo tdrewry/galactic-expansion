@@ -12,7 +12,7 @@ interface BlackHoleProps {
 
 export const BlackHole: React.FC<BlackHoleProps> = ({
   position,
-  size = 800,
+  size = 400, // Reduced from 800 to make it half the size
   isSelected = false,
   onSelect
 }) => {

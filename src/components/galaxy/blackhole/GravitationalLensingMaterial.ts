@@ -6,8 +6,8 @@ export const createGravitationalLensingMaterial = () => {
     uniforms: {
       time: { value: 0 },
       center: { value: new THREE.Vector2(0.5, 0.5) },
-      eventHorizonRadius: { value: 0.08 },
-      distortionRadius: { value: 0.2 },
+      eventHorizonRadius: { value: 0.04 }, // Reduced from 0.08
+      distortionRadius: { value: 0.1 }, // Reduced from 0.2
     },
     vertexShader: `
       varying vec2 vUv;
@@ -33,31 +33,31 @@ export const createGravitationalLensingMaterial = () => {
         float distFromCenter = length(uv - center);
         vec2 offset = uv - center;
         
-        // Event horizon - solid black sphere
-        if (distFromCenter < eventHorizonRadius) {
+        // Event horizon - solid black sphere (made more prominent)
+        if (distFromCenter <= eventHorizonRadius) {
           color = vec3(0.0, 0.0, 0.0);
           alpha = 1.0;
         }
         // Distortion ring - orange accretion disk with warping effect
-        else if (distFromCenter > eventHorizonRadius + 0.01 && distFromCenter < distortionRadius) {
+        else if (distFromCenter > eventHorizonRadius && distFromCenter < distortionRadius) {
           // Calculate angle for radial distortion
           float angle = atan(offset.y, offset.x);
           
           // Create radial distortion effect
           float distortionStrength = 1.0 - smoothstep(eventHorizonRadius, distortionRadius, distFromCenter);
-          float warpedDistance = distFromCenter + sin(angle * 6.0 + time * 2.0) * 0.02 * distortionStrength;
+          float warpedDistance = distFromCenter + sin(angle * 6.0 + time * 2.0) * 0.01 * distortionStrength;
           
           // Create ring thickness with falloff
           float ringCenter = (eventHorizonRadius + distortionRadius) * 0.65;
           float ringDistance = abs(warpedDistance - ringCenter);
-          float ringThickness = 0.05;
+          float ringThickness = 0.025; // Reduced thickness
           
           if (ringDistance < ringThickness) {
             float intensity = 1.0 - (ringDistance / ringThickness);
             intensity = smoothstep(0.0, 1.0, intensity);
             
             // Add swirling animation
-            float swirl = sin(angle * 3.0 + time * 4.0 + distFromCenter * 10.0) * 0.5 + 0.5;
+            float swirl = sin(angle * 3.0 + time * 4.0 + distFromCenter * 20.0) * 0.5 + 0.5;
             
             // Create temperature gradient from inner (hot) to outer (cooler)
             float temp = mix(0.8, 0.3, (distFromCenter - eventHorizonRadius) / (distortionRadius - eventHorizonRadius));
