@@ -47,6 +47,7 @@ const Index = () => {
     jumpLaneOpacity,
     greenPathOpacity,
     visitedJumpLaneOpacity,
+    blackHoleSize,
     defaultShipStats,
     selectedSystem,
     setSelectedSystem,
@@ -423,6 +424,7 @@ const Index = () => {
             jumpLaneOpacity={jumpLaneOpacity}
             greenPathOpacity={greenPathOpacity}
             visitedJumpLaneOpacity={visitedJumpLaneOpacity}
+            blackHoleSize={blackHoleSize}
             defaultShipStats={defaultShipStats}
             inputSeed={inputSeed}
             setInputSeed={setInputSeed}
