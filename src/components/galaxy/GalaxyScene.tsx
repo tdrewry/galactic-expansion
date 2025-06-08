@@ -126,11 +126,9 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
   };
 
   useEffect(() => {
-    return () => {
-      if (scannerFadeTimer) {
-        clearTimeout(scannerFadeTimer);
-      }
-    };
+    if (scannerFadeTimer) {
+      clearTimeout(scannerFadeTimer);
+    }
   }, [scannerFadeTimer]);
   
   useEffect(() => {
@@ -301,8 +299,8 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
         />
       ))}
       
-      {/* Render Black Holes - Always render them regardless of showBlackHoles setting */}
-      {galaxy.blackHoles?.map((blackHole) => {
+      {/* Render Black Holes - Only render when showBlackHoles is true */}
+      {showBlackHoles && galaxy.blackHoles?.map((blackHole) => {
         console.log('Rendering black hole:', blackHole.id, 'at position:', blackHole.position);
         return (
           <BlackHoleComponent

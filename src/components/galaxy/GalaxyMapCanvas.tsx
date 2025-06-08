@@ -1,3 +1,4 @@
+
 import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { GalaxyScene, GalaxySceneRef } from './GalaxyScene';
@@ -12,7 +13,6 @@ interface GalaxyMapCanvasProps {
   showDustLanes?: boolean;
   showStarFormingRegions?: boolean;
   showCosmicDust?: boolean;
-  showBlackHoles?: boolean;
   dustLaneParticles?: number;
   starFormingParticles?: number;
   cosmicDustParticles?: number;
@@ -62,6 +62,9 @@ export const GalaxyMapCanvas = forwardRef<GalaxyMapCanvasRef, GalaxyMapCanvasPro
     }
   }), []);
 
+  // Ensure showBlackHoles is true when there are black holes in the galaxy
+  const showBlackHoles = (galaxy.blackHoles?.length || 0) > 0;
+
   return (
     <Canvas 
       camera={{ 
@@ -91,7 +94,7 @@ export const GalaxyMapCanvas = forwardRef<GalaxyMapCanvasRef, GalaxyMapCanvasPro
         greenPathOpacity={greenPathOpacity}
         travelHistory={travelHistory}
         currentSystemId={currentSystemId}
-        showBlackHoles={true}
+        showBlackHoles={showBlackHoles}
         {...sceneProps}
       />
     </Canvas>
