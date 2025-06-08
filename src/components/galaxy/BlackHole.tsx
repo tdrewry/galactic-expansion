@@ -41,6 +41,7 @@ export const BlackHole: React.FC<BlackHoleProps> = ({
         onClick={handleClick}
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}
+        disableBillboard={false}
       />
       
       {/* Second ring - horizontal orientation (rotated 90 degrees around X-axis) */}
@@ -50,6 +51,7 @@ export const BlackHole: React.FC<BlackHoleProps> = ({
           onClick={handleClick}
           onPointerOver={handlePointerOver}
           onPointerOut={handlePointerOut}
+          disableBillboard={true}
         />
       </group>
       

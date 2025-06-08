@@ -10,13 +10,15 @@ interface BlackHoleMeshProps {
   onClick: (event: any) => void;
   onPointerOver: (event: any) => void;
   onPointerOut: (event: any) => void;
+  disableBillboard?: boolean;
 }
 
 export const BlackHoleMesh: React.FC<BlackHoleMeshProps> = ({
   size,
   onClick,
   onPointerOver,
-  onPointerOut
+  onPointerOut,
+  disableBillboard = false
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const timeRef = useRef(0);
@@ -34,17 +36,25 @@ export const BlackHoleMesh: React.FC<BlackHoleMeshProps> = ({
     }
   });
 
+  const meshElement = (
+    <mesh
+      ref={meshRef}
+      material={materialRef.current}
+      onClick={onClick}
+      onPointerOver={onPointerOver}
+      onPointerOut={onPointerOut}
+    >
+      <planeGeometry args={[size, size, 32, 32]} />
+    </mesh>
+  );
+
+  if (disableBillboard) {
+    return meshElement;
+  }
+
   return (
     <Billboard>
-      <mesh
-        ref={meshRef}
-        material={materialRef.current}
-        onClick={onClick}
-        onPointerOver={onPointerOver}
-        onPointerOut={onPointerOut}
-      >
-        <planeGeometry args={[size, size, 32, 32]} />
-      </mesh>
+      {meshElement}
     </Billboard>
   );
 };
