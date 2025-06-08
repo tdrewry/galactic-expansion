@@ -40,29 +40,31 @@ export const createGravitationalLensingMaterial = () => {
           color = vec3(0.0, 0.0, 0.0);
           alpha = 1.0;
         }
-        // Ring 1: Gravitational halo (horizontal orientation)
-        else if (distFromCenter > eventHorizonRadius && distFromCenter < haloRadius) {
-          // Create horizontal ring by checking distance from horizontal line
-          float horizontalDistance = abs(offset.y);
-          float ringThickness = 0.03;
+        // Ring 1: Gravitational halo - circular ring
+        else if (distFromCenter > eventHorizonRadius + 0.02 && distFromCenter < haloRadius) {
+          // Create a circular ring by checking distance from a specific radius
+          float targetRadius = (eventHorizonRadius + haloRadius) * 0.6;
+          float ringDistance = abs(distFromCenter - targetRadius);
+          float ringThickness = 0.04;
           
-          if (horizontalDistance < ringThickness) {
-            float intensity = 1.0 - (horizontalDistance / ringThickness);
+          if (ringDistance < ringThickness) {
+            float intensity = 1.0 - (ringDistance / ringThickness);
             intensity = smoothstep(0.0, 1.0, intensity);
             
             // Blue gravitational lensing glow
             color = vec3(0.3, 0.5, 1.0) * intensity;
-            alpha = intensity * 0.8;
+            alpha = intensity * 0.7;
           }
         }
-        // Ring 2: Accretion disk (vertical orientation, 90 degrees rotated)
-        else if (distFromCenter > eventHorizonRadius && distFromCenter < accretionRadius) {
-          // Create vertical ring by checking distance from vertical line
-          float verticalDistance = abs(offset.x);
-          float diskThickness = 0.02;
+        // Ring 2: Accretion disk - circular ring rotated 90 degrees
+        else if (distFromCenter > eventHorizonRadius + 0.01 && distFromCenter < accretionRadius) {
+          // Create a second circular ring at a different radius
+          float targetRadius = (eventHorizonRadius + accretionRadius) * 0.7;
+          float ringDistance = abs(distFromCenter - targetRadius);
+          float diskThickness = 0.03;
           
-          if (verticalDistance < diskThickness) {
-            float intensity = 1.0 - (verticalDistance / diskThickness);
+          if (ringDistance < diskThickness) {
+            float intensity = 1.0 - (ringDistance / diskThickness);
             intensity = smoothstep(0.0, 1.0, intensity);
             
             // Orange swirling pattern
@@ -77,7 +79,7 @@ export const createGravitationalLensingMaterial = () => {
               temp
             );
             
-            alpha = intensity * 0.9;
+            alpha = intensity * 0.8;
           }
         }
         
