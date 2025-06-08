@@ -7,8 +7,7 @@ export const createGravitationalLensingMaterial = () => {
       time: { value: 0 },
       center: { value: new THREE.Vector2(0.5, 0.5) },
       eventHorizonRadius: { value: 0.08 },
-      haloRadius: { value: 0.25 },
-      accretionRadius: { value: 0.15 },
+      distortionRadius: { value: 0.2 },
     },
     vertexShader: `
       varying vec2 vUv;
@@ -22,8 +21,7 @@ export const createGravitationalLensingMaterial = () => {
       uniform float time;
       uniform vec2 center;
       uniform float eventHorizonRadius;
-      uniform float haloRadius;
-      uniform float accretionRadius;
+      uniform float distortionRadius;
       
       varying vec2 vUv;
       
@@ -40,46 +38,43 @@ export const createGravitationalLensingMaterial = () => {
           color = vec3(0.0, 0.0, 0.0);
           alpha = 1.0;
         }
-        // Ring 1: Gravitational halo - circular ring
-        else if (distFromCenter > eventHorizonRadius + 0.02 && distFromCenter < haloRadius) {
-          // Create a circular ring by checking distance from a specific radius
-          float targetRadius = (eventHorizonRadius + haloRadius) * 0.6;
-          float ringDistance = abs(distFromCenter - targetRadius);
-          float ringThickness = 0.04;
+        // Distortion ring - orange accretion disk with warping effect
+        else if (distFromCenter > eventHorizonRadius + 0.01 && distFromCenter < distortionRadius) {
+          // Calculate angle for radial distortion
+          float angle = atan(offset.y, offset.x);
+          
+          // Create radial distortion effect
+          float distortionStrength = 1.0 - smoothstep(eventHorizonRadius, distortionRadius, distFromCenter);
+          float warpedDistance = distFromCenter + sin(angle * 6.0 + time * 2.0) * 0.02 * distortionStrength;
+          
+          // Create ring thickness with falloff
+          float ringCenter = (eventHorizonRadius + distortionRadius) * 0.65;
+          float ringDistance = abs(warpedDistance - ringCenter);
+          float ringThickness = 0.05;
           
           if (ringDistance < ringThickness) {
             float intensity = 1.0 - (ringDistance / ringThickness);
             intensity = smoothstep(0.0, 1.0, intensity);
             
-            // Blue gravitational lensing glow
-            color = vec3(0.3, 0.5, 1.0) * intensity;
-            alpha = intensity * 0.7;
-          }
-        }
-        // Ring 2: Accretion disk - circular ring rotated 90 degrees
-        else if (distFromCenter > eventHorizonRadius + 0.01 && distFromCenter < accretionRadius) {
-          // Create a second circular ring at a different radius
-          float targetRadius = (eventHorizonRadius + accretionRadius) * 0.7;
-          float ringDistance = abs(distFromCenter - targetRadius);
-          float diskThickness = 0.03;
-          
-          if (ringDistance < diskThickness) {
-            float intensity = 1.0 - (ringDistance / diskThickness);
-            intensity = smoothstep(0.0, 1.0, intensity);
+            // Add swirling animation
+            float swirl = sin(angle * 3.0 + time * 4.0 + distFromCenter * 10.0) * 0.5 + 0.5;
             
-            // Orange swirling pattern
-            float angle = atan(offset.y, offset.x);
-            float swirl = sin(angle * 4.0 + time * 3.0 + distFromCenter * 15.0) * 0.5 + 0.5;
+            // Create temperature gradient from inner (hot) to outer (cooler)
+            float temp = mix(0.8, 0.3, (distFromCenter - eventHorizonRadius) / (distortionRadius - eventHorizonRadius));
+            temp = temp * swirl * intensity;
             
-            // Temperature-based colors - hot orange swirls
-            float temp = swirl * intensity;
+            // Orange/amber colors for the accretion disk
             color = mix(
-              vec3(1.0, 0.4, 0.1), // Hot orange-red
-              vec3(1.0, 0.8, 0.3), // Bright yellow-orange
+              vec3(1.0, 0.3, 0.1), // Hot orange-red
+              vec3(1.0, 0.7, 0.2), // Bright orange-yellow
               temp
             );
             
-            alpha = intensity * 0.8;
+            // Add some brightness variation
+            float brightness = 0.8 + 0.4 * swirl;
+            color *= brightness;
+            
+            alpha = intensity * 0.9;
           }
         }
         
@@ -88,7 +83,7 @@ export const createGravitationalLensingMaterial = () => {
     `,
     transparent: true,
     side: THREE.DoubleSide,
-    blending: THREE.NormalBlending
+    blending: THREE.AdditiveBlending
   });
 };
 
