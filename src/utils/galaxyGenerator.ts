@@ -102,7 +102,7 @@ class SeededRandom {
 export function generateGalaxy(
   seed: number, 
   numSystems: number = 1000, 
-  numNebulae: number = 50,
+  numBlackHoles: number = 50,
   binaryFrequency: number = 0.15,
   trinaryFrequency: number = 0.03
 ): Galaxy {
@@ -124,6 +124,14 @@ export function generateGalaxy(
     console.log(`Galaxy ${seed}: Substituting elliptical with globular`);
     galaxyType = 'globular';
   }
+
+  // ALWAYS place a supermassive black hole at the center of the galaxy
+  blackHoles.push({
+    id: 'central-blackhole',
+    position: [0, 0, 0],
+    mass: rng.range(1000000, 10000000), // Supermassive black hole
+    size: rng.range(5000, 8000) // Larger visual size for central black hole
+  });
 
   // Generate star systems based on galaxy type
   
@@ -195,20 +203,20 @@ export function generateGalaxy(
     });
   }
 
-  // Replace nebulae generation with additional black holes from nebula count
-  const totalBlackHoles = Math.floor(numNebulae * 0.8); // Use 80% of nebula count for black holes
-  for (let i = 0; i < totalBlackHoles; i++) {
+  // Generate additional black holes from numBlackHoles parameter
+  const additionalBlackHoles = Math.floor(numBlackHoles * 0.8); // Use 80% of black hole count for additional black holes
+  for (let i = 0; i < additionalBlackHoles; i++) {
     let position: [number, number, number];
     
     switch (galaxyType) {
       case 'spiral':
-        position = generateSpiralPosition(rng, i, totalBlackHoles, galaxyRadius * 0.8);
+        position = generateSpiralPosition(rng, i, additionalBlackHoles, galaxyRadius * 0.8);
         break;
       case 'globular':
         position = generateGlobularPosition(rng, galaxyRadius * 0.6);
         break;
       default:
-        position = generateSpiralPosition(rng, i, totalBlackHoles, galaxyRadius * 0.8);
+        position = generateSpiralPosition(rng, i, additionalBlackHoles, galaxyRadius * 0.8);
     }
     
     blackHoles.push({

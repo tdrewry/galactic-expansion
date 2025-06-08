@@ -7,7 +7,7 @@ import { GalaxyMapLoading } from './galaxy/GalaxyMapLoading';
 interface GalaxyMapProps {
   seed?: number;
   numSystems?: number;
-  numNebulae?: number;
+  numBlackHoles?: number;
   binaryFrequency?: number;
   trinaryFrequency?: number;
   raymarchingSamples?: number;
@@ -15,7 +15,6 @@ interface GalaxyMapProps {
   showDustLanes?: boolean;
   showStarFormingRegions?: boolean;
   showCosmicDust?: boolean;
-  showBlackHoles?: boolean;
   dustLaneParticles?: number;
   starFormingParticles?: number;
   cosmicDustParticles?: number;
@@ -50,7 +49,7 @@ export interface GalaxyMapRef {
 export const GalaxyMap = forwardRef<GalaxyMapRef, GalaxyMapProps>(({ 
   seed = 12345,
   numSystems = 1000,
-  numNebulae = 50,
+  numBlackHoles = 50,
   binaryFrequency = 0.15,
   trinaryFrequency = 0.03,
   onSystemSelect,
@@ -78,9 +77,9 @@ export const GalaxyMap = forwardRef<GalaxyMapRef, GalaxyMapProps>(({
   const currentSelectedStar = propSelectedStar || selectedStar;
   
   const galaxy = useMemo(() => {
-    console.log('Generating galaxy with seed:', seed, 'systems:', numSystems, 'nebulae:', numNebulae);
+    console.log('Generating galaxy with seed:', seed, 'systems:', numSystems, 'black holes:', numBlackHoles);
     try {
-      const newGalaxy = generateGalaxy(seed, numSystems, numNebulae, binaryFrequency, trinaryFrequency);
+      const newGalaxy = generateGalaxy(seed, numSystems, numBlackHoles, binaryFrequency, trinaryFrequency);
       console.log('Generated galaxy with', newGalaxy.starSystems.length, 'systems and', newGalaxy.blackHoles?.length || 0, 'black holes');
       return newGalaxy;
     } catch (error) {
@@ -88,7 +87,7 @@ export const GalaxyMap = forwardRef<GalaxyMapRef, GalaxyMapProps>(({
       setCanvasError(`Galaxy generation failed: ${error}`);
       return null;
     }
-  }, [seed, numSystems, numNebulae, binaryFrequency, trinaryFrequency]);
+  }, [seed, numSystems, numBlackHoles, binaryFrequency, trinaryFrequency]);
 
   // Create enhanced galaxy data with exploration status
   const enhancedGalaxy = useMemo(() => {
@@ -154,7 +153,6 @@ export const GalaxyMap = forwardRef<GalaxyMapRef, GalaxyMapProps>(({
         onScanComplete={onScanComplete}
         jumpLaneOpacity={jumpLaneOpacity}
         greenPathOpacity={greenPathOpacity}
-        showBlackHoles={true}
         onCanvasError={setCanvasError}
         {...canvasProps}
       />

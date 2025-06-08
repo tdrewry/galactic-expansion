@@ -10,8 +10,17 @@ export const useJumpMechanics = () => {
     allSystems: StarSystem[],
     stats: StarshipStats,
     exploredSystemIds: Set<string>,
-    travelHistory: string[]
+    travelHistory: string[],
+    allBlackHoles: any[] = []
   ) => {
+    // If we're at a black hole, we can jump to ANY other black hole in the galaxy
+    if (fromSystem.starType === 'blackhole') {
+      if (toSystem.starType === 'blackhole') {
+        return true; // Black hole to black hole travel is always allowed
+      }
+      // Also allow normal jump mechanics from black holes
+    }
+    
     // Black holes can always be jumped to if within range (they're mysterious and powerful)
     const isBlackHole = toSystem.starType === 'blackhole';
     
@@ -43,10 +52,24 @@ export const useJumpMechanics = () => {
     allSystems: StarSystem[],
     stats: StarshipStats,
     exploredSystemIds: Set<string>,
-    travelHistory: string[]
+    travelHistory: string[],
+    allBlackHoles: any[] = []
   ) => {
+    // If we're at a black hole, include ALL black holes in jumpable systems
+    if (fromSystem.starType === 'blackhole') {
+      const blackHoleIds = allBlackHoles
+        .filter(bh => bh.id !== fromSystem.id)
+        .map(bh => bh.id);
+      
+      const normalJumpable = allSystems
+        .filter(system => system.id !== fromSystem.id && canJumpToSystem(fromSystem, system, allSystems, stats, exploredSystemIds, travelHistory, allBlackHoles))
+        .map(system => system.id);
+        
+      return [...blackHoleIds, ...normalJumpable];
+    }
+    
     return allSystems
-      .filter(system => system.id !== fromSystem.id && canJumpToSystem(fromSystem, system, allSystems, stats, exploredSystemIds, travelHistory))
+      .filter(system => system.id !== fromSystem.id && canJumpToSystem(fromSystem, system, allSystems, stats, exploredSystemIds, travelHistory, allBlackHoles))
       .map(system => system.id);
   }, [canJumpToSystem]);
 

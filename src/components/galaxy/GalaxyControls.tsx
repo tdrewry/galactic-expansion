@@ -4,12 +4,11 @@ import { GalaxySettings } from './GalaxySettings';
 
 interface GalaxyControlsProps {
   numSystems: number;
-  numNebulae: number;
+  numBlackHoles: number;
   binaryFrequency: number;
   trinaryFrequency: number;
   showDustLanes: boolean;
   showCosmicDust: boolean;
-  showBlackHoles: boolean;
   appTitle: string;
   dustLaneParticles: number;
   cosmicDustParticles: number;
@@ -30,12 +29,11 @@ interface GalaxyControlsProps {
 
 export const GalaxyControls: React.FC<GalaxyControlsProps> = ({
   numSystems,
-  numNebulae,
+  numBlackHoles,
   binaryFrequency,
   trinaryFrequency,
   showDustLanes,
   showCosmicDust,
-  showBlackHoles,
   appTitle,
   dustLaneParticles,
   cosmicDustParticles,
@@ -57,12 +55,11 @@ export const GalaxyControls: React.FC<GalaxyControlsProps> = ({
     <div className="flex items-center gap-4">
       <GalaxySettings
         numSystems={numSystems}
-        numNebulae={numNebulae}
+        numBlackHoles={numBlackHoles}
         binaryFrequency={binaryFrequency}
         trinaryFrequency={trinaryFrequency}
         showDustLanes={showDustLanes}
         showCosmicDust={showCosmicDust}
-        showBlackHoles={showBlackHoles}
         appTitle={appTitle}
         dustLaneParticles={dustLaneParticles}
         cosmicDustParticles={cosmicDustParticles}

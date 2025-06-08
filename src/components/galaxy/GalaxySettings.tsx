@@ -11,12 +11,11 @@ import { Settings } from 'lucide-react';
 
 interface GalaxySettingsProps {
   numSystems: number;
-  numNebulae: number;
+  numBlackHoles: number;
   binaryFrequency: number;
   trinaryFrequency: number;
   showDustLanes?: boolean;
   showCosmicDust?: boolean;
-  showBlackHoles?: boolean;
   appTitle?: string;
   dustLaneParticles?: number;
   cosmicDustParticles?: number;
@@ -37,12 +36,11 @@ interface GalaxySettingsProps {
 
 export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
   numSystems,
-  numNebulae,
+  numBlackHoles,
   binaryFrequency,
   trinaryFrequency,
   showDustLanes = true,
   showCosmicDust = true,
-  showBlackHoles = false,
   appTitle = 'Galactic Expansion',
   dustLaneParticles = 15000,
   cosmicDustParticles = 10000,
@@ -62,12 +60,11 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
 }) => {
   const [localSettings, setLocalSettings] = React.useState({
     numSystems,
-    numNebulae,
+    numBlackHoles,
     binaryFrequency,
     trinaryFrequency,
     showDustLanes,
     showCosmicDust,
-    showBlackHoles,
     appTitle,
     dustLaneParticles,
     cosmicDustParticles,
@@ -85,12 +82,11 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
   React.useEffect(() => {
     setLocalSettings({
       numSystems,
-      numNebulae,
+      numBlackHoles,
       binaryFrequency,
       trinaryFrequency,
       showDustLanes,
       showCosmicDust,
-      showBlackHoles,
       appTitle,
       dustLaneParticles,
       cosmicDustParticles,
@@ -103,7 +99,7 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
       visitedJumpLaneOpacity,
       defaultShipStats
     });
-  }, [numSystems, numNebulae, binaryFrequency, trinaryFrequency, showDustLanes, showCosmicDust, showBlackHoles, appTitle, dustLaneParticles, cosmicDustParticles, dustLaneOpacity, cosmicDustOpacity, dustLaneColorIntensity, cosmicDustColorIntensity, jumpLaneOpacity, greenPathOpacity, visitedJumpLaneOpacity, defaultShipStats]);
+  }, [numSystems, numBlackHoles, binaryFrequency, trinaryFrequency, showDustLanes, showCosmicDust, appTitle, dustLaneParticles, cosmicDustParticles, dustLaneOpacity, cosmicDustOpacity, dustLaneColorIntensity, cosmicDustColorIntensity, jumpLaneOpacity, greenPathOpacity, visitedJumpLaneOpacity, defaultShipStats]);
 
   const handleSeedChange = () => {
     const newSeed = parseInt(inputSeed) || 12345;
@@ -118,12 +114,11 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
   const handleReset = () => {
     const defaultSettings = {
       numSystems: 1000,
-      numNebulae: 50,
+      numBlackHoles: 50,
       binaryFrequency: 0.15,
       trinaryFrequency: 0.03,
       showDustLanes: true,
       showCosmicDust: true,
-      showBlackHoles: false,
       appTitle: 'Galactic Expansion',
       dustLaneParticles: 15000,
       cosmicDustParticles: 10000,
@@ -382,18 +377,6 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
                     }))}
                   />
                 </div>
-                
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="black-holes">Black Holes</Label>
-                  <Switch
-                    id="black-holes"
-                    checked={localSettings.showBlackHoles}
-                    onCheckedChange={(checked) => setLocalSettings(prev => ({
-                      ...prev,
-                      showBlackHoles: checked
-                    }))}
-                  />
-                </div>
               </CardContent>
             </Card>
 
@@ -418,14 +401,14 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="nebulae">Nebulae</Label>
+                  <Label htmlFor="black-holes">Black Holes</Label>
                   <Input
-                    id="nebulae"
+                    id="black-holes"
                     type="number"
-                    value={localSettings.numNebulae}
+                    value={localSettings.numBlackHoles}
                     onChange={(e) => setLocalSettings(prev => ({
                       ...prev,
-                      numNebulae: parseInt(e.target.value) || 50
+                      numBlackHoles: parseInt(e.target.value) || 50
                     }))}
                     min="10"
                     max="200"

@@ -8,6 +8,7 @@ import { ExplorationActions } from './actions/ExplorationActions';
 import { NavigationActions } from './actions/NavigationActions';
 import { SystemStatusDisplay } from './actions/SystemStatusDisplay';
 import { MarketActions } from './actions/MarketActions';
+import { GalaxyJumpActions } from './actions/GalaxyJumpActions';
 
 interface ActionsPanelProps {
   selectedSystem: StarSystem | null;
@@ -29,6 +30,7 @@ interface ActionsPanelProps {
   isScanning?: boolean;
   canJumpToSelected?: boolean;
   onJumpToSystem?: (systemId: string) => void;
+  onJumpToNewGalaxy?: () => void;
 }
 
 export const ActionsPanel: React.FC<ActionsPanelProps> = ({
@@ -46,9 +48,11 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
   onTriggerScan,
   isScanning = false,
   canJumpToSelected = false,
-  onJumpToSystem
+  onJumpToSystem,
+  onJumpToNewGalaxy
 }) => {
   const isBlackHole = selectedSystem?.starType === 'blackhole';
+  const isCentralBlackHole = selectedSystem?.id === 'central-blackhole';
 
   return (
     <div className="bg-gray-800 border border-gray-600 rounded-lg h-full w-full p-3 flex flex-col">
@@ -62,6 +66,12 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
               currentSystemId={currentSystemId}
               canJumpToSelected={canJumpToSelected}
               onJumpToSystem={onJumpToSystem}
+            />
+
+            <GalaxyJumpActions
+              selectedSystem={selectedSystem}
+              currentSystemId={currentSystemId}
+              onJumpToNewGalaxy={onJumpToNewGalaxy}
             />
 
             <SystemStatusDisplay
@@ -97,9 +107,15 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
               />
             )}
 
-            {isBlackHole && (
+            {isBlackHole && !isCentralBlackHole && (
               <div className="text-center text-purple-400 text-sm p-2 border border-purple-600 rounded">
                 Black Hole - Mysterious and dangerous. No exploration or market activities available.
+              </div>
+            )}
+
+            {isCentralBlackHole && (
+              <div className="text-center text-purple-400 text-sm p-2 border border-purple-600 rounded">
+                Central Supermassive Black Hole - Gateway to other galaxies.
               </div>
             )}
           </>

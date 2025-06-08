@@ -196,6 +196,24 @@ export const useShipStats = (initialStats: StarshipStats) => {
     return canJumpToSystemCheck(fromSystem, toSystem, allSystems, stats, exploredSystemIds, travelHistory);
   }, [canJumpToSystemCheck, stats, exploredSystemIds, travelHistory]);
 
+  const jumpToNewGalaxy = useCallback(() => {
+    // Generate a random seed for the new galaxy
+    const newGalaxySeed = Math.floor(Math.random() * 1000000);
+    
+    // Reset location but keep ship stats
+    setCurrentSystemId(null);
+    setSelectedSystemId(null);
+    setExploredSystemIds(new Set());
+    setTravelHistory([]);
+    
+    toast({
+      title: "Galaxy Jump Complete",
+      description: `Jumped to new galaxy (Seed: ${newGalaxySeed}). Ship stats preserved.`,
+    });
+    
+    return newGalaxySeed;
+  }, [toast]);
+
   const getJumpableSystemIds = useCallback((fromSystem: StarSystem, allSystems: StarSystem[]) => {
     return getJumpableIds(fromSystem, allSystems, stats, exploredSystemIds, travelHistory);
   }, [getJumpableIds, stats, exploredSystemIds, travelHistory]);
@@ -233,6 +251,7 @@ export const useShipStats = (initialStats: StarshipStats) => {
     getScannerRangeSystemIds,
     selectSystem,
     jumpToSystem,
+    jumpToNewGalaxy,
     resetStats,
     saveGame,
     loadGame,
