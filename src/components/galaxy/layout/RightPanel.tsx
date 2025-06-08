@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
-import { StarSystem, Planet, Moon } from '../../../utils/galaxyGenerator';
+import { StarSystem, Planet, Moon, BlackHole } from '../../../utils/galaxyGenerator';
 import { SystemView } from '../SystemView';
 import { SystemInfoCard } from '../SystemInfoCard';
 import { MarketDialog } from '../../starship/MarketDialog';
@@ -35,6 +35,8 @@ interface RightPanelProps {
   onRepairShields?: (cost: number) => void;
   onRepairCombatSystems?: (cost: number) => void;
   onBlackHoleJumpBoost?: () => void;
+  allSystems?: StarSystem[];
+  allBlackHoles?: BlackHole[];
 }
 
 export const RightPanel: React.FC<RightPanelProps> = ({
@@ -59,7 +61,9 @@ export const RightPanel: React.FC<RightPanelProps> = ({
   onRepairHull,
   onRepairShields,
   onRepairCombatSystems,
-  onBlackHoleJumpBoost
+  onBlackHoleJumpBoost,
+  allSystems,
+  allBlackHoles
 }) => {
   const [isMarketOpen, setIsMarketOpen] = useState(false);
   const [marketInfo, setMarketInfo] = useState<MarketLocation | null>(null);
