@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
 import { ExplorationDialog } from '../components/galaxy/ExplorationDialog';
@@ -75,7 +74,8 @@ const Index = () => {
     saveGame,
     loadGame,
     triggerGameOver,
-    updateShipName
+    updateShipName,
+    blackHoleJumpBoost
   } = useShipStats(initialStarship.stats);
 
   const {
@@ -340,6 +340,7 @@ const Index = () => {
         onOpenMarket={() => handleOpenMarket(selectedSystem)}
         onJumpToSystem={handleJumpToSystem}
         onUpdateShipName={updateShipName}
+        onBlackHoleJumpBoost={blackHoleJumpBoost}
         handleCompleteExploration={handleCompleteExploration}
         handleContinueExploration={handleContinueExploration}
         onZoomToStarterSystem={handleZoomToStarterSystem}
