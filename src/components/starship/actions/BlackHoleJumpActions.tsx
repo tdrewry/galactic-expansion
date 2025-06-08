@@ -32,23 +32,43 @@ export const BlackHoleJumpActions: React.FC<BlackHoleJumpActionsProps> = ({
   // Check if we can draw purple lines to black holes (tech level 8+ requirement)
   const canUseBlackHoleJumps = shipStats && shipStats.techLevel >= 8;
   
-  // Check if there are any black holes within jump range
-  const hasBlackHoleInRange = React.useMemo(() => {
-    if (!currentSystem || !canUseBlackHoleJumps || !shipStats) return false;
+  // Check if there are any black holes within jump range and if galactic center is among them
+  const blackHoleAnalysis = React.useMemo(() => {
+    if (!currentSystem || !canUseBlackHoleJumps || !shipStats) {
+      return { hasBlackHoleInRange: false, hasGalacticCenterInRange: false };
+    }
     
     const galaxyWidth = 100000;
     const maxJumpDistance = (shipStats.techLevel / 10) * (galaxyWidth / 16);
     
-    return allBlackHoles.some(blackHole => {
-      if (blackHole.id === currentSystemId) return false;
+    let hasBlackHoleInRange = false;
+    let hasGalacticCenterInRange = false;
+    
+    allBlackHoles.forEach(blackHole => {
+      if (blackHole.id === currentSystemId) return;
       
       const dx = currentSystem.position[0] - blackHole.position[0];
       const dy = currentSystem.position[1] - blackHole.position[1];
       const dz = currentSystem.position[2] - blackHole.position[2];
       const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
       
-      return distance <= maxJumpDistance;
+      if (distance <= maxJumpDistance) {
+        hasBlackHoleInRange = true;
+        
+        // Check if this is the galactic center (should be at or very near 0,0,0)
+        const centerDistance = Math.sqrt(
+          blackHole.position[0] * blackHole.position[0] + 
+          blackHole.position[1] * blackHole.position[1] + 
+          blackHole.position[2] * blackHole.position[2]
+        );
+        
+        if (centerDistance < 5000) { // Within 5000 units of galactic center
+          hasGalacticCenterInRange = true;
+        }
+      }
     });
+    
+    return { hasBlackHoleInRange, hasGalacticCenterInRange };
   }, [currentSystem, currentSystemId, allBlackHoles, canUseBlackHoleJumps, shipStats]);
 
   console.log('BlackHoleJumpActions Enhanced Debug:', {
@@ -56,7 +76,8 @@ export const BlackHoleJumpActions: React.FC<BlackHoleJumpActionsProps> = ({
     hasCurrentSystem: !!currentSystem,
     currentSystemPosition: currentSystem?.position,
     canUseBlackHoleJumps,
-    hasBlackHoleInRange,
+    hasBlackHoleInRange: blackHoleAnalysis.hasBlackHoleInRange,
+    hasGalacticCenterInRange: blackHoleAnalysis.hasGalacticCenterInRange,
     techLevel: shipStats?.techLevel,
     blackHolesCount: allBlackHoles.length,
     blackHoleIds: allBlackHoles.map(bh => bh.id),
@@ -66,7 +87,7 @@ export const BlackHoleJumpActions: React.FC<BlackHoleJumpActionsProps> = ({
   });
 
   // Only show if we're at a system that can reach black holes
-  if (!hasBlackHoleInRange) {
+  if (!blackHoleAnalysis.hasBlackHoleInRange) {
     return null;
   }
 
@@ -105,6 +126,7 @@ export const BlackHoleJumpActions: React.FC<BlackHoleJumpActionsProps> = ({
         isOpen={isDialogOpen}
         onClose={handleCloseDialog}
         onConfirm={handleConfirmJump}
+        hasGalacticCenterInRange={blackHoleAnalysis.hasGalacticCenterInRange}
       />
     </>
   );
