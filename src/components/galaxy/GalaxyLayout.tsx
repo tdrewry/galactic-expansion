@@ -65,7 +65,7 @@ interface GalaxyLayoutProps {
   onOpenMarket: () => void;
   onJumpToSystem: (systemId: string) => void;
   onUpdateShipName?: (newName: string) => void;
-  onBlackHoleJumpBoost?: (jumpData: { mode: 'local' | 'newGalaxy' | 'knownGalaxy'; seed?: number }) => void;
+  onBlackHoleJumpBoost?: () => (allSystems: StarSystem[], allBlackHoles: BlackHole[]) => string | null;
   handleCompleteExploration: () => void;
   handleContinueExploration: () => void;
   canJumpToSelected?: boolean;

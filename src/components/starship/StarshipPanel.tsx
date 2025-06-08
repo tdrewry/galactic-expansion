@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from 'react';
 import { generateStarship } from '../../utils/starshipGenerator';
 import { ActionsPanel } from './ActionsPanel';
@@ -62,6 +61,13 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
   const starship = useMemo(() => generateStarship(seed), [seed]);
   const [isShipLayoutOpen, setIsShipLayoutOpen] = useState(false);
 
+  // Create a wrapper function that calls the black hole jump boost with the required parameters
+  const handleBlackHoleJumpBoost = (jumpData: { mode: 'local' | 'newGalaxy' | 'knownGalaxy'; seed?: number }) => {
+    if (onBlackHoleJumpBoost && allSystems && allBlackHoles) {
+      onBlackHoleJumpBoost(jumpData);
+    }
+  };
+
   console.log('StarshipPanel Debug - Black Holes:', {
     allBlackHolesLength: allBlackHoles?.length || 0,
     allBlackHoleIds: allBlackHoles?.map(bh => bh.id) || [],
@@ -121,7 +127,7 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
               onJumpToSystem={onJumpToSystem}
               onTriggerScan={onTriggerScan}
               isScanning={isScanning}
-              onBlackHoleJumpBoost={onBlackHoleJumpBoost}
+              onBlackHoleJumpBoost={handleBlackHoleJumpBoost}
               allSystems={allSystems}
               allBlackHoles={allBlackHoles}
               shipStats={shipStats || currentStats}
