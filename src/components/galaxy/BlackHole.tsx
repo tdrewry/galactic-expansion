@@ -37,30 +37,28 @@ export const BlackHole: React.FC<BlackHoleProps> = ({
 
   return (
     <group position={position}>
-      {/* Large invisible collision sphere for easy selection */}
+      {/* Smaller collision sphere that matches the black hole size more precisely */}
       <mesh
         onClick={handleClick}
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}
         visible={false}
       >
-        <sphereGeometry args={[size * 1.5, 8, 6]} />
+        <sphereGeometry args={[size * 0.8, 8, 6]} />
         <meshBasicMaterial transparent opacity={0} />
       </mesh>
 
-      {/* First ring - vertical orientation, moved slightly forward */}
-      <group position={[0, 0, 1]}>
-        <BlackHoleMesh
-          size={size}
-          onClick={handleClick}
-          onPointerOver={handlePointerOver}
-          onPointerOut={handlePointerOut}
-          disableBillboard={false}
-        />
-      </group>
+      {/* First ring - vertical orientation */}
+      <BlackHoleMesh
+        size={size}
+        onClick={handleClick}
+        onPointerOver={handlePointerOver}
+        onPointerOut={handlePointerOut}
+        disableBillboard={false}
+      />
       
-      {/* Second ring - horizontal orientation, moved slightly back */}
-      <group position={[0, 0, -1]} rotation={[Math.PI / 2, 0, 0]}>
+      {/* Second ring - horizontal orientation (rotated 90 degrees around X-axis) */}
+      <group rotation={[Math.PI / 2, 0, 0]}>
         <BlackHoleMesh
           size={size}
           onClick={handleClick}
