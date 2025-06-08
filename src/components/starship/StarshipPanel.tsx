@@ -30,6 +30,7 @@ interface StarshipPanelProps {
   onRepairHull?: (cost: number) => void;
   onRepairShields?: (cost: number) => void;
   onRepairCombatSystems?: (cost: number) => void;
+  onBlackHoleJumpBoost?: () => void;
 }
 
 export const StarshipPanel: React.FC<StarshipPanelProps> = ({ 
@@ -51,7 +52,8 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
   onUpdateShipName,
   onRepairHull,
   onRepairShields,
-  onRepairCombatSystems
+  onRepairCombatSystems,
+  onBlackHoleJumpBoost
 }) => {
   const starship = useMemo(() => generateStarship(seed), [seed]);
   const [isShipLayoutOpen, setIsShipLayoutOpen] = useState(false);
@@ -107,6 +109,7 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
               onJumpToSystem={onJumpToSystem}
               onTriggerScan={onTriggerScan}
               isScanning={isScanning}
+              onBlackHoleJumpBoost={onBlackHoleJumpBoost}
             />
           </div>
         )}
