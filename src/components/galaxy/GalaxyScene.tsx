@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle, useCallback } from 'react';
 import { Galaxy, StarSystem as StarSystemType, BlackHole } from '../../utils/galaxyGenerator';
 import { InterstellarMaterial } from './InterstellarMaterial';
@@ -193,6 +192,7 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
         <JumpRangeVisualizer
           currentSystem={currentSystem}
           allSystems={galaxy.starSystems}
+          allBlackHoles={galaxy.blackHoles}
           shipStats={shipStats}
           exploredSystemIds={exploredSystemIds}
           travelHistory={travelHistory}

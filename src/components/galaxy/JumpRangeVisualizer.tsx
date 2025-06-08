@@ -1,12 +1,13 @@
 
 import React, { useMemo } from 'react';
 import { Line } from '@react-three/drei';
-import { StarSystem } from '../../utils/galaxyGenerator';
+import { StarSystem, BlackHole } from '../../utils/galaxyGenerator';
 import { StarshipStats } from '../../utils/starshipGenerator';
 
 interface JumpRangeVisualizerProps {
-  currentSystem: StarSystem | null;
+  currentSystem: StarSystem | BlackHole | null;
   allSystems: StarSystem[];
+  allBlackHoles?: BlackHole[];
   shipStats: StarshipStats;
   exploredSystemIds: Set<string>;
   travelHistory: string[];
@@ -20,6 +21,7 @@ interface JumpRangeVisualizerProps {
 export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
   currentSystem,
   allSystems,
+  allBlackHoles = [],
   shipStats,
   exploredSystemIds,
   travelHistory = [],
@@ -29,11 +31,12 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
   greenPathOpacity,
   visitedJumpLaneOpacity = 0.1
 }) => {
-  const { jumpableLines, visitedLines } = useMemo(() => {
-    if (!currentSystem) return { jumpableLines: [], visitedLines: [] };
+  const { jumpableLines, visitedLines, blackHoleLines } = useMemo(() => {
+    if (!currentSystem) return { jumpableLines: [], visitedLines: [], blackHoleLines: [] };
     
     const jumpableLines = [];
     const visitedLines = [];
+    const blackHoleLines = [];
     
     // Add unexplored systems that are within jump range
     for (const systemId of jumpableSystemIds) {
@@ -51,8 +54,35 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
       }
     }
     
-    return { jumpableLines, visitedLines };
-  }, [currentSystem, allSystems, jumpableSystemIds, exploredSystemIds]);
+    // Add special purple lines to black holes if tech level 8+ and within range
+    if (shipStats.techLevel >= 8) {
+      for (const blackHole of allBlackHoles) {
+        if (blackHole.id !== currentSystem.id) {
+          // Calculate distance to black hole
+          const dx = currentSystem.position[0] - blackHole.position[0];
+          const dy = currentSystem.position[1] - blackHole.position[1];
+          const dz = currentSystem.position[2] - blackHole.position[2];
+          const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+          
+          // Calculate max jump distance based on tech level
+          const galaxyWidth = 100000;
+          const maxJumpDistance = (shipStats.techLevel / 10) * (galaxyWidth / 16);
+          
+          if (distance <= maxJumpDistance) {
+            blackHoleLines.push({
+              points: [
+                [currentSystem.position[0], currentSystem.position[1], currentSystem.position[2]] as [number, number, number],
+                [blackHole.position[0], blackHole.position[1], blackHole.position[2]] as [number, number, number]
+              ],
+              color: '#a855f7' // Purple for black hole connections
+            });
+          }
+        }
+      }
+    }
+    
+    return { jumpableLines, visitedLines, blackHoleLines };
+  }, [currentSystem, allSystems, allBlackHoles, jumpableSystemIds, exploredSystemIds, shipStats.techLevel]);
 
   const greenPathLines = useMemo(() => {
     if (!travelHistory || travelHistory.length < 2) return [];
@@ -61,8 +91,10 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
     // This is always visible regardless of jump range
     const lines = [];
     for (let i = 0; i < travelHistory.length - 1; i++) {
-      const fromSystem = allSystems.find(s => s.id === travelHistory[i]);
-      const toSystem = allSystems.find(s => s.id === travelHistory[i + 1]);
+      const fromSystem = allSystems.find(s => s.id === travelHistory[i]) ||
+                        allBlackHoles.find(bh => bh.id === travelHistory[i]);
+      const toSystem = allSystems.find(s => s.id === travelHistory[i + 1]) ||
+                      allBlackHoles.find(bh => bh.id === travelHistory[i + 1]);
       
       if (fromSystem && toSystem) {
         lines.push({
@@ -75,7 +107,7 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
       }
     }
     return lines;
-  }, [travelHistory, allSystems]);
+  }, [travelHistory, allSystems, allBlackHoles]);
 
   if (!currentSystem) return null;
 
@@ -93,6 +125,18 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
           dashed
           dashSize={100}
           gapSize={50}
+        />
+      ))}
+      
+      {/* Special purple lines to black holes (solid) - for tech level 8+ ships */}
+      {blackHoleLines.map((line, index) => (
+        <Line
+          key={`blackhole-${index}`}
+          points={line.points}
+          color={line.color}
+          lineWidth={2}
+          transparent
+          opacity={jumpLaneOpacity * 1.2}
         />
       ))}
       
