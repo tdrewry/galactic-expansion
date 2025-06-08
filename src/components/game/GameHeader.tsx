@@ -62,7 +62,7 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
             </Button>
           </div>
         </div>
-        <GalaxyControls {...controlsProps} />
+        <GalaxyControls appTitle={appTitle} {...controlsProps} />
       </div>
     </header>
   );

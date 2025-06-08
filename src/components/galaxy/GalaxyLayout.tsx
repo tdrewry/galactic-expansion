@@ -1,6 +1,6 @@
 
 import React, { useRef } from 'react';
-import { StarSystem, Planet, Moon } from '../../utils/galaxyGenerator';
+import { StarSystem, Planet, Moon, BlackHole } from '../../utils/galaxyGenerator';
 import { ExplorationDialog } from './ExplorationDialog';
 import { GalaxyLayoutPanels } from './layout/GalaxyLayoutPanels';
 import { GalaxyMapRef } from '../GalaxyMap';
@@ -47,6 +47,8 @@ interface GalaxyLayoutProps {
   currentSystemId: string | null;
   exploredSystemIds: Set<string>;
   travelHistory: string[];
+  allSystems: StarSystem[];
+  allBlackHoles: BlackHole[];
   getJumpableSystemIds: (fromSystem: StarSystem, allSystems: StarSystem[]) => string[];
   getScannerRangeSystemIds: (fromSystem: StarSystem, allSystems: StarSystem[]) => string[];
   isSystemExplored: (system: StarSystem) => boolean;
