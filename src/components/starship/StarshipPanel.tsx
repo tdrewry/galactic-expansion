@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from 'react';
 import { generateStarship } from '../../utils/starshipGenerator';
 import { ActionsPanel } from './ActionsPanel';
@@ -29,7 +28,7 @@ interface StarshipPanelProps {
   onUpdateShipName?: (newName: string) => void;
   onRepairHull?: (cost: number) => void;
   onRepairShields?: (cost: number) => void;
-  onRepairCombatSystems?: (cost: number) => void;
+  onRepairCombatSystems?: () => void;
   onBlackHoleJumpBoost?: () => void;
   allSystems?: StarSystem[];
   allBlackHoles?: BlackHole[];
@@ -61,6 +60,14 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
 }) => {
   const starship = useMemo(() => generateStarship(seed), [seed]);
   const [isShipLayoutOpen, setIsShipLayoutOpen] = useState(false);
+
+  console.log('StarshipPanel Debug - Black Holes:', {
+    allBlackHolesLength: allBlackHoles?.length || 0,
+    allBlackHoleIds: allBlackHoles?.map(bh => bh.id) || [],
+    allSystemsLength: allSystems?.length || 0,
+    currentSystemId,
+    shipStats: !!shipStats
+  });
 
   console.log('StarshipPanel: onRepairHull prop received:', !!onRepairHull);
   console.log('StarshipPanel: onRepairShields prop received:', !!onRepairShields);
