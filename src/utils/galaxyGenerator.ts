@@ -1,7 +1,7 @@
 export interface StarSystem {
   id: string;
   position: [number, number, number];
-  starType: 'main-sequence' | 'red-giant' | 'white-dwarf' | 'neutron' | 'magnetar' | 'pulsar' | 'quasar' | 'blackhole';
+  starType: 'main-sequence' | 'red-giant' | 'white-dwarf' | 'neutron' | 'magnetar' | 'pulsar' | 'quasar';
   temperature: number;
   mass: number;
   explored: boolean;
@@ -66,6 +66,11 @@ export interface BlackHole {
   position: [number, number, number];
   mass: number;
   size: number;
+  starType: 'blackhole'; // Add this to make black holes compatible with system selection
+  temperature: number;
+  explored: boolean;
+  planets: Planet[]; // Empty array for black holes
+  specialFeatures: string[]; // Empty array for black holes
 }
 
 export interface Galaxy {
@@ -130,15 +135,18 @@ export function generateGalaxy(
     id: 'central-blackhole',
     position: [0, 0, 0],
     mass: rng.range(1000000, 10000000), // Supermassive black hole
-    size: rng.range(5000, 8000) // Larger visual size for central black hole
+    size: rng.range(5000, 8000), // Larger visual size for central black hole
+    starType: 'blackhole',
+    temperature: 0,
+    explored: false,
+    planets: [],
+    specialFeatures: []
   });
 
-  // Generate star systems based on galaxy type
-  
-  // Define star types with proper typing - include blackhole as a regular star type
+  // Generate star systems - only normal star types, no black holes
   const starTypes: StarSystem['starType'][] = [
     'main-sequence', 'main-sequence', 'main-sequence', 'main-sequence',
-    'red-giant', 'white-dwarf', 'neutron', 'magnetar', 'pulsar', 'quasar', 'blackhole'
+    'red-giant', 'white-dwarf', 'neutron', 'magnetar', 'pulsar', 'quasar'
   ];
   
   for (let i = 0; i < numSystems; i++) {
@@ -156,15 +164,13 @@ export function generateGalaxy(
     }
     
     const starType = rng.choice(starTypes);
+    const planets = generatePlanets(rng, starType, `${i}-primary`);
     
-    // Black holes don't have planets or companions
-    const planets = starType === 'blackhole' ? [] : generatePlanets(rng, starType, `${i}-primary`);
-    
-    // Generate binary/trinary companions using configurable frequencies (not for black holes)
+    // Generate binary/trinary companions using configurable frequencies
     let binaryCompanion: StarSystem['binaryCompanion'] = undefined;
     let trinaryCompanion: StarSystem['trinaryCompanion'] = undefined;
     
-    if (starType !== 'blackhole' && rng.next() < binaryFrequency) {
+    if (rng.next() < binaryFrequency) {
       const companionTypes: ('main-sequence' | 'red-giant' | 'white-dwarf' | 'neutron' | 'magnetar' | 'pulsar' | 'quasar')[] = [
         'main-sequence', 'red-giant', 'white-dwarf', 'neutron', 'magnetar', 'pulsar', 'quasar'
       ];
@@ -197,14 +203,14 @@ export function generateGalaxy(
       mass: getStarMass(starType, rng),
       explored: false,
       planets,
-      specialFeatures: starType === 'blackhole' ? [] : generateSpecialFeatures(rng),
+      specialFeatures: generateSpecialFeatures(rng),
       binaryCompanion,
       trinaryCompanion
     });
   }
 
-  // Generate additional black holes from numBlackHoles parameter
-  const additionalBlackHoles = Math.floor(numBlackHoles * 0.8); // Use 80% of black hole count for additional black holes
+  // Generate additional black holes from numBlackHoles parameter (minus the central one)
+  const additionalBlackHoles = numBlackHoles - 1; // Subtract the central black hole
   for (let i = 0; i < additionalBlackHoles; i++) {
     let position: [number, number, number];
     
@@ -223,7 +229,12 @@ export function generateGalaxy(
       id: `blackhole-${i}`,
       position,
       mass: rng.range(10, 100), // Solar masses
-      size: rng.range(1500, 3000) // Visual size
+      size: rng.range(1500, 3000), // Visual size
+      starType: 'blackhole',
+      temperature: 0,
+      explored: false,
+      planets: [],
+      specialFeatures: []
     });
   }
 
@@ -364,8 +375,7 @@ function getStarTemperature(starType: StarSystem['starType'], rng: SeededRandom)
     'neutron': [600000, 1000000],
     'magnetar': [1000000, 10000000],
     'pulsar': [1000000, 1000000],
-    'quasar': [10000000, 100000000],
-    'blackhole': [0, 0] // Black holes don't have temperature in traditional sense
+    'quasar': [10000000, 100000000]
   };
   const range = temps[starType] || [5000, 6000];
   return rng.range(range[0], range[1]);
@@ -379,8 +389,7 @@ function getStarMass(starType: StarSystem['starType'], rng: SeededRandom): numbe
     'neutron': [1.4, 2],
     'magnetar': [1.4, 2],
     'pulsar': [1.4, 2],
-    'quasar': [1000000, 10000000000],
-    'blackhole': [10, 100] // Black hole masses in solar masses
+    'quasar': [1000000, 10000000000]
   };
   const range = masses[starType] || [1, 1];
   return rng.range(range[0], range[1]);

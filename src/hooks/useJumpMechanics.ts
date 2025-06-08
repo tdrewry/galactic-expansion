@@ -1,17 +1,17 @@
 
 import { useCallback } from 'react';
-import { StarSystem } from '../utils/galaxyGenerator';
+import { StarSystem, BlackHole } from '../utils/galaxyGenerator';
 import { StarshipStats } from '../utils/starshipGenerator';
 
 export const useJumpMechanics = () => {
   const canJumpToSystem = useCallback((
-    fromSystem: StarSystem,
-    toSystem: StarSystem,
+    fromSystem: StarSystem | BlackHole,
+    toSystem: StarSystem | BlackHole,
     allSystems: StarSystem[],
     stats: StarshipStats,
     exploredSystemIds: Set<string>,
     travelHistory: string[],
-    allBlackHoles: any[] = []
+    allBlackHoles: BlackHole[] = []
   ) => {
     // If we're at a black hole, we can jump to ANY other black hole in the galaxy
     if (fromSystem.starType === 'blackhole') {
@@ -48,42 +48,49 @@ export const useJumpMechanics = () => {
   }, []);
 
   const getJumpableSystemIds = useCallback((
-    fromSystem: StarSystem,
+    fromSystem: StarSystem | BlackHole,
     allSystems: StarSystem[],
     stats: StarshipStats,
     exploredSystemIds: Set<string>,
     travelHistory: string[],
-    allBlackHoles: any[] = []
+    allBlackHoles: BlackHole[] = []
   ) => {
+    // Combine all systems and black holes for jump calculations
+    const allEntities = [...allSystems, ...allBlackHoles];
+    
     // If we're at a black hole, include ALL black holes in jumpable systems
     if (fromSystem.starType === 'blackhole') {
       const blackHoleIds = allBlackHoles
         .filter(bh => bh.id !== fromSystem.id)
         .map(bh => bh.id);
       
-      const normalJumpable = allSystems
+      const normalJumpable = allEntities
         .filter(system => system.id !== fromSystem.id && canJumpToSystem(fromSystem, system, allSystems, stats, exploredSystemIds, travelHistory, allBlackHoles))
         .map(system => system.id);
         
       return [...blackHoleIds, ...normalJumpable];
     }
     
-    return allSystems
+    return allEntities
       .filter(system => system.id !== fromSystem.id && canJumpToSystem(fromSystem, system, allSystems, stats, exploredSystemIds, travelHistory, allBlackHoles))
       .map(system => system.id);
   }, [canJumpToSystem]);
 
   const getScannerRangeSystemIds = useCallback((
-    fromSystem: StarSystem,
+    fromSystem: StarSystem | BlackHole,
     allSystems: StarSystem[],
-    stats: StarshipStats
+    stats: StarshipStats,
+    allBlackHoles: BlackHole[] = []
   ) => {
+    // Combine all systems and black holes for scanner calculations
+    const allEntities = [...allSystems, ...allBlackHoles];
+    
     // Scanner range is a percentage of jump distance
     const galaxyWidth = 100000;
     const maxJumpDistance = (stats.techLevel / 10) * (galaxyWidth / 16);
     const scannerRange = (stats.scanners / 100) * maxJumpDistance;
     
-    return allSystems.filter(system => {
+    return allEntities.filter(system => {
       if (system.id === fromSystem.id) return false;
       
       const dx = fromSystem.position[0] - system.position[0];

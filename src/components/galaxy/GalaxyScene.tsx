@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stars, Billboard } from '@react-three/drei';
-import { Galaxy, StarSystem as StarSystemType } from '../../utils/galaxyGenerator';
+import { Galaxy, StarSystem as StarSystemType, BlackHole } from '../../utils/galaxyGenerator';
 import { StarSystem } from './StarSystem';
 import { Nebula } from './Nebula';
 import { InterstellarMaterial } from './InterstellarMaterial';
@@ -10,7 +10,7 @@ import { ScannerRangeIcons } from './ScannerRangeIcons';
 import { ScannerPing } from './scanner/ScannerPing';
 import { SystemPOIIndicator } from './scanner/SystemPOIIndicator';
 import * as THREE from 'three';
-import { BlackHole } from './BlackHole';
+import { BlackHole as BlackHoleComponent } from './BlackHole';
 
 interface GalaxySceneProps {
   galaxy: Galaxy;
@@ -32,8 +32,8 @@ interface GalaxySceneProps {
   exploredSystemIds?: Set<string>;
   travelHistory?: string[];
   currentSystemId?: string | null;
-  getJumpableSystemIds?: (fromSystem: StarSystemType, allSystems: StarSystemType[]) => string[];
-  getScannerRangeSystemIds?: (fromSystem: StarSystemType, allSystems: StarSystemType[]) => string[];
+  getJumpableSystemIds?: (fromSystem: StarSystemType | BlackHole, allSystems: StarSystemType[], allBlackHoles?: BlackHole[]) => string[];
+  getScannerRangeSystemIds?: (fromSystem: StarSystemType | BlackHole, allSystems: StarSystemType[], allBlackHoles?: BlackHole[]) => string[];
   isScanning?: boolean;
   onScanComplete?: () => void;
 }
@@ -79,8 +79,10 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
   const [scannerFadeTimer, setScannerFadeTimer] = useState<NodeJS.Timeout | null>(null);
   const [revealedPOISystems, setRevealedPOISystems] = useState<Set<string>>(new Set());
   
-  // Find the actual current system object
-  const currentSystem = currentSystemId ? galaxy.starSystems.find(s => s.id === currentSystemId) : null;
+  // Find the actual current system object (could be a star system or black hole)
+  const currentSystem = currentSystemId ? 
+    galaxy.starSystems.find(s => s.id === currentSystemId) || 
+    galaxy.blackHoles?.find(bh => bh.id === currentSystemId) : null;
   
   // Calculate scanner range for ping visualization
   const scannerRange = shipStats ? (shipStats.scanners / 100) * 50000 : 25000;
@@ -97,7 +99,8 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
 
   useImperativeHandle(ref, () => ({
     zoomToSystem: (systemId: string) => {
-      const system = galaxy.starSystems.find(s => s.id === systemId);
+      const system = galaxy.starSystems.find(s => s.id === systemId) || 
+                   galaxy.blackHoles?.find(bh => bh.id === systemId);
       if (system && controlsRef.current) {
         console.log('Zooming to system:', systemId);
         const [x, y, z] = system.position;
@@ -111,24 +114,16 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
         hasInitiallyZoomed.current = true;
       }
     }
-  }), [galaxy.starSystems, camera]);
+  }), [galaxy.starSystems, galaxy.blackHoles, camera]);
 
   const handleBlackHoleSelect = (blackHole: { id: string; position: [number, number, number] }) => {
     console.log('Black hole selected:', blackHole.id);
-    // Create a pseudo-system object for black holes to work with existing selection logic
-    const blackHoleAsSystem: StarSystemType = {
-      id: blackHole.id,
-      position: blackHole.position,
-      starType: 'blackhole',
-      temperature: 0,
-      mass: 50, // Default mass
-      explored: false,
-      planets: [],
-      specialFeatures: [],
-      binaryCompanion: undefined,
-      trinaryCompanion: undefined
-    };
-    onSystemSelect(blackHoleAsSystem);
+    // Find the actual black hole object from the galaxy
+    const actualBlackHole = galaxy.blackHoles?.find(bh => bh.id === blackHole.id);
+    if (actualBlackHole) {
+      // Black holes are now proper system objects with starType 'blackhole'
+      onSystemSelect(actualBlackHole as any);
+    }
   };
 
   useEffect(() => {
@@ -187,13 +182,13 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
   
   // Determine if selected system icons should be shown
   const shouldShowSelectedSystemIcons = selectedSystem && currentSystem && getScannerRangeSystemIds && 
-    getScannerRangeSystemIds(currentSystem, galaxy.starSystems).includes(selectedSystem.id);
+    getScannerRangeSystemIds(currentSystem, galaxy.starSystems, galaxy.blackHoles).includes(selectedSystem.id);
 
   const handleScanComplete = () => {
     setShowScannerIcons(true);
     
     if (currentSystem && getScannerRangeSystemIds) {
-      const scannerRangeIds = getScannerRangeSystemIds(currentSystem, galaxy.starSystems);
+      const scannerRangeIds = getScannerRangeSystemIds(currentSystem, galaxy.starSystems, galaxy.blackHoles);
       const newRevealedPOIs = new Set(revealedPOISystems);
       
       scannerRangeIds.forEach(systemId => {
@@ -277,8 +272,8 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
           shipStats={shipStats}
           exploredSystemIds={exploredSystemIds}
           travelHistory={travelHistory}
-          scannerRangeSystemIds={getScannerRangeSystemIds(currentSystem, galaxy.starSystems)}
-          jumpableSystemIds={getJumpableSystemIds(currentSystem, galaxy.starSystems)}
+          scannerRangeSystemIds={getScannerRangeSystemIds(currentSystem, galaxy.starSystems, galaxy.blackHoles)}
+          jumpableSystemIds={getJumpableSystemIds(currentSystem, galaxy.starSystems, galaxy.blackHoles)}
           jumpLaneOpacity={jumpLaneOpacity}
           greenPathOpacity={greenPathOpacity}
           visitedJumpLaneOpacity={visitedJumpLaneOpacity}
@@ -294,9 +289,9 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
         />
       ))}
       
-      {/* Render Black Holes - always show them now since they replace nebulae */}
+      {/* Render Black Holes as selectable systems */}
       {galaxy.blackHoles?.map((blackHole) => (
-        <BlackHole
+        <BlackHoleComponent
           key={blackHole.id}
           id={blackHole.id}
           position={blackHole.position}
@@ -321,7 +316,7 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
             <ScannerRangeIcons
               key={`scanner-all-${system.id}`}
               system={system}
-              scannerRangeSystemIds={getScannerRangeSystemIds(currentSystem, galaxy.starSystems)}
+              scannerRangeSystemIds={getScannerRangeSystemIds(currentSystem, galaxy.starSystems, galaxy.blackHoles)}
             />
           ))}
         </>

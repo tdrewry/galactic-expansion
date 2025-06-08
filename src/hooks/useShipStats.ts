@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { StarshipStats } from '../utils/starshipGenerator';
 import { ExplorationEvent } from '../components/galaxy/ExplorationDialog';
 import { useToast } from '@/hooks/use-toast';
-import { StarSystem } from '../utils/galaxyGenerator';
+import { StarSystem, BlackHole } from '../utils/galaxyGenerator';
 import { useGameSave } from './useGameSave';
 import { useExplorationEvents } from './useExplorationEvents';
 import { useJumpMechanics } from './useJumpMechanics';
@@ -192,8 +192,8 @@ export const useShipStats = (initialStats: StarshipStats) => {
     return null;
   }, [loadGameData]);
 
-  const canJumpToSystem = useCallback((fromSystem: StarSystem, toSystem: StarSystem, allSystems: StarSystem[]) => {
-    return canJumpToSystemCheck(fromSystem, toSystem, allSystems, stats, exploredSystemIds, travelHistory);
+  const canJumpToSystem = useCallback((fromSystem: StarSystem | BlackHole, toSystem: StarSystem | BlackHole, allSystems: StarSystem[], allBlackHoles: BlackHole[] = []) => {
+    return canJumpToSystemCheck(fromSystem, toSystem, allSystems, stats, exploredSystemIds, travelHistory, allBlackHoles);
   }, [canJumpToSystemCheck, stats, exploredSystemIds, travelHistory]);
 
   const jumpToNewGalaxy = useCallback(() => {
@@ -214,12 +214,12 @@ export const useShipStats = (initialStats: StarshipStats) => {
     return newGalaxySeed;
   }, [toast]);
 
-  const getJumpableSystemIds = useCallback((fromSystem: StarSystem, allSystems: StarSystem[]) => {
-    return getJumpableIds(fromSystem, allSystems, stats, exploredSystemIds, travelHistory);
+  const getJumpableSystemIds = useCallback((fromSystem: StarSystem | BlackHole, allSystems: StarSystem[], allBlackHoles: BlackHole[] = []) => {
+    return getJumpableIds(fromSystem, allSystems, stats, exploredSystemIds, travelHistory, allBlackHoles);
   }, [getJumpableIds, stats, exploredSystemIds, travelHistory]);
 
-  const getScannerRangeSystemIds = useCallback((fromSystem: StarSystem, allSystems: StarSystem[]) => {
-    return getScannerRangeIds(fromSystem, allSystems, stats);
+  const getScannerRangeSystemIds = useCallback((fromSystem: StarSystem | BlackHole, allSystems: StarSystem[], allBlackHoles: BlackHole[] = []) => {
+    return getScannerRangeIds(fromSystem, allSystems, stats, allBlackHoles);
   }, [getScannerRangeIds, stats]);
 
   const resetStats = useCallback((newStats: StarshipStats, startingSystemId?: string) => {
