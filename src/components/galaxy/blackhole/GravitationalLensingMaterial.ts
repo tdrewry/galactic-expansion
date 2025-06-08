@@ -1,3 +1,4 @@
+
 import * as THREE from 'three';
 
 export const createGravitationalLensingMaterial = () => {
@@ -40,40 +41,42 @@ export const createGravitationalLensingMaterial = () => {
           return;
         }
         
-        // Distortion ring - orange accretion disk with ring pattern
+        // Distortion ring - orange accretion disk with concentric rings
         if (distFromCenter > eventHorizonRadius && distFromCenter < distortionRadius) {
+          // Normalize distance within the ring
+          float normalizedDist = (distFromCenter - eventHorizonRadius) / (distortionRadius - eventHorizonRadius);
+          
           // Create concentric rings
-          float ringScale = 15.0; // Number of rings
-          float ringPattern = sin((distFromCenter - eventHorizonRadius) * ringScale + time * 2.0);
+          float ringScale = 12.0; // Number of rings
+          float ringPos = normalizedDist * ringScale;
+          float ringIndex = floor(ringPos);
+          float ringFraction = fract(ringPos);
           
-          // Create ring thickness with falloff
-          float ringCenter = (eventHorizonRadius + distortionRadius) * 0.65;
-          float ringDistance = abs(distFromCenter - ringCenter);
-          float ringThickness = 0.025; // Reduced thickness
+          // Create ring pattern with sharp edges
+          float ringMask = step(0.3, ringFraction) * step(ringFraction, 0.7);
           
-          if (ringDistance < ringThickness) {
-            float intensity = 1.0 - (ringDistance / ringThickness);
-            intensity = smoothstep(0.0, 1.0, intensity);
-            
-            // Apply ring pattern
-            float ringIntensity = (ringPattern * 0.5 + 0.5) * intensity;
-            
+          if (ringMask > 0.0) {
             // Create temperature gradient from inner (hot) to outer (cooler)
-            float temp = mix(0.8, 0.3, (distFromCenter - eventHorizonRadius) / (distortionRadius - eventHorizonRadius));
-            temp = temp * ringIntensity;
+            float temp = 1.0 - normalizedDist * 0.6;
+            
+            // Vary ring colors based on ring index
+            float ringVariation = sin(ringIndex * 1.5) * 0.3 + 0.7;
+            temp *= ringVariation;
             
             // Orange/amber colors for the accretion disk
             color = mix(
-              vec3(1.0, 0.3, 0.1), // Hot orange-red
-              vec3(1.0, 0.7, 0.2), // Bright orange-yellow
+              vec3(1.0, 0.4, 0.1), // Hot orange-red
+              vec3(1.0, 0.8, 0.3), // Bright orange-yellow
               temp
             );
             
-            // Add some brightness variation based on rings
-            float brightness = 0.7 + 0.5 * ringIntensity;
+            // Add brightness variation
+            float brightness = 0.8 + 0.4 * ringVariation;
             color *= brightness;
             
-            alpha = ringIntensity * 0.9;
+            // Smooth falloff at ring edges
+            float edgeSmooth = smoothstep(0.25, 0.35, ringFraction) * smoothstep(0.75, 0.65, ringFraction);
+            alpha = edgeSmooth * 0.9;
           }
         }
         
