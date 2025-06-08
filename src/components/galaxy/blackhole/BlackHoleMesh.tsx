@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Billboard } from '@react-three/drei';
@@ -36,6 +35,11 @@ export const BlackHoleMesh: React.FC<BlackHoleMeshProps> = ({
     }
   });
 
+  // Use ring geometry with inner and outer radius to create the ring effect
+  // Keep the ring size tight to the visual effect
+  const ringInnerRadius = size * 0.3;
+  const ringOuterRadius = size * 0.5;
+
   const meshElement = (
     <mesh
       ref={meshRef}
@@ -44,7 +48,7 @@ export const BlackHoleMesh: React.FC<BlackHoleMeshProps> = ({
       onPointerOver={onPointerOver}
       onPointerOut={onPointerOut}
     >
-      <planeGeometry args={[size, size, 32, 32]} />
+      <ringGeometry args={[ringInnerRadius, ringOuterRadius, 64]} />
     </mesh>
   );
 
