@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
 import { ExplorationDialog } from '../components/galaxy/ExplorationDialog';
@@ -164,7 +163,7 @@ const Index = () => {
     if (!currentSystemId && numSystems > 0) {
       // Generate systems and find a suitable starting system
       const tempGalaxy = generateGalaxy(galaxySeed, numSystems, numBlackHoles, binaryFrequency, trinaryFrequency);
-      const startingSystem = selectStartingSystem(tempGalaxy.starSystems);
+      const startingSystem = selectStartingSystem(tempGalaxy.starSystems, shipStats, tempGalaxy.blackHoles);
       
       if (startingSystem) {
         jumpToSystem(startingSystem.id, false); // No interrupt for initial placement
@@ -177,7 +176,7 @@ const Index = () => {
         }
       }
     }
-  }, [galaxySeed, numSystems, numBlackHoles, binaryFrequency, trinaryFrequency, currentSystemId, jumpToSystem, shouldZoomToStarter]);
+  }, [galaxySeed, numSystems, numBlackHoles, binaryFrequency, trinaryFrequency, currentSystemId, jumpToSystem, shouldZoomToStarter, shipStats]);
 
   // Show ship selection on first load
   React.useEffect(() => {
