@@ -14,7 +14,7 @@ interface BlackHoleProps {
 export const BlackHole: React.FC<BlackHoleProps> = ({
   id,
   position,
-  size = 150, // Reduced from 400 to 150
+  size = 100, // Reduced from 150 to 100
   isSelected = false,
   onSelect
 }) => {
