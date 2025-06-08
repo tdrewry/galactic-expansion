@@ -18,6 +18,14 @@ export const BlackHoleJumpActions: React.FC<BlackHoleJumpActionsProps> = ({
   const isBlackHole = selectedSystem?.starType === 'blackhole';
   const isAtBlackHole = currentSystemId && selectedSystem?.id === currentSystemId && isBlackHole;
 
+  console.log('BlackHoleJumpActions Debug:', {
+    selectedSystemId: selectedSystem?.id,
+    selectedSystemStarType: selectedSystem?.starType,
+    currentSystemId,
+    isBlackHole,
+    isAtBlackHole
+  });
+
   if (!isBlackHole) {
     return null;
   }
