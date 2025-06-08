@@ -65,6 +65,7 @@ interface GalaxyLayoutPanelsProps {
   onUpdateShipName?: (newName: string) => void;
   canJumpToSelected?: boolean;
   galaxyMapRef?: React.RefObject<GalaxyMapRef>;
+  onBlackHoleJumpBoost?: () => void;
 }
 
 export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => {
@@ -139,6 +140,7 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => 
           galaxyMapRef={props.galaxyMapRef}
           canJumpToSelected={props.canJumpToSelected}
           onTriggerScan={handleTriggerScan}
+          onBlackHoleJumpBoost={props.onBlackHoleJumpBoost}
         />
       </ResizablePanel>
 
@@ -169,6 +171,7 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => 
               onRepairHull={props.onRepairHull}
               onRepairShields={props.onRepairShields}
               onRepairCombatSystems={props.onRepairCombatSystems}
+              onBlackHoleJumpBoost={props.onBlackHoleJumpBoost}
             />
           </ResizablePanel>
         </>

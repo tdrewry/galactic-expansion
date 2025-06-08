@@ -114,12 +114,16 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
     // Find the actual black hole object from the galaxy
     const actualBlackHole = galaxy.blackHoles?.find(bh => bh.id === blackHole.id);
     if (actualBlackHole) {
-      // Convert BlackHole to StarSystemType for compatibility
+      // Convert BlackHole to StarSystemType for compatibility - but keep starType as 'blackhole'
       const blackHoleAsSystem: StarSystemType = {
         ...actualBlackHole,
-        starType: 'neutron', // Use compatible star type instead of 'blackhole'
+        starType: 'blackhole' as any, // Keep original type for identification
+        temperature: 0, // Black holes have no temperature
+        mass: actualBlackHole.size / 10, // Estimate mass from size
         planets: [],
-        specialFeatures: []
+        specialFeatures: ['supermassive-black-hole'],
+        binaryCompanion: undefined,
+        trinaryCompanion: undefined
       };
       onSystemSelect(blackHoleAsSystem);
     }

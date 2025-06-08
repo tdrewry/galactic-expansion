@@ -9,6 +9,7 @@ import { NavigationActions } from './actions/NavigationActions';
 import { SystemStatusDisplay } from './actions/SystemStatusDisplay';
 import { MarketActions } from './actions/MarketActions';
 import { GalaxyJumpActions } from './actions/GalaxyJumpActions';
+import { BlackHoleJumpActions } from './actions/BlackHoleJumpActions';
 
 interface ActionsPanelProps {
   selectedSystem: StarSystem | null;
@@ -31,6 +32,7 @@ interface ActionsPanelProps {
   canJumpToSelected?: boolean;
   onJumpToSystem?: (systemId: string) => void;
   onJumpToNewGalaxy?: () => void;
+  onBlackHoleJumpBoost?: () => void;
 }
 
 export const ActionsPanel: React.FC<ActionsPanelProps> = ({
@@ -49,7 +51,8 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
   isScanning = false,
   canJumpToSelected = false,
   onJumpToSystem,
-  onJumpToNewGalaxy
+  onJumpToNewGalaxy,
+  onBlackHoleJumpBoost
 }) => {
   const isBlackHole = selectedSystem?.starType === 'blackhole';
   const isCentralBlackHole = selectedSystem?.id === 'central-blackhole';
@@ -72,6 +75,12 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
               selectedSystem={selectedSystem}
               currentSystemId={currentSystemId}
               onJumpToNewGalaxy={onJumpToNewGalaxy}
+            />
+
+            <BlackHoleJumpActions
+              selectedSystem={selectedSystem}
+              currentSystemId={currentSystemId}
+              onBlackHoleJumpBoost={onBlackHoleJumpBoost}
             />
 
             <SystemStatusDisplay

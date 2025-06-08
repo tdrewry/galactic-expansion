@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { StarSystem, Planet, Moon } from '../../../utils/galaxyGenerator';
@@ -35,6 +34,7 @@ interface RightPanelProps {
   onRepairHull?: (cost: number) => void;
   onRepairShields?: (cost: number) => void;
   onRepairCombatSystems?: (cost: number) => void;
+  onBlackHoleJumpBoost?: () => void;
 }
 
 export const RightPanel: React.FC<RightPanelProps> = ({
@@ -58,7 +58,8 @@ export const RightPanel: React.FC<RightPanelProps> = ({
   onUpdateShipName,
   onRepairHull,
   onRepairShields,
-  onRepairCombatSystems
+  onRepairCombatSystems,
+  onBlackHoleJumpBoost
 }) => {
   const [isMarketOpen, setIsMarketOpen] = useState(false);
   const [marketInfo, setMarketInfo] = useState<MarketLocation | null>(null);

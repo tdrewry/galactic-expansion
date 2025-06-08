@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { StarSystem } from '../../utils/galaxyGenerator';
-import { Star, Thermometer, Scale, Zap, Users, Building2 } from 'lucide-react';
+import { Star, Thermometer, Scale, Zap, Users, Building2, AlertTriangle } from 'lucide-react';
 
 interface SystemInfoCardProps {
   system: StarSystem;
@@ -17,6 +16,93 @@ export const SystemInfoCard: React.FC<SystemInfoCardProps> = ({
   selectedStar, 
   onStarSelect 
 }) => {
+  // Check if this is a black hole
+  const isBlackHole = system.starType === 'blackhole';
+  const isCentralBlackHole = system.id === 'central-blackhole';
+
+  if (isBlackHole) {
+    return (
+      <Card className="bg-gray-800 border-gray-600">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-red-500" />
+            Black Hole {system.id}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Hazard Warning */}
+          <div className="bg-red-900/20 border border-red-600 rounded-lg p-3">
+            <div className="flex items-center gap-2 text-red-400 font-semibold mb-2">
+              <AlertTriangle className="h-4 w-4" />
+              EXTREME HAZARD WARNING
+            </div>
+            <p className="text-red-300 text-sm">
+              Supermassive black hole detected. Gravitational anomalies present. 
+              Standard exploration and market operations are not possible.
+            </p>
+          </div>
+
+          {/* Black Hole Properties */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-gray-300">Type:</span>
+              <Badge className="bg-purple-600 text-white">
+                {isCentralBlackHole ? 'SUPERMASSIVE' : 'BLACK HOLE'}
+              </Badge>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <span className="text-gray-300 flex items-center gap-1">
+                <Scale className="h-4 w-4" />
+                Estimated Mass:
+              </span>
+              <span className="text-white">{system.mass.toFixed(2)} M☉</span>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <span className="text-gray-300">Event Horizon:</span>
+              <span className="text-white">~{(system.mass * 3).toFixed(1)} km</span>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <span className="text-gray-300">Gravitational Influence:</span>
+              <span className="text-red-400">EXTREME</span>
+            </div>
+          </div>
+
+          {/* Special Properties */}
+          <div className="pt-3 border-t border-gray-600">
+            <h4 className="text-white font-medium mb-2">Properties</h4>
+            <div className="flex flex-wrap gap-1">
+              <Badge className="bg-purple-700 text-white text-xs">
+                GRAVITATIONAL LENSING
+              </Badge>
+              <Badge className="bg-red-700 text-white text-xs">
+                TIME DILATION
+              </Badge>
+              {isCentralBlackHole && (
+                <Badge className="bg-indigo-700 text-white text-xs">
+                  GALAXY GATEWAY
+                </Badge>
+              )}
+            </div>
+          </div>
+
+          {/* Navigation Note */}
+          <div className="pt-3 border-t border-gray-600">
+            <p className="text-gray-400 text-xs">
+              {isCentralBlackHole 
+                ? "Central galaxy black hole - may enable intergalactic travel"
+                : "Isolated black hole - use caution when approaching"
+              }
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Regular star system display
   const getCurrentStar = () => {
     switch (selectedStar) {
       case 'binary':
