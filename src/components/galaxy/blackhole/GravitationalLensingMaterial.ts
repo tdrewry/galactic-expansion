@@ -33,13 +33,16 @@ export const createGravitationalLensingMaterial = () => {
         float distFromCenter = length(uv - center);
         vec2 offset = uv - center;
         
-        // Event horizon - solid black sphere (made more prominent)
+        // Event horizon - solid black sphere (always render this first)
         if (distFromCenter <= eventHorizonRadius) {
           color = vec3(0.0, 0.0, 0.0);
           alpha = 1.0;
+          gl_FragColor = vec4(color, alpha);
+          return;
         }
+        
         // Distortion ring - orange accretion disk with warping effect
-        else if (distFromCenter > eventHorizonRadius && distFromCenter < distortionRadius) {
+        if (distFromCenter > eventHorizonRadius && distFromCenter < distortionRadius) {
           // Calculate angle for radial distortion
           float angle = atan(offset.y, offset.x);
           
@@ -83,7 +86,8 @@ export const createGravitationalLensingMaterial = () => {
     `,
     transparent: true,
     side: THREE.DoubleSide,
-    blending: THREE.AdditiveBlending
+    blending: THREE.NormalBlending,
+    depthWrite: false
   });
 };
 
