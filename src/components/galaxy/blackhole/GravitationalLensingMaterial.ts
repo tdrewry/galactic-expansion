@@ -6,8 +6,8 @@ export const createGravitationalLensingMaterial = () => {
     uniforms: {
       time: { value: 0 },
       center: { value: new THREE.Vector2(0.5, 0.5) },
-      eventHorizonRadius: { value: 0.04 }, // Reduced from 0.08
-      distortionRadius: { value: 0.055 }, // Reduced from 0.1 to be 45% smaller
+      eventHorizonRadius: { value: 0.06 }, // Increased slightly to compensate for smaller plane
+      distortionRadius: { value: 0.08 }, // Increased slightly to compensate for smaller plane
     },
     vertexShader: `
       varying vec2 vUv;

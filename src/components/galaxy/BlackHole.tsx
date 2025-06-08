@@ -14,7 +14,7 @@ interface BlackHoleProps {
 export const BlackHole: React.FC<BlackHoleProps> = ({
   id,
   position,
-  size = 400,
+  size = 150, // Reduced from 400 to 150
   isSelected = false,
   onSelect
 }) => {
@@ -44,7 +44,7 @@ export const BlackHole: React.FC<BlackHoleProps> = ({
         onPointerOut={handlePointerOut}
         visible={false}
       >
-        <sphereGeometry args={[size * 2, 8, 6]} />
+        <sphereGeometry args={[size * 1.5, 8, 6]} />
         <meshBasicMaterial transparent opacity={0} />
       </mesh>
 
