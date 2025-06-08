@@ -27,28 +27,25 @@ export const createGravitationalLensingMaterial = () => {
       
       varying vec2 vUv;
       
-      // Simple noise function
-      float noise(vec2 p) {
-        return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
-      }
-      
-      // Gravitational lensing distortion
+      // Gravitational lensing distortion for background elements
       vec2 gravitationalLens(vec2 uv, vec2 blackHole, float radius) {
         vec2 delta = uv - blackHole;
         float dist = length(delta);
         
         if (dist < eventHorizonRadius) {
-          return vec2(-1.0); // Inside event horizon
+          return vec2(-1.0); // Inside event horizon - no light escapes
         }
         
-        if (dist < radius) {
-          // Apply lensing distortion
-          float bendStrength = (radius * radius) / (dist * dist + 0.01);
-          float angle = atan(delta.y, delta.x) + time * 0.1;
+        if (dist < radius && dist > eventHorizonRadius) {
+          // Apply realistic lensing based on distance from black hole
+          float lensStrength = (radius - dist) / (radius - eventHorizonRadius);
+          float bendAngle = lensStrength * 0.3; // Reduced bending for realism
           
-          // Create the characteristic ring distortion
-          vec2 lensedPos = uv + normalize(delta) * bendStrength * 0.2;
-          return lensedPos;
+          // Bend light rays around the black hole
+          float angle = atan(delta.y, delta.x);
+          vec2 bentDirection = vec2(cos(angle + bendAngle), sin(angle + bendAngle));
+          
+          return uv + bentDirection * lensStrength * 0.1;
         }
         
         return uv;
@@ -60,74 +57,61 @@ export const createGravitationalLensingMaterial = () => {
         
         float distFromCenter = length(uv - center);
         
-        // Event horizon - pure black
+        // Event horizon - pure black, no light escapes
         if (distFromCenter < eventHorizonRadius) {
           gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
           return;
         }
         
-        // Apply gravitational lensing to background
-        vec2 lensedUv = gravitationalLens(uv, center, lensingRadius);
-        
-        // Simulate background stars being lensed
-        if (lensedUv.x >= 0.0) {
-          float starField = noise(lensedUv * 80.0);
-          if (starField > 0.97) {
-            float starIntensity = (starField - 0.97) / 0.03;
-            color += vec3(1.0, 0.9, 0.7) * starIntensity;
-          }
-          
-          // Add some distant galaxy light being lensed
-          float galaxyNoise = noise(lensedUv * 20.0 + time * 0.1);
-          if (galaxyNoise > 0.9) {
-            color += vec3(0.4, 0.6, 1.0) * (galaxyNoise - 0.9) * 2.0;
-          }
-        }
-        
-        // Accretion disk - minimal and focused
+        // Accretion disk - minimal and realistic
         if (distFromCenter > eventHorizonRadius && distFromCenter < accretionRadius) {
           float diskFactor = (distFromCenter - eventHorizonRadius) / (accretionRadius - eventHorizonRadius);
           
-          // Simple spiral pattern
+          // Simple orbital motion
           float angle = atan(uv.y - center.y, uv.x - center.x);
-          float spiral = sin(angle * 2.0 + distFromCenter * 15.0 - time * 3.0);
+          float orbital = sin(angle * 3.0 - time * 2.0 * (1.0 / distFromCenter));
           
           // Temperature gradient (hotter closer to black hole)
           float temperature = 1.0 - diskFactor;
           
-          // Disk intensity
-          float intensity = (spiral * 0.3 + 0.7) * temperature;
-          intensity = smoothstep(0.2, 1.0, intensity);
+          // Disk intensity with realistic orbital patterns
+          float intensity = (orbital * 0.2 + 0.8) * temperature;
+          intensity = smoothstep(0.3, 1.0, intensity);
           
-          // Hot accretion disk colors
-          if (temperature > 0.7) {
-            color += vec3(0.8, 0.9, 1.0) * intensity * 0.8; // Blue-white hot
-          } else if (temperature > 0.4) {
-            color += vec3(1.0, 0.8, 0.4) * intensity * 0.6; // Yellow-white
+          // Realistic accretion disk colors based on temperature
+          if (temperature > 0.8) {
+            color += vec3(0.9, 0.95, 1.0) * intensity * 0.6; // Very hot - blue-white
+          } else if (temperature > 0.5) {
+            color += vec3(1.0, 0.9, 0.7) * intensity * 0.5; // Hot - white-yellow
           } else {
-            color += vec3(1.0, 0.4, 0.1) * intensity * 0.4; // Orange-red
+            color += vec3(1.0, 0.6, 0.2) * intensity * 0.3; // Cooler - orange-red
           }
         }
         
-        // Einstein ring effect - bright ring at lensing boundary
-        float ringDist = abs(distFromCenter - lensingRadius * 0.8);
-        if (ringDist < 0.02) {
-          float ringIntensity = 1.0 - (ringDist / 0.02);
-          color += vec3(1.0, 0.8, 0.6) * ringIntensity * 0.5;
+        // Einstein ring effect - visible when background objects align
+        float ringDist = abs(distFromCenter - lensingRadius * 0.85);
+        if (ringDist < 0.01) {
+          float ringIntensity = 1.0 - (ringDist / 0.01);
+          color += vec3(0.8, 0.9, 1.0) * ringIntensity * 0.3;
         }
         
-        // Photon sphere glow - subtle
-        if (distFromCenter > eventHorizonRadius && distFromCenter < eventHorizonRadius * 2.0) {
-          float glowIntensity = 1.0 - (distFromCenter - eventHorizonRadius) / eventHorizonRadius;
-          glowIntensity = pow(glowIntensity, 2.0);
-          color += vec3(0.3, 0.5, 1.0) * glowIntensity * 0.3;
+        // Photon sphere - subtle gravitational redshift effect
+        if (distFromCenter > eventHorizonRadius && distFromCenter < eventHorizonRadius * 1.5) {
+          float photonSphereIntensity = 1.0 - (distFromCenter - eventHorizonRadius) / (eventHorizonRadius * 0.5);
+          photonSphereIntensity = pow(photonSphereIntensity, 3.0);
+          color += vec3(0.2, 0.3, 0.8) * photonSphereIntensity * 0.2;
         }
+        
+        // Outside the black hole, we let background elements show through naturally
+        // The actual lensing of background stars/galaxies will be handled by 
+        // the overall scene rendering, not artificial generation here
         
         gl_FragColor = vec4(color, 1.0);
       }
     `,
     transparent: true,
-    side: THREE.DoubleSide
+    side: THREE.DoubleSide,
+    blending: THREE.AdditiveBlending
   });
 };
 
