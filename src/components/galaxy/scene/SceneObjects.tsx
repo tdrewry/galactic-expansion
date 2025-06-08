@@ -1,14 +1,13 @@
 
 import React from 'react';
-import { Galaxy, StarSystem as StarSystemType, BlackHole } from '../../../utils/galaxyGenerator';
 import { StarSystem } from '../StarSystem';
-import { BlackHole as BlackHoleComponent } from '../BlackHole';
-import { Nebula } from '../Nebula';
+import { BlackHole } from '../BlackHole';
+import { Galaxy, StarSystem as StarSystemType } from '../../../utils/galaxyGenerator';
 
 interface SceneObjectsProps {
   galaxy: Galaxy;
   selectedSystem: StarSystemType | null;
-  onSystemSelect: (system: StarSystemType | null) => void;
+  onSystemSelect: (system: StarSystemType) => void;
   onBlackHoleSelect: (blackHole: { id: string; position: [number, number, number] }) => void;
 }
 
@@ -20,28 +19,26 @@ export const SceneObjects: React.FC<SceneObjectsProps> = ({
 }) => {
   return (
     <>
+      {/* Render Star Systems */}
       {galaxy.starSystems.map((system) => (
         <StarSystem
           key={system.id}
           system={system}
-          isSelected={selectedSystem?.id === system.id}
+          isSelected={selectedSystem?.id === system.id && selectedSystem?.starType !== 'blackhole'}
           onSelect={onSystemSelect}
         />
       ))}
       
+      {/* Render Black Holes */}
       {galaxy.blackHoles?.map((blackHole) => (
-        <BlackHoleComponent
+        <BlackHole
           key={blackHole.id}
           id={blackHole.id}
           position={blackHole.position}
           size={blackHole.size}
-          isSelected={selectedSystem?.id === blackHole.id}
+          isSelected={selectedSystem?.id === blackHole.id && selectedSystem?.starType === 'blackhole'}
           onSelect={onBlackHoleSelect}
         />
-      ))}
-      
-      {galaxy.nebulae.map((nebula) => (
-        <Nebula key={nebula.id} nebula={nebula} />
       ))}
     </>
   );

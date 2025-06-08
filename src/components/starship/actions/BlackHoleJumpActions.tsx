@@ -16,10 +16,31 @@ export const BlackHoleJumpActions: React.FC<BlackHoleJumpActionsProps> = ({
   onBlackHoleJumpBoost
 }) => {
   const isBlackHole = selectedSystem?.starType === 'blackhole';
-  const isCurrentBlackHole = isBlackHole && selectedSystem?.id === currentSystemId;
+  const isAtBlackHole = currentSystemId && selectedSystem?.id === currentSystemId && isBlackHole;
 
-  if (!isBlackHole || !isCurrentBlackHole) {
+  if (!isBlackHole) {
     return null;
+  }
+
+  // Show different content based on whether we're at the black hole or just viewing it
+  if (!isAtBlackHole) {
+    return (
+      <div className="space-y-2">
+        <div className="bg-purple-900/20 border border-purple-600 rounded-lg p-3">
+          <div className="flex items-center gap-2 text-purple-400 font-medium mb-2">
+            <Zap className="h-4 w-4" />
+            Black Hole Jump Boost
+          </div>
+          <p className="text-purple-300 text-sm mb-3">
+            Travel to this black hole to use its gravitational field for experimental long-range jumps.
+          </p>
+          <div className="flex items-center gap-2 text-yellow-400 text-xs">
+            <AlertTriangle className="h-3 w-3" />
+            <span>Must be at black hole location to activate</span>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
