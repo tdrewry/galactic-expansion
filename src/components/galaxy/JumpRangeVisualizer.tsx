@@ -1,12 +1,13 @@
 
 import React, { useMemo } from 'react';
 import { Line } from '@react-three/drei';
-import { StarSystem } from '../../utils/galaxyGenerator';
+import { StarSystem, BlackHole, SelectableEntity } from '../../utils/galaxyGenerator';
 import { StarshipStats } from '../../utils/starshipGenerator';
 
 interface JumpRangeVisualizerProps {
-  currentSystem: StarSystem | null;
+  currentSystem: SelectableEntity | null;
   allSystems: StarSystem[];
+  allBlackHoles?: BlackHole[];
   shipStats: StarshipStats;
   exploredSystemIds: Set<string>;
   travelHistory: string[];
@@ -20,6 +21,7 @@ interface JumpRangeVisualizerProps {
 export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
   currentSystem,
   allSystems,
+  allBlackHoles = [],
   shipStats,
   exploredSystemIds,
   travelHistory = [],
@@ -35,10 +37,13 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
     const jumpableLines = [];
     const visitedLines = [];
     
+    // Combine all entities for position lookup
+    const allEntities = [...allSystems, ...allBlackHoles];
+    
     // Add unexplored systems that are within jump range
     for (const systemId of jumpableSystemIds) {
       if (!exploredSystemIds.has(systemId)) {
-        const targetSystem = allSystems.find(s => s.id === systemId);
+        const targetSystem = allEntities.find(s => s.id === systemId);
         if (targetSystem) {
           jumpableLines.push({
             points: [
@@ -52,17 +57,20 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
     }
     
     return { jumpableLines, visitedLines };
-  }, [currentSystem, allSystems, jumpableSystemIds, exploredSystemIds]);
+  }, [currentSystem, allSystems, allBlackHoles, jumpableSystemIds, exploredSystemIds]);
 
   const greenPathLines = useMemo(() => {
     if (!travelHistory || travelHistory.length < 2) return [];
+    
+    // Combine all entities for position lookup
+    const allEntities = [...allSystems, ...allBlackHoles];
     
     // Show the green path connecting systems in order of travel history
     // This is always visible regardless of jump range
     const lines = [];
     for (let i = 0; i < travelHistory.length - 1; i++) {
-      const fromSystem = allSystems.find(s => s.id === travelHistory[i]);
-      const toSystem = allSystems.find(s => s.id === travelHistory[i + 1]);
+      const fromSystem = allEntities.find(s => s.id === travelHistory[i]);
+      const toSystem = allEntities.find(s => s.id === travelHistory[i + 1]);
       
       if (fromSystem && toSystem) {
         lines.push({
@@ -75,7 +83,7 @@ export const JumpRangeVisualizer: React.FC<JumpRangeVisualizerProps> = ({
       }
     }
     return lines;
-  }, [travelHistory, allSystems]);
+  }, [travelHistory, allSystems, allBlackHoles]);
 
   if (!currentSystem) return null;
 

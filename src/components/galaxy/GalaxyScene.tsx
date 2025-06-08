@@ -3,7 +3,6 @@ import { useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stars, Billboard } from '@react-three/drei';
 import { Galaxy, StarSystem as StarSystemType, BlackHole, SelectableEntity } from '../../utils/galaxyGenerator';
 import { StarSystem } from './StarSystem';
-import { Nebula } from './Nebula';
 import { InterstellarMaterial } from './InterstellarMaterial';
 import { JumpRangeVisualizer } from './JumpRangeVisualizer';
 import { ScannerRangeIcons } from './ScannerRangeIcons';
@@ -48,7 +47,7 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
   onSystemSelect,
   showDustLanes = true,
   showCosmicDust = true,
-  showBlackHoles = false,
+  showBlackHoles = true,
   dustLaneParticles = 15000,
   cosmicDustParticles = 10000,
   dustLaneOpacity = 0.2,
@@ -116,7 +115,7 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
     }
   }), [galaxy.starSystems, galaxy.blackHoles, camera]);
 
-const handleBlackHoleSelect = (blackHole: { id: string; position: [number, number, number] }) => {
+  const handleBlackHoleSelect = (blackHole: { id: string; position: [number, number, number] }) => {
     console.log('Black hole selected:', blackHole.id);
     // Find the actual black hole object from the galaxy
     const actualBlackHole = galaxy.blackHoles?.find(bh => bh.id === blackHole.id);
@@ -143,6 +142,7 @@ const handleBlackHoleSelect = (blackHole: { id: string; position: [number, numbe
     
     console.log('Camera positioned for galaxy view');
     console.log('Galaxy systems:', galaxy.starSystems.length);
+    console.log('Galaxy black holes:', galaxy.blackHoles?.length || 0);
     console.log('Particle settings - Dust lanes:', dustLaneParticles, 'Cosmic dust:', cosmicDustParticles);
     
     gl.domElement.style.touchAction = 'none';
@@ -169,6 +169,7 @@ const handleBlackHoleSelect = (blackHole: { id: string; position: [number, numbe
       const direction = camera.position.clone().sub(targetPosition.current).normalize();
       camera.position.copy(targetPosition.current).add(direction.multiplyScalar(targetDistance));
       isMoving.current = true;
+      hasInitiallyZoomed.current = true;
     }
   }, [selectedSystem, camera]);
 
@@ -269,6 +270,7 @@ const handleBlackHoleSelect = (blackHole: { id: string; position: [number, numbe
         <JumpRangeVisualizer
           currentSystem={currentSystem}
           allSystems={galaxy.starSystems}
+          allBlackHoles={galaxy.blackHoles || []}
           shipStats={shipStats}
           exploredSystemIds={exploredSystemIds}
           travelHistory={travelHistory}
@@ -290,7 +292,7 @@ const handleBlackHoleSelect = (blackHole: { id: string; position: [number, numbe
       ))}
       
       {/* Render Black Holes as selectable systems */}
-      {galaxy.blackHoles?.map((blackHole) => (
+      {showBlackHoles && galaxy.blackHoles?.map((blackHole) => (
         <BlackHoleComponent
           key={blackHole.id}
           id={blackHole.id}
@@ -330,9 +332,7 @@ const handleBlackHoleSelect = (blackHole: { id: string; position: [number, numbe
         />
       )}
       
-      {galaxy.nebulae.map((nebula) => (
-        <Nebula key={nebula.id} nebula={nebula} />
-      ))}
+      {/* Removed nebulae rendering completely */}
       
       <mesh 
         position={[0, 0, -50000]} 
