@@ -65,7 +65,7 @@ interface GalaxyLayoutPanelsProps {
   onUpdateShipName?: (newName: string) => void;
   canJumpToSelected?: boolean;
   galaxyMapRef?: React.RefObject<GalaxyMapRef>;
-  onBlackHoleJumpBoost?: () => void;
+  onBlackHoleJumpBoost?: () => (allSystems: StarSystem[], allBlackHoles: BlackHole[]) => string | null;
   allSystems?: StarSystem[];
   allBlackHoles?: BlackHole[];
 }
