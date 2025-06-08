@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
 import { ExplorationDialog } from '../components/galaxy/ExplorationDialog';
@@ -38,7 +39,6 @@ const Index = () => {
     trinaryFrequency,
     showDustLanes,
     showCosmicDust,
-    showBlackHoles,
     dustLaneParticles,
     cosmicDustParticles,
     dustLaneOpacity,
@@ -414,7 +414,6 @@ const Index = () => {
             trinaryFrequency={trinaryFrequency}
             showDustLanes={showDustLanes}
             showCosmicDust={showCosmicDust}
-            showBlackHoles={showBlackHoles}
             appTitle={appTitle}
             dustLaneParticles={dustLaneParticles}
             cosmicDustParticles={cosmicDustParticles}
@@ -443,7 +442,7 @@ const Index = () => {
         trinaryFrequency={trinaryFrequency}
         showDustLanes={showDustLanes}
         showCosmicDust={showCosmicDust}
-        showBlackHoles={showBlackHoles}
+        showBlackHoles={true}
         dustLaneParticles={dustLaneParticles}
         cosmicDustParticles={cosmicDustParticles}
         dustLaneOpacity={dustLaneOpacity}

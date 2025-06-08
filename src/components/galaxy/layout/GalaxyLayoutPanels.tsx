@@ -24,7 +24,7 @@ interface GalaxyLayoutPanelsProps {
   // Galaxy props
   galaxySeed: number;
   numSystems: number;
-  numNebulae: number;
+  numBlackHoles: number;
   binaryFrequency: number;
   trinaryFrequency: number;
   showDustLanes: boolean;
@@ -98,7 +98,7 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => 
         <CenterPanel
           galaxySeed={props.galaxySeed}
           numSystems={props.numSystems}
-          numNebulae={props.numNebulae}
+          numBlackHoles={props.numBlackHoles}
           binaryFrequency={props.binaryFrequency}
           trinaryFrequency={props.trinaryFrequency}
           showDustLanes={props.showDustLanes}
