@@ -32,7 +32,7 @@ interface ActionsPanelProps {
   canJumpToSelected?: boolean;
   onJumpToSystem?: (systemId: string) => void;
   onJumpToNewGalaxy?: () => void;
-  onBlackHoleJumpBoost?: () => void;
+  onBlackHoleJumpBoost?: (jumpData: { mode: 'local' | 'newGalaxy' | 'knownGalaxy'; seed?: number }) => void;
   allSystems?: StarSystem[];
   allBlackHoles?: BlackHole[];
   shipStats?: any;
