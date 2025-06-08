@@ -1,7 +1,7 @@
 export interface StarSystem {
   id: string;
   position: [number, number, number];
-  starType: 'main-sequence' | 'red-giant' | 'white-dwarf' | 'neutron' | 'magnetar' | 'pulsar' | 'quasar';
+  starType: 'main-sequence' | 'red-giant' | 'white-dwarf' | 'neutron' | 'magnetar' | 'pulsar' | 'quasar' | 'blackhole';
   temperature: number;
   mass: number;
   explored: boolean;
@@ -127,10 +127,10 @@ export function generateGalaxy(
 
   // Generate star systems based on galaxy type
   
-  // Define star types with proper typing - removed black-hole since they're generated separately
+  // Define star types with proper typing - include blackhole as a regular star type
   const starTypes: StarSystem['starType'][] = [
     'main-sequence', 'main-sequence', 'main-sequence', 'main-sequence',
-    'red-giant', 'white-dwarf', 'neutron', 'magnetar', 'pulsar', 'quasar'
+    'red-giant', 'white-dwarf', 'neutron', 'magnetar', 'pulsar', 'quasar', 'blackhole'
   ];
   
   for (let i = 0; i < numSystems; i++) {
@@ -148,14 +148,19 @@ export function generateGalaxy(
     }
     
     const starType = rng.choice(starTypes);
-    const planets = generatePlanets(rng, starType, `${i}-primary`);
     
-    // Generate binary/trinary companions using configurable frequencies
+    // Black holes don't have planets or companions
+    const planets = starType === 'blackhole' ? [] : generatePlanets(rng, starType, `${i}-primary`);
+    
+    // Generate binary/trinary companions using configurable frequencies (not for black holes)
     let binaryCompanion: StarSystem['binaryCompanion'] = undefined;
     let trinaryCompanion: StarSystem['trinaryCompanion'] = undefined;
     
-    if (rng.next() < binaryFrequency) { // Configurable binary frequency
-      const companionType = rng.choice(starTypes);
+    if (starType !== 'blackhole' && rng.next() < binaryFrequency) {
+      const companionTypes: ('main-sequence' | 'red-giant' | 'white-dwarf' | 'neutron' | 'magnetar' | 'pulsar' | 'quasar')[] = [
+        'main-sequence', 'red-giant', 'white-dwarf', 'neutron', 'magnetar', 'pulsar', 'quasar'
+      ];
+      const companionType = rng.choice(companionTypes);
       const binaryPlanets = generatePlanets(rng, companionType, `${i}-binary`);
       binaryCompanion = {
         starType: companionType,
@@ -164,8 +169,8 @@ export function generateGalaxy(
         planets: binaryPlanets
       };
       
-      if (rng.next() < (trinaryFrequency / binaryFrequency)) { // Adjusted trinary calculation
-        const trinaryType = rng.choice(starTypes);
+      if (rng.next() < (trinaryFrequency / binaryFrequency)) {
+        const trinaryType = rng.choice(companionTypes);
         const trinaryPlanets = generatePlanets(rng, trinaryType, `${i}-trinary`);
         trinaryCompanion = {
           starType: trinaryType,
@@ -184,26 +189,26 @@ export function generateGalaxy(
       mass: getStarMass(starType, rng),
       explored: false,
       planets,
-      specialFeatures: generateSpecialFeatures(rng),
+      specialFeatures: starType === 'blackhole' ? [] : generateSpecialFeatures(rng),
       binaryCompanion,
       trinaryCompanion
     });
   }
 
-  // Generate black holes (rare cosmic objects)
-  const numBlackHoles = Math.floor(numSystems * 0.001); // 0.1% of systems have black holes
-  for (let i = 0; i < numBlackHoles; i++) {
+  // Replace nebulae generation with additional black holes from nebula count
+  const totalBlackHoles = Math.floor(numNebulae * 0.8); // Use 80% of nebula count for black holes
+  for (let i = 0; i < totalBlackHoles; i++) {
     let position: [number, number, number];
     
     switch (galaxyType) {
       case 'spiral':
-        position = generateSpiralPosition(rng, i, numBlackHoles, galaxyRadius * 0.8);
+        position = generateSpiralPosition(rng, i, totalBlackHoles, galaxyRadius * 0.8);
         break;
       case 'globular':
         position = generateGlobularPosition(rng, galaxyRadius * 0.6);
         break;
       default:
-        position = generateSpiralPosition(rng, i, numBlackHoles, galaxyRadius * 0.8);
+        position = generateSpiralPosition(rng, i, totalBlackHoles, galaxyRadius * 0.8);
     }
     
     blackHoles.push({
@@ -214,27 +219,10 @@ export function generateGalaxy(
     });
   }
 
-  // Generate nebulae
-  for (let i = 0; i < numNebulae; i++) {
-    const angle = rng.next() * Math.PI * 2;
-    const distance = rng.range(5000, galaxyRadius * 0.8);
-    const x = Math.cos(angle) * distance;
-    const z = Math.sin(angle) * distance;
-    const y = rng.range(-500, 500);
-    
-    nebulae.push({
-      id: `nebula-${i}`,
-      position: [x, y, z],
-      size: rng.range(1000, 5000),
-      type: rng.choice(['emission', 'reflection', 'dark', 'planetary']),
-      color: rng.choice(['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57'])
-    });
-  }
-
   return {
     seed,
     starSystems,
-    nebulae,
+    nebulae: [], // Empty nebulae array since we're replacing with black holes
     blackHoles,
     galacticCenter: [0, 0, 0],
     playerPosition: starSystems[0]?.position || [0, 0, 0],
@@ -368,7 +356,8 @@ function getStarTemperature(starType: StarSystem['starType'], rng: SeededRandom)
     'neutron': [600000, 1000000],
     'magnetar': [1000000, 10000000],
     'pulsar': [1000000, 1000000],
-    'quasar': [10000000, 100000000]
+    'quasar': [10000000, 100000000],
+    'blackhole': [0, 0] // Black holes don't have temperature in traditional sense
   };
   const range = temps[starType] || [5000, 6000];
   return rng.range(range[0], range[1]);
@@ -382,7 +371,8 @@ function getStarMass(starType: StarSystem['starType'], rng: SeededRandom): numbe
     'neutron': [1.4, 2],
     'magnetar': [1.4, 2],
     'pulsar': [1.4, 2],
-    'quasar': [1000000, 10000000000]
+    'quasar': [1000000, 10000000000],
+    'blackhole': [10, 100] // Black hole masses in solar masses
   };
   const range = masses[starType] || [1, 1];
   return rng.range(range[0], range[1]);

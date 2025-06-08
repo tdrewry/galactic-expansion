@@ -53,7 +53,6 @@ export const GalaxyMap = forwardRef<GalaxyMapRef, GalaxyMapProps>(({
   numNebulae = 50,
   binaryFrequency = 0.15,
   trinaryFrequency = 0.03,
-  showBlackHoles = false,
   onSystemSelect,
   selectedSystem: propSelectedSystem = null,
   selectedStar: propSelectedStar = 'primary',
@@ -155,7 +154,7 @@ export const GalaxyMap = forwardRef<GalaxyMapRef, GalaxyMapProps>(({
         onScanComplete={onScanComplete}
         jumpLaneOpacity={jumpLaneOpacity}
         greenPathOpacity={greenPathOpacity}
-        showBlackHoles={showBlackHoles}
+        showBlackHoles={true}
         onCanvasError={setCanvasError}
         {...canvasProps}
       />

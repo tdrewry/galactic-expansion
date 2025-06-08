@@ -116,14 +116,17 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
   const handleBlackHoleSelect = (blackHole: { id: string; position: [number, number, number] }) => {
     console.log('Black hole selected:', blackHole.id);
     // Create a pseudo-system object for black holes to work with existing selection logic
-    const blackHoleAsSystem = {
+    const blackHoleAsSystem: StarSystemType = {
       id: blackHole.id,
       position: blackHole.position,
-      starType: 'blackhole' as any,
+      starType: 'blackhole',
+      temperature: 0,
+      mass: 50, // Default mass
+      explored: false,
       planets: [],
-      binaryStarType: null,
-      trinaryStarType: null,
-      explored: false
+      specialFeatures: [],
+      binaryCompanion: undefined,
+      trinaryCompanion: undefined
     };
     onSystemSelect(blackHoleAsSystem);
   };
@@ -291,8 +294,8 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
         />
       ))}
       
-      {/* Render Black Holes - conditionally based on setting */}
-      {showBlackHoles && galaxy.blackHoles?.map((blackHole) => (
+      {/* Render Black Holes - always show them now since they replace nebulae */}
+      {galaxy.blackHoles?.map((blackHole) => (
         <BlackHole
           key={blackHole.id}
           id={blackHole.id}

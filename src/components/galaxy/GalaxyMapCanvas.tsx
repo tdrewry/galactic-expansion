@@ -1,4 +1,3 @@
-
 import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { GalaxyScene, GalaxySceneRef } from './GalaxyScene';
@@ -51,12 +50,10 @@ export const GalaxyMapCanvas = forwardRef<GalaxyMapCanvasRef, GalaxyMapCanvasPro
   greenPathOpacity,
   travelHistory,
   currentSystemId,
-  showBlackHoles,
   ...sceneProps
 }, ref) => {
   const sceneRef = useRef<GalaxySceneRef>(null);
 
-  // Expose zoom functionality through ref
   useImperativeHandle(ref, () => ({
     zoomToSystem: (systemId: string) => {
       if (sceneRef.current && sceneRef.current.zoomToSystem) {
@@ -94,7 +91,7 @@ export const GalaxyMapCanvas = forwardRef<GalaxyMapCanvasRef, GalaxyMapCanvasPro
         greenPathOpacity={greenPathOpacity}
         travelHistory={travelHistory}
         currentSystemId={currentSystemId}
-        showBlackHoles={showBlackHoles}
+        showBlackHoles={true}
         {...sceneProps}
       />
     </Canvas>
