@@ -1,4 +1,3 @@
-
 import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { GalaxyScene, GalaxySceneRef } from './GalaxyScene';
@@ -13,6 +12,7 @@ interface GalaxyMapCanvasProps {
   showDustLanes?: boolean;
   showStarFormingRegions?: boolean;
   showCosmicDust?: boolean;
+  showBlackHoles?: boolean;
   dustLaneParticles?: number;
   starFormingParticles?: number;
   cosmicDustParticles?: number;
@@ -24,7 +24,6 @@ interface GalaxyMapCanvasProps {
   cosmicDustColorIntensity?: number;
   jumpLaneOpacity?: number;
   greenPathOpacity?: number;
-  blackHoleSize?: number;
   shipStats?: any;
   exploredSystemIds?: Set<string>;
   travelHistory?: string[];
@@ -49,7 +48,6 @@ export const GalaxyMapCanvas = forwardRef<GalaxyMapCanvasRef, GalaxyMapCanvasPro
   onScanComplete,
   jumpLaneOpacity,
   greenPathOpacity,
-  blackHoleSize = 1.0,
   travelHistory,
   currentSystemId,
   ...sceneProps
@@ -63,9 +61,6 @@ export const GalaxyMapCanvas = forwardRef<GalaxyMapCanvasRef, GalaxyMapCanvasPro
       }
     }
   }), []);
-
-  // Ensure showBlackHoles is true when there are black holes in the galaxy
-  const showBlackHoles = (galaxy.blackHoles?.length || 0) > 0;
 
   return (
     <Canvas 
@@ -94,10 +89,9 @@ export const GalaxyMapCanvas = forwardRef<GalaxyMapCanvasRef, GalaxyMapCanvasPro
         onScanComplete={onScanComplete}
         jumpLaneOpacity={jumpLaneOpacity}
         greenPathOpacity={greenPathOpacity}
-        blackHoleSize={blackHoleSize}
         travelHistory={travelHistory}
         currentSystemId={currentSystemId}
-        showBlackHoles={showBlackHoles}
+        showBlackHoles={true}
         {...sceneProps}
       />
     </Canvas>

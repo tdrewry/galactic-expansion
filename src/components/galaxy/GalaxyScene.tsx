@@ -1,9 +1,9 @@
-
 import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stars, Billboard } from '@react-three/drei';
-import { Galaxy, StarSystem as StarSystemType, BlackHole, SelectableEntity } from '../../utils/galaxyGenerator';
+import { Galaxy, StarSystem as StarSystemType, BlackHole } from '../../utils/galaxyGenerator';
 import { StarSystem } from './StarSystem';
+import { Nebula } from './Nebula';
 import { InterstellarMaterial } from './InterstellarMaterial';
 import { JumpRangeVisualizer } from './JumpRangeVisualizer';
 import { ScannerRangeIcons } from './ScannerRangeIcons';
@@ -14,8 +14,8 @@ import { BlackHole as BlackHoleComponent } from './BlackHole';
 
 interface GalaxySceneProps {
   galaxy: Galaxy;
-  selectedSystem: SelectableEntity | null;
-  onSystemSelect: (system: SelectableEntity | null) => void;
+  selectedSystem: StarSystemType | null;
+  onSystemSelect: (system: StarSystemType | null) => void;
   showDustLanes?: boolean;
   showCosmicDust?: boolean;
   showBlackHoles?: boolean;
@@ -28,7 +28,6 @@ interface GalaxySceneProps {
   jumpLaneOpacity?: number;
   greenPathOpacity?: number;
   visitedJumpLaneOpacity?: number;
-  blackHoleSize?: number;
   shipStats?: any;
   exploredSystemIds?: Set<string>;
   travelHistory?: string[];
@@ -49,7 +48,7 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
   onSystemSelect,
   showDustLanes = true,
   showCosmicDust = true,
-  showBlackHoles = true,
+  showBlackHoles = false,
   dustLaneParticles = 15000,
   cosmicDustParticles = 10000,
   dustLaneOpacity = 0.2,
@@ -59,7 +58,6 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
   jumpLaneOpacity = 0.3,
   greenPathOpacity = 0.6,
   visitedJumpLaneOpacity = 0.1,
-  blackHoleSize = 1.0,
   shipStats,
   exploredSystemIds = new Set(),
   travelHistory = [],
@@ -124,14 +122,16 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
     const actualBlackHole = galaxy.blackHoles?.find(bh => bh.id === blackHole.id);
     if (actualBlackHole) {
       // Black holes are now proper system objects with starType 'blackhole'
-      onSystemSelect(actualBlackHole);
+      onSystemSelect(actualBlackHole as any);
     }
   };
 
   useEffect(() => {
-    if (scannerFadeTimer) {
-      clearTimeout(scannerFadeTimer);
-    }
+    return () => {
+      if (scannerFadeTimer) {
+        clearTimeout(scannerFadeTimer);
+      }
+    };
   }, [scannerFadeTimer]);
   
   useEffect(() => {
@@ -143,7 +143,6 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
     
     console.log('Camera positioned for galaxy view');
     console.log('Galaxy systems:', galaxy.starSystems.length);
-    console.log('Galaxy black holes:', galaxy.blackHoles?.length || 0);
     console.log('Particle settings - Dust lanes:', dustLaneParticles, 'Cosmic dust:', cosmicDustParticles);
     
     gl.domElement.style.touchAction = 'none';
@@ -170,7 +169,6 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
       const direction = camera.position.clone().sub(targetPosition.current).normalize();
       camera.position.copy(targetPosition.current).add(direction.multiplyScalar(targetDistance));
       isMoving.current = true;
-      hasInitiallyZoomed.current = true;
     }
   }, [selectedSystem, camera]);
 
@@ -217,15 +215,6 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
       onScanComplete();
     }
   };
-
-  useEffect(() => {
-    console.log('Galaxy Scene Debug:');
-    console.log('Total star systems:', galaxy.starSystems.length);
-    console.log('Total black holes:', galaxy.blackHoles?.length || 0);
-    console.log('Show black holes setting:', showBlackHoles);
-    console.log('Selected system:', selectedSystem?.id);
-    console.log('Current system:', currentSystemId);
-  }, [galaxy, showBlackHoles, selectedSystem, currentSystemId]);
 
   return (
     <>
@@ -280,7 +269,6 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
         <JumpRangeVisualizer
           currentSystem={currentSystem}
           allSystems={galaxy.starSystems}
-          allBlackHoles={galaxy.blackHoles || []}
           shipStats={shipStats}
           exploredSystemIds={exploredSystemIds}
           travelHistory={travelHistory}
@@ -292,7 +280,6 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
         />
       )}
       
-      {/* Render Star Systems */}
       {galaxy.starSystems.map((system) => (
         <StarSystem
           key={system.id}
@@ -302,22 +289,17 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
         />
       ))}
       
-      {/* Render Black Holes - Only render when showBlackHoles is true */}
-      {showBlackHoles && galaxy.blackHoles?.map((blackHole) => {
-        console.log('Rendering black hole:', blackHole.id, 'at position:', blackHole.position);
-        const baseSize = blackHole.id === 'central-blackhole' ? 500 : 300;
-        const scaledSize = baseSize * blackHoleSize;
-        return (
-          <BlackHoleComponent
-            key={blackHole.id}
-            id={blackHole.id}
-            position={blackHole.position}
-            size={scaledSize}
-            isSelected={selectedSystem?.id === blackHole.id}
-            onSelect={handleBlackHoleSelect}
-          />
-        );
-      })}
+      {/* Render Black Holes as selectable systems */}
+      {galaxy.blackHoles?.map((blackHole) => (
+        <BlackHoleComponent
+          key={blackHole.id}
+          id={blackHole.id}
+          position={blackHole.position}
+          size={blackHole.size}
+          isSelected={selectedSystem?.id === blackHole.id}
+          onSelect={handleBlackHoleSelect}
+        />
+      ))}
       
       {galaxy.starSystems.map((system) => (
         revealedPOISystems.has(system.id) && (
@@ -348,7 +330,9 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
         />
       )}
       
-      {/* Removed nebulae rendering completely */}
+      {galaxy.nebulae.map((nebula) => (
+        <Nebula key={nebula.id} nebula={nebula} />
+      ))}
       
       <mesh 
         position={[0, 0, -50000]} 

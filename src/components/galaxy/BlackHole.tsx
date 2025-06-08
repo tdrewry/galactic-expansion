@@ -14,13 +14,12 @@ interface BlackHoleProps {
 export const BlackHole: React.FC<BlackHoleProps> = ({
   id,
   position,
-  size = 300, // Increased from 150 to 300 for better visibility
+  size = 150, // Reduced from 400 to 150
   isSelected = false,
   onSelect
 }) => {
   const handleClick = (event: any) => {
     event.stopPropagation();
-    console.log('Black hole clicked:', id);
     if (onSelect) {
       onSelect({ id, position });
     }
@@ -45,11 +44,11 @@ export const BlackHole: React.FC<BlackHoleProps> = ({
         onPointerOut={handlePointerOut}
         visible={false}
       >
-        <sphereGeometry args={[size * 2, 8, 6]} />
+        <sphereGeometry args={[size * 1.5, 8, 6]} />
         <meshBasicMaterial transparent opacity={0} />
       </mesh>
 
-      {/* Visual black hole representation */}
+      {/* First ring - vertical orientation */}
       <BlackHoleMesh
         size={size}
         onClick={handleClick}
@@ -58,10 +57,10 @@ export const BlackHole: React.FC<BlackHoleProps> = ({
         disableBillboard={false}
       />
       
-      {/* Second ring for 3D effect */}
+      {/* Second ring - horizontal orientation (rotated 90 degrees around X-axis) */}
       <group rotation={[Math.PI / 2, 0, 0]}>
         <BlackHoleMesh
-          size={size * 0.8}
+          size={size}
           onClick={handleClick}
           onPointerOver={handlePointerOver}
           onPointerOut={handlePointerOut}

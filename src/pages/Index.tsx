@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
 import { ExplorationDialog } from '../components/galaxy/ExplorationDialog';
@@ -47,7 +48,6 @@ const Index = () => {
     jumpLaneOpacity,
     greenPathOpacity,
     visitedJumpLaneOpacity,
-    blackHoleSize,
     defaultShipStats,
     selectedSystem,
     setSelectedSystem,
@@ -164,7 +164,7 @@ const Index = () => {
     if (!currentSystemId && numSystems > 0) {
       // Generate systems and find a suitable starting system
       const tempGalaxy = generateGalaxy(galaxySeed, numSystems, numBlackHoles, binaryFrequency, trinaryFrequency);
-      const startingSystem = selectStartingSystem(tempGalaxy.starSystems, shipStats, tempGalaxy.blackHoles);
+      const startingSystem = selectStartingSystem(tempGalaxy.starSystems);
       
       if (startingSystem) {
         jumpToSystem(startingSystem.id, false); // No interrupt for initial placement
@@ -177,7 +177,7 @@ const Index = () => {
         }
       }
     }
-  }, [galaxySeed, numSystems, numBlackHoles, binaryFrequency, trinaryFrequency, currentSystemId, jumpToSystem, shouldZoomToStarter, shipStats]);
+  }, [galaxySeed, numSystems, numBlackHoles, binaryFrequency, trinaryFrequency, currentSystemId, jumpToSystem, shouldZoomToStarter]);
 
   // Show ship selection on first load
   React.useEffect(() => {
@@ -424,7 +424,6 @@ const Index = () => {
             jumpLaneOpacity={jumpLaneOpacity}
             greenPathOpacity={greenPathOpacity}
             visitedJumpLaneOpacity={visitedJumpLaneOpacity}
-            blackHoleSize={blackHoleSize}
             defaultShipStats={defaultShipStats}
             inputSeed={inputSeed}
             setInputSeed={setInputSeed}
