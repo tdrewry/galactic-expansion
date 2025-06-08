@@ -63,6 +63,13 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
   const isBlackHole = selectedSystem?.starType === 'blackhole';
   const isCentralBlackHole = selectedSystem?.id === 'central-blackhole';
 
+  console.log('ActionsPanel Debug - Black Holes:', {
+    allBlackHolesLength: allBlackHoles.length,
+    allBlackHoleIds: allBlackHoles.map(bh => bh.id),
+    currentSystemId,
+    shipStats: !!shipStats
+  });
+
   return (
     <div className="bg-gray-800 border border-gray-600 rounded-lg h-full w-full p-3 flex flex-col">
       <div className="flex-1 space-y-2 min-h-0">
