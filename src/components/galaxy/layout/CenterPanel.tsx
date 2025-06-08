@@ -2,7 +2,7 @@
 import React from 'react';
 import { GalaxyMap, GalaxyMapRef } from '../../GalaxyMap';
 import { StarshipPanel } from '../../starship/StarshipPanel';
-import { StarSystem, Planet, Moon } from '../../../utils/galaxyGenerator';
+import { StarSystem, Planet, Moon, BlackHole } from '../../../utils/galaxyGenerator';
 import { Button } from '@/components/ui/button';
 import { Target } from 'lucide-react';
 
@@ -64,6 +64,8 @@ interface CenterPanelProps {
   canJumpToSelected?: boolean;
   onTriggerScan?: () => void;
   onBlackHoleJumpBoost?: () => void;
+  allSystems?: StarSystem[];
+  allBlackHoles?: BlackHole[];
 }
 
 export const CenterPanel: React.FC<CenterPanelProps> = ({
@@ -108,9 +110,17 @@ export const CenterPanel: React.FC<CenterPanelProps> = ({
   onJumpToSystem,
   canJumpToSelected,
   onTriggerScan,
-  onBlackHoleJumpBoost
+  onBlackHoleJumpBoost,
+  allSystems,
+  allBlackHoles
 }) => {
   console.log('CenterPanel: onRepairCombatSystems prop received:', !!onRepairCombatSystems);
+  console.log('CenterPanel Debug - Received Props:', {
+    allSystemsLength: allSystems?.length || 0,
+    allBlackHolesLength: allBlackHoles?.length || 0,
+    allSystemsReceived: !!allSystems,
+    allBlackHolesReceived: !!allBlackHoles
+  });
 
   const handleCenterOnCurrentSystem = () => {
     if (currentSystemId && galaxyMapRef?.current) {
@@ -188,6 +198,8 @@ export const CenterPanel: React.FC<CenterPanelProps> = ({
           onRepairShields={onRepairShields}
           onRepairCombatSystems={onRepairCombatSystems}
           onBlackHoleJumpBoost={onBlackHoleJumpBoost}
+          allSystems={allSystems}
+          allBlackHoles={allBlackHoles}
         />
       </div>
     </div>

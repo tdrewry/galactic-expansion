@@ -1,7 +1,7 @@
 
 import React, { useState, useRef } from 'react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
-import { StarSystem, Planet, Moon } from '../../../utils/galaxyGenerator';
+import { StarSystem, Planet, Moon, BlackHole } from '../../../utils/galaxyGenerator';
 import { LeftPanel } from './LeftPanel';
 import { CenterPanel } from './CenterPanel';
 import { RightPanel } from './RightPanel';
@@ -66,12 +66,20 @@ interface GalaxyLayoutPanelsProps {
   canJumpToSelected?: boolean;
   galaxyMapRef?: React.RefObject<GalaxyMapRef>;
   onBlackHoleJumpBoost?: () => void;
+  allSystems?: StarSystem[];
+  allBlackHoles?: BlackHole[];
 }
 
 export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => {
   const [isScanning, setIsScanning] = useState(false);
 
   console.log('GalaxyLayoutPanels: onRepairCombatSystems prop received:', !!props.onRepairCombatSystems);
+  console.log('GalaxyLayoutPanels Debug - Props received:', {
+    allSystemsLength: props.allSystems?.length || 0,
+    allBlackHolesLength: props.allBlackHoles?.length || 0,
+    allSystemsReceived: !!props.allSystems,
+    allBlackHolesReceived: !!props.allBlackHoles
+  });
 
   const handleTriggerScan = () => {
     if (props.selectedSystem) {
@@ -141,6 +149,8 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => 
           canJumpToSelected={props.canJumpToSelected}
           onTriggerScan={handleTriggerScan}
           onBlackHoleJumpBoost={props.onBlackHoleJumpBoost}
+          allSystems={props.allSystems}
+          allBlackHoles={props.allBlackHoles}
         />
       </ResizablePanel>
 
@@ -172,6 +182,8 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => 
               onRepairShields={props.onRepairShields}
               onRepairCombatSystems={props.onRepairCombatSystems}
               onBlackHoleJumpBoost={props.onBlackHoleJumpBoost}
+              allSystems={props.allSystems}
+              allBlackHoles={props.allBlackHoles}
             />
           </ResizablePanel>
         </>
