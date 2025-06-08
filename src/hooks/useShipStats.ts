@@ -77,55 +77,58 @@ export const useShipStats = (initialStats: StarshipStats) => {
     });
   }, [toast]);
 
-  const blackHoleJumpBoost = useCallback((allSystems: StarSystem[], allBlackHoles: BlackHole[]) => {
-    // Find all systems near black holes (within a certain distance)
-    const systemsNearBlackHoles: StarSystem[] = [];
-    const searchRadius = 5000; // Distance to consider "near" a black hole
-    
-    allSystems.forEach(system => {
-      const isNearBlackHole = allBlackHoles.some(blackHole => {
-        const dx = system.position[0] - blackHole.position[0];
-        const dy = system.position[1] - blackHole.position[1];
-        const dz = system.position[2] - blackHole.position[2];
-        const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        return distance <= searchRadius;
+  const blackHoleJumpBoost = useCallback(() => {
+    // This function now returns a callback that accepts the required parameters
+    return (allSystems: StarSystem[], allBlackHoles: BlackHole[]) => {
+      // Find all systems near black holes (within a certain distance)
+      const systemsNearBlackHoles: StarSystem[] = [];
+      const searchRadius = 5000; // Distance to consider "near" a black hole
+      
+      allSystems.forEach(system => {
+        const isNearBlackHole = allBlackHoles.some(blackHole => {
+          const dx = system.position[0] - blackHole.position[0];
+          const dy = system.position[1] - blackHole.position[1];
+          const dz = system.position[2] - blackHole.position[2];
+          const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+          return distance <= searchRadius;
+        });
+        
+        if (isNearBlackHole && system.id !== currentSystemId) {
+          systemsNearBlackHoles.push(system);
+        }
       });
       
-      if (isNearBlackHole && system.id !== currentSystemId) {
-        systemsNearBlackHoles.push(system);
+      if (systemsNearBlackHoles.length === 0) {
+        toast({
+          title: "Jump Boost Failed",
+          description: "No suitable destination systems detected near black holes.",
+          variant: "destructive",
+        });
+        return null;
       }
-    });
-    
-    if (systemsNearBlackHoles.length === 0) {
-      toast({
-        title: "Jump Boost Failed",
-        description: "No suitable destination systems detected near black holes.",
-        variant: "destructive",
+      
+      // Select a random system from the candidates
+      const randomIndex = Math.floor(Math.random() * systemsNearBlackHoles.length);
+      const targetSystem = systemsNearBlackHoles[randomIndex];
+      
+      // Perform the jump
+      setCurrentSystemId(targetSystem.id);
+      setSelectedSystemId(targetSystem.id);
+      setExploredSystemIds(prev => new Set([...prev, targetSystem.id]));
+      setTravelHistory(prev => {
+        if (!prev.includes(targetSystem.id)) {
+          return [...prev, targetSystem.id];
+        }
+        return prev;
       });
-      return null;
-    }
-    
-    // Select a random system from the candidates
-    const randomIndex = Math.floor(Math.random() * systemsNearBlackHoles.length);
-    const targetSystem = systemsNearBlackHoles[randomIndex];
-    
-    // Perform the jump
-    setCurrentSystemId(targetSystem.id);
-    setSelectedSystemId(targetSystem.id);
-    setExploredSystemIds(prev => new Set([...prev, targetSystem.id]));
-    setTravelHistory(prev => {
-      if (!prev.includes(targetSystem.id)) {
-        return [...prev, targetSystem.id];
-      }
-      return prev;
-    });
-    
-    toast({
-      title: "Black Hole Jump Boost Complete!",
-      description: `Used gravitational assistance to jump to system ${targetSystem.id} near a black hole.`,
-    });
-    
-    return targetSystem.id;
+      
+      toast({
+        title: "Black Hole Jump Boost Complete!",
+        description: `Used gravitational assistance to jump to system ${targetSystem.id} near a black hole.`,
+      });
+      
+      return targetSystem.id;
+    };
   }, [currentSystemId, toast]);
 
   const sellCargo = useCallback((amount: number, isMarket: boolean = false) => {
@@ -227,7 +230,7 @@ export const useShipStats = (initialStats: StarshipStats) => {
 
   const saveGame = useCallback((galaxySeed: number) => {
     saveGameData(stats, currentSystemId, exploredSystemIds, travelHistory, galaxySeed);
-  }, [saveGameData, stats, currentSystemId, exploredSystemIds, travelHistory]);
+  }, [saveGameData, stats, currentSystemId, exploredSystemIds, travelHistory, galaxySeed]);
 
   const loadGame = useCallback(() => {
     const gameData = loadGameData();

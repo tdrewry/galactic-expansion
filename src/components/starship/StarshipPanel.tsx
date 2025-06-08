@@ -29,7 +29,7 @@ interface StarshipPanelProps {
   onRepairHull?: (cost: number) => void;
   onRepairShields?: (cost: number) => void;
   onRepairCombatSystems?: (cost: number) => void;
-  onBlackHoleJumpBoost?: () => void;
+  onBlackHoleJumpBoost?: () => (allSystems: StarSystem[], allBlackHoles: BlackHole[]) => string | null;
   allSystems?: StarSystem[];
   allBlackHoles?: BlackHole[];
 }
@@ -60,6 +60,14 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
 }) => {
   const starship = useMemo(() => generateStarship(seed), [seed]);
   const [isShipLayoutOpen, setIsShipLayoutOpen] = useState(false);
+
+  // Create a wrapper function that calls the black hole jump boost with the required parameters
+  const handleBlackHoleJumpBoost = () => {
+    if (onBlackHoleJumpBoost && allSystems && allBlackHoles) {
+      const jumpBoostFunction = onBlackHoleJumpBoost();
+      jumpBoostFunction(allSystems, allBlackHoles);
+    }
+  };
 
   console.log('StarshipPanel Debug - Black Holes:', {
     allBlackHolesLength: allBlackHoles?.length || 0,
@@ -120,7 +128,7 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
               onJumpToSystem={onJumpToSystem}
               onTriggerScan={onTriggerScan}
               isScanning={isScanning}
-              onBlackHoleJumpBoost={onBlackHoleJumpBoost}
+              onBlackHoleJumpBoost={handleBlackHoleJumpBoost}
               allSystems={allSystems}
               allBlackHoles={allBlackHoles}
               shipStats={shipStats || currentStats}
