@@ -46,21 +46,33 @@ export const createGravitationalLensingMaterial = () => {
           // Normalize distance within the ring
           float normalizedDist = (distFromCenter - eventHorizonRadius) / (distortionRadius - eventHorizonRadius);
           
+          // Calculate angle for rotational effects
+          float angle = atan(offset.y, offset.x) + time * 0.5; // Slow rotation
+          
           // Create concentric rings
           float ringScale = 12.0; // Number of rings
           float ringPos = normalizedDist * ringScale;
           float ringIndex = floor(ringPos);
           float ringFraction = fract(ringPos);
           
-          // Create ring pattern with sharp edges
-          float ringMask = step(0.3, ringFraction) * step(ringFraction, 0.7);
+          // Add thickness variation based on angle and ring index
+          float thicknessVariation = sin(angle * 3.0 + ringIndex * 2.0) * 0.15 + 0.85;
+          float baseThickness = 0.4;
+          float variableThickness = baseThickness * thicknessVariation;
+          
+          // Create asymmetric ring pattern with variable thickness
+          float ringStart = 0.5 - variableThickness * 0.5;
+          float ringEnd = 0.5 + variableThickness * 0.5;
+          
+          // Create ring pattern with variable edges
+          float ringMask = step(ringStart, ringFraction) * step(ringFraction, ringEnd);
           
           if (ringMask > 0.0) {
             // Create temperature gradient from inner (hot) to outer (cooler)
             float temp = 1.0 - normalizedDist * 0.6;
             
-            // Vary ring colors based on ring index
-            float ringVariation = sin(ringIndex * 1.5) * 0.3 + 0.7;
+            // Vary ring colors based on ring index and angle
+            float ringVariation = sin(ringIndex * 1.5 + angle * 0.5) * 0.3 + 0.7;
             temp *= ringVariation;
             
             // Orange/amber colors for the accretion disk
@@ -70,13 +82,14 @@ export const createGravitationalLensingMaterial = () => {
               temp
             );
             
-            // Add brightness variation
-            float brightness = 0.8 + 0.4 * ringVariation;
+            // Add brightness variation based on thickness and position
+            float brightness = 0.8 + 0.4 * ringVariation * thicknessVariation;
             color *= brightness;
             
-            // Smooth falloff at ring edges
-            float edgeSmooth = smoothstep(0.25, 0.35, ringFraction) * smoothstep(0.75, 0.65, ringFraction);
-            alpha = edgeSmooth * 0.9;
+            // Smooth falloff at ring edges with variable smoothing
+            float edgeSmooth = smoothstep(ringStart - 0.05, ringStart + 0.05, ringFraction) * 
+                             smoothstep(ringEnd + 0.05, ringEnd - 0.05, ringFraction);
+            alpha = edgeSmooth * 0.9 * thicknessVariation;
           }
         }
         
