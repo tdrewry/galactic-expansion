@@ -4,12 +4,11 @@ import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
 
 export interface GalaxySettings {
   numSystems: number;
-  numNebulae: number;
+  numBlackHoles: number;
   binaryFrequency: number;
   trinaryFrequency: number;
   showDustLanes: boolean;
   showCosmicDust: boolean;
-  showBlackHoles: boolean;
   appTitle: string;
   dustLaneParticles: number;
   cosmicDustParticles: number;
@@ -30,12 +29,11 @@ export const useGalaxyState = () => {
   // Galaxy settings with new defaults
   const [appTitle, setAppTitle] = useState('Galactic Expansion');
   const [numSystems, setNumSystems] = useState(1000);
-  const [numNebulae, setNumNebulae] = useState(50);
+  const [numBlackHoles, setNumBlackHoles] = useState(50);
   const [binaryFrequency, setBinaryFrequency] = useState(0.15);
   const [trinaryFrequency, setTrinaryFrequency] = useState(0.03);
   const [showDustLanes, setShowDustLanes] = useState(true);
   const [showCosmicDust, setShowCosmicDust] = useState(true);
-  const [showBlackHoles, setShowBlackHoles] = useState(false);
   const [dustLaneParticles, setDustLaneParticles] = useState(15000);
   const [cosmicDustParticles, setCosmicDustParticles] = useState(10000);
   const [dustLaneOpacity, setDustLaneOpacity] = useState(0.2);
@@ -67,12 +65,11 @@ export const useGalaxyState = () => {
     
     if (newSettings.appTitle !== undefined) setAppTitle(newSettings.appTitle);
     if (newSettings.numSystems !== undefined) setNumSystems(newSettings.numSystems);
-    if (newSettings.numNebulae !== undefined) setNumNebulae(newSettings.numNebulae);
+    if (newSettings.numBlackHoles !== undefined) setNumBlackHoles(newSettings.numBlackHoles);
     if (newSettings.binaryFrequency !== undefined) setBinaryFrequency(newSettings.binaryFrequency);
     if (newSettings.trinaryFrequency !== undefined) setTrinaryFrequency(newSettings.trinaryFrequency);
     if (newSettings.showDustLanes !== undefined) setShowDustLanes(newSettings.showDustLanes);
     if (newSettings.showCosmicDust !== undefined) setShowCosmicDust(newSettings.showCosmicDust);
-    if (newSettings.showBlackHoles !== undefined) setShowBlackHoles(newSettings.showBlackHoles);
     if (newSettings.dustLaneParticles !== undefined) setDustLaneParticles(newSettings.dustLaneParticles);
     if (newSettings.cosmicDustParticles !== undefined) setCosmicDustParticles(newSettings.cosmicDustParticles);
     if (newSettings.dustLaneOpacity !== undefined) setDustLaneOpacity(newSettings.dustLaneOpacity);
@@ -92,12 +89,11 @@ export const useGalaxyState = () => {
     setInputSeed,
     appTitle,
     numSystems,
-    numNebulae,
+    numBlackHoles,
     binaryFrequency,
     trinaryFrequency,
     showDustLanes,
     showCosmicDust,
-    showBlackHoles,
     dustLaneParticles,
     cosmicDustParticles,
     dustLaneOpacity,
