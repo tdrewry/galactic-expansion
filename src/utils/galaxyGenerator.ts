@@ -321,6 +321,8 @@ export function generateGalaxy(seed: number, numSystems: number, numBlackHoles: 
     planets: []
   });
 
+  console.log('Generated galaxy with:', starSystems.length, 'star systems and', blackHoles.length, 'black holes');
+
   // Generate nebulae
   const nebulae: Nebula[] = [];
   for (let i = 0; i < 10; i++) {

@@ -217,6 +217,15 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
     }
   };
 
+  useEffect(() => {
+    console.log('Galaxy Scene Debug:');
+    console.log('Total star systems:', galaxy.starSystems.length);
+    console.log('Total black holes:', galaxy.blackHoles?.length || 0);
+    console.log('Show black holes setting:', showBlackHoles);
+    console.log('Selected system:', selectedSystem?.id);
+    console.log('Current system:', currentSystemId);
+  }, [galaxy, showBlackHoles, selectedSystem, currentSystemId]);
+
   return (
     <>
       <ambientLight intensity={0.4} />
@@ -282,6 +291,7 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
         />
       )}
       
+      {/* Render Star Systems */}
       {galaxy.starSystems.map((system) => (
         <StarSystem
           key={system.id}
@@ -291,17 +301,20 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
         />
       ))}
       
-      {/* Render Black Holes as selectable systems */}
-      {showBlackHoles && galaxy.blackHoles?.map((blackHole) => (
-        <BlackHoleComponent
-          key={blackHole.id}
-          id={blackHole.id}
-          position={blackHole.position}
-          size={blackHole.size}
-          isSelected={selectedSystem?.id === blackHole.id}
-          onSelect={handleBlackHoleSelect}
-        />
-      ))}
+      {/* Render Black Holes - Always render them regardless of showBlackHoles setting */}
+      {galaxy.blackHoles?.map((blackHole) => {
+        console.log('Rendering black hole:', blackHole.id, 'at position:', blackHole.position);
+        return (
+          <BlackHoleComponent
+            key={blackHole.id}
+            id={blackHole.id}
+            position={blackHole.position}
+            size={blackHole.id === 'central-blackhole' ? 500 : 300}
+            isSelected={selectedSystem?.id === blackHole.id}
+            onSelect={handleBlackHoleSelect}
+          />
+        );
+      })}
       
       {galaxy.starSystems.map((system) => (
         revealedPOISystems.has(system.id) && (
