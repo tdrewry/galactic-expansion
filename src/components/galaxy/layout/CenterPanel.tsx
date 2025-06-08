@@ -63,7 +63,7 @@ interface CenterPanelProps {
   galaxyMapRef?: React.RefObject<GalaxyMapRef>;
   canJumpToSelected?: boolean;
   onTriggerScan?: () => void;
-  onBlackHoleJumpBoost?: () => void;
+  onBlackHoleJumpBoost?: () => (allSystems: StarSystem[], allBlackHoles: BlackHole[]) => string | null;
   allSystems?: StarSystem[];
   allBlackHoles?: BlackHole[];
 }

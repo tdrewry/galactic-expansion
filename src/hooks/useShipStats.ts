@@ -230,7 +230,7 @@ export const useShipStats = (initialStats: StarshipStats) => {
 
   const saveGame = useCallback((galaxySeed: number) => {
     saveGameData(stats, currentSystemId, exploredSystemIds, travelHistory, galaxySeed);
-  }, [saveGameData, stats, currentSystemId, exploredSystemIds, travelHistory, galaxySeed]);
+  }, [saveGameData, stats, currentSystemId, exploredSystemIds, travelHistory]);
 
   const loadGame = useCallback(() => {
     const gameData = loadGameData();
