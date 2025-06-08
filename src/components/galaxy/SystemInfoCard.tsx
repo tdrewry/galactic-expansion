@@ -45,7 +45,7 @@ export const SystemInfoCard: React.FC<SystemInfoCardProps> = ({
   if (!currentStarData) {
     return (
       <div className="bg-gray-800 rounded-lg p-4">
-        <h3 className="text-white text-xl font-bold mb-4">{system.name}</h3>
+        <h3 className="text-white text-xl font-bold mb-4">{system.id}</h3>
         <div className="text-gray-400">Selected star data not available</div>
       </div>
     );
@@ -61,7 +61,7 @@ export const SystemInfoCard: React.FC<SystemInfoCardProps> = ({
 
   return (
     <div className="bg-gray-800 rounded-lg p-4">
-      <h3 className="text-white text-xl font-bold mb-4">{system.name}</h3>
+      <h3 className="text-white text-xl font-bold mb-4">{system.id}</h3>
       
       {/* Star Selection Tabs */}
       <div className="flex space-x-2 mb-4">
@@ -144,13 +144,13 @@ export const SystemInfoCard: React.FC<SystemInfoCardProps> = ({
                 <div key={index} className="bg-gray-700 rounded p-2">
                   <div className="flex justify-between items-start mb-1">
                     <span className="text-white font-medium">{civ.name}</span>
-                    <span className="bg-blue-600 text-white px-2 py-1 rounded text-xs font-medium">
+                    <span className="bg-amber-600 text-black px-2 py-1 rounded text-xs font-bold">
                       Tech Level {civ.techLevel}
                     </span>
                   </div>
                   
                   <div className="text-xs text-gray-300 mb-2">
-                    Planet: {planet?.name} • Type: {civ.type}
+                    Planet: {planet?.id} • Type: {civ.type}
                   </div>
                   
                   <div className="flex space-x-2">

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
 import { ExplorationDialog } from '../components/galaxy/ExplorationDialog';
@@ -191,7 +192,7 @@ const Index = () => {
   }, [setSelectedStar, setSelectedBody]);
 
   const handleBodySelect = useCallback((body: Planet | Moon | null) => {
-    console.log('Index: Body selected:', body?.name || 'none');
+    console.log('Index: Body selected:', body?.id || 'none');
     setSelectedBody(body);
   }, [setSelectedBody]);
 
@@ -384,7 +385,7 @@ const Index = () => {
         onOpenMarket={() => handleOpenMarket(selectedSystem)}
         onJumpToSystem={handleJumpToSystem}
         onUpdateShipName={updateShipName}
-        onBlackHoleJumpBoost={handleBlackHoleJumpBoost}
+        onBlackHoleJumpBoost={blackHoleJumpBoost}
         handleCompleteExploration={handleCompleteExploration}
         handleContinueExploration={handleContinueExploration}
         onZoomToStarterSystem={handleZoomToStarterSystem}
