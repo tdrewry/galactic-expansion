@@ -1,4 +1,3 @@
-
 import * as THREE from 'three';
 
 export const createGravitationalLensingMaterial = () => {
@@ -41,30 +40,27 @@ export const createGravitationalLensingMaterial = () => {
           return;
         }
         
-        // Distortion ring - orange accretion disk with warping effect
+        // Distortion ring - orange accretion disk with ring pattern
         if (distFromCenter > eventHorizonRadius && distFromCenter < distortionRadius) {
-          // Calculate angle for radial distortion
-          float angle = atan(offset.y, offset.x);
-          
-          // Create radial distortion effect
-          float distortionStrength = 1.0 - smoothstep(eventHorizonRadius, distortionRadius, distFromCenter);
-          float warpedDistance = distFromCenter + sin(angle * 6.0 + time * 2.0) * 0.01 * distortionStrength;
+          // Create concentric rings
+          float ringScale = 15.0; // Number of rings
+          float ringPattern = sin((distFromCenter - eventHorizonRadius) * ringScale + time * 2.0);
           
           // Create ring thickness with falloff
           float ringCenter = (eventHorizonRadius + distortionRadius) * 0.65;
-          float ringDistance = abs(warpedDistance - ringCenter);
+          float ringDistance = abs(distFromCenter - ringCenter);
           float ringThickness = 0.025; // Reduced thickness
           
           if (ringDistance < ringThickness) {
             float intensity = 1.0 - (ringDistance / ringThickness);
             intensity = smoothstep(0.0, 1.0, intensity);
             
-            // Add swirling animation
-            float swirl = sin(angle * 3.0 + time * 4.0 + distFromCenter * 20.0) * 0.5 + 0.5;
+            // Apply ring pattern
+            float ringIntensity = (ringPattern * 0.5 + 0.5) * intensity;
             
             // Create temperature gradient from inner (hot) to outer (cooler)
             float temp = mix(0.8, 0.3, (distFromCenter - eventHorizonRadius) / (distortionRadius - eventHorizonRadius));
-            temp = temp * swirl * intensity;
+            temp = temp * ringIntensity;
             
             // Orange/amber colors for the accretion disk
             color = mix(
@@ -73,11 +69,11 @@ export const createGravitationalLensingMaterial = () => {
               temp
             );
             
-            // Add some brightness variation
-            float brightness = 0.8 + 0.4 * swirl;
+            // Add some brightness variation based on rings
+            float brightness = 0.7 + 0.5 * ringIntensity;
             color *= brightness;
             
-            alpha = intensity * 0.9;
+            alpha = ringIntensity * 0.9;
           }
         }
         
