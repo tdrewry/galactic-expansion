@@ -19,6 +19,7 @@ export interface GalaxySettings {
   jumpLaneOpacity: number;
   greenPathOpacity: number;
   visitedJumpLaneOpacity: number;
+  blackHoleSize: number;
   defaultShipStats: any;
 }
 
@@ -43,6 +44,7 @@ export const useGalaxyState = () => {
   const [jumpLaneOpacity, setJumpLaneOpacity] = useState(0.3);
   const [greenPathOpacity, setGreenPathOpacity] = useState(0.6);
   const [visitedJumpLaneOpacity, setVisitedJumpLaneOpacity] = useState(0.1);
+  const [blackHoleSize, setBlackHoleSize] = useState(1.0);
   const [defaultShipStats, setDefaultShipStats] = useState({
     techLevel: 3,
     shields: 75,
@@ -79,6 +81,7 @@ export const useGalaxyState = () => {
     if (newSettings.jumpLaneOpacity !== undefined) setJumpLaneOpacity(newSettings.jumpLaneOpacity);
     if (newSettings.greenPathOpacity !== undefined) setGreenPathOpacity(newSettings.greenPathOpacity);
     if (newSettings.visitedJumpLaneOpacity !== undefined) setVisitedJumpLaneOpacity(newSettings.visitedJumpLaneOpacity);
+    if (newSettings.blackHoleSize !== undefined) setBlackHoleSize(newSettings.blackHoleSize);
     if (newSettings.defaultShipStats !== undefined) setDefaultShipStats(newSettings.defaultShipStats);
   };
 
@@ -103,6 +106,7 @@ export const useGalaxyState = () => {
     jumpLaneOpacity,
     greenPathOpacity,
     visitedJumpLaneOpacity,
+    blackHoleSize,
     defaultShipStats,
     selectedSystem,
     setSelectedSystem,

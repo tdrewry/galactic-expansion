@@ -24,6 +24,7 @@ interface GalaxyMapCanvasProps {
   cosmicDustColorIntensity?: number;
   jumpLaneOpacity?: number;
   greenPathOpacity?: number;
+  blackHoleSize?: number;
   shipStats?: any;
   exploredSystemIds?: Set<string>;
   travelHistory?: string[];
@@ -48,6 +49,7 @@ export const GalaxyMapCanvas = forwardRef<GalaxyMapCanvasRef, GalaxyMapCanvasPro
   onScanComplete,
   jumpLaneOpacity,
   greenPathOpacity,
+  blackHoleSize = 1.0,
   travelHistory,
   currentSystemId,
   ...sceneProps
@@ -92,6 +94,7 @@ export const GalaxyMapCanvas = forwardRef<GalaxyMapCanvasRef, GalaxyMapCanvasPro
         onScanComplete={onScanComplete}
         jumpLaneOpacity={jumpLaneOpacity}
         greenPathOpacity={greenPathOpacity}
+        blackHoleSize={blackHoleSize}
         travelHistory={travelHistory}
         currentSystemId={currentSystemId}
         showBlackHoles={showBlackHoles}

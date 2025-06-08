@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stars, Billboard } from '@react-three/drei';
@@ -27,6 +28,7 @@ interface GalaxySceneProps {
   jumpLaneOpacity?: number;
   greenPathOpacity?: number;
   visitedJumpLaneOpacity?: number;
+  blackHoleSize?: number;
   shipStats?: any;
   exploredSystemIds?: Set<string>;
   travelHistory?: string[];
@@ -57,6 +59,7 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
   jumpLaneOpacity = 0.3,
   greenPathOpacity = 0.6,
   visitedJumpLaneOpacity = 0.1,
+  blackHoleSize = 1.0,
   shipStats,
   exploredSystemIds = new Set(),
   travelHistory = [],
@@ -302,12 +305,14 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
       {/* Render Black Holes - Only render when showBlackHoles is true */}
       {showBlackHoles && galaxy.blackHoles?.map((blackHole) => {
         console.log('Rendering black hole:', blackHole.id, 'at position:', blackHole.position);
+        const baseSize = blackHole.id === 'central-blackhole' ? 500 : 300;
+        const scaledSize = baseSize * blackHoleSize;
         return (
           <BlackHoleComponent
             key={blackHole.id}
             id={blackHole.id}
             position={blackHole.position}
-            size={blackHole.id === 'central-blackhole' ? 500 : 300}
+            size={scaledSize}
             isSelected={selectedSystem?.id === blackHole.id}
             onSelect={handleBlackHoleSelect}
           />

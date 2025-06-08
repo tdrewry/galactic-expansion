@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,6 +27,7 @@ interface GalaxySettingsProps {
   jumpLaneOpacity?: number;
   greenPathOpacity?: number;
   visitedJumpLaneOpacity?: number;
+  blackHoleSize?: number;
   defaultShipStats?: any;
   inputSeed: string;
   setInputSeed: (seed: string) => void;
@@ -51,6 +53,7 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
   jumpLaneOpacity = 0.3,
   greenPathOpacity = 0.6,
   visitedJumpLaneOpacity = 0.1,
+  blackHoleSize = 1.0,
   defaultShipStats = {},
   inputSeed,
   setInputSeed,
@@ -75,6 +78,7 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
     jumpLaneOpacity,
     greenPathOpacity,
     visitedJumpLaneOpacity,
+    blackHoleSize,
     defaultShipStats
   });
 
@@ -97,9 +101,10 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
       jumpLaneOpacity,
       greenPathOpacity,
       visitedJumpLaneOpacity,
+      blackHoleSize,
       defaultShipStats
     });
-  }, [numSystems, numBlackHoles, binaryFrequency, trinaryFrequency, showDustLanes, showCosmicDust, appTitle, dustLaneParticles, cosmicDustParticles, dustLaneOpacity, cosmicDustOpacity, dustLaneColorIntensity, cosmicDustColorIntensity, jumpLaneOpacity, greenPathOpacity, visitedJumpLaneOpacity, defaultShipStats]);
+  }, [numSystems, numBlackHoles, binaryFrequency, trinaryFrequency, showDustLanes, showCosmicDust, appTitle, dustLaneParticles, cosmicDustParticles, dustLaneOpacity, cosmicDustOpacity, dustLaneColorIntensity, cosmicDustColorIntensity, jumpLaneOpacity, greenPathOpacity, visitedJumpLaneOpacity, blackHoleSize, defaultShipStats]);
 
   const handleSeedChange = () => {
     const newSeed = parseInt(inputSeed) || 12345;
@@ -129,6 +134,7 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
       jumpLaneOpacity: 0.3,
       greenPathOpacity: 0.6,
       visitedJumpLaneOpacity: 0.1,
+      blackHoleSize: 1.0,
       defaultShipStats: {
         techLevel: 3,
         shields: 75,
@@ -302,6 +308,21 @@ export const GalaxySettings: React.FC<GalaxySettingsProps> = ({
                 <CardTitle className="text-sm">Visual Settings</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Black Hole Size: {localSettings.blackHoleSize.toFixed(1)}x</Label>
+                  <Slider
+                    value={[localSettings.blackHoleSize]}
+                    onValueChange={([value]) => setLocalSettings(prev => ({
+                      ...prev,
+                      blackHoleSize: value
+                    }))}
+                    min={0.5}
+                    max={3.0}
+                    step={0.1}
+                    className="w-full"
+                  />
+                </div>
+                
                 <div className="space-y-2">
                   <Label>Jump Lane Opacity: {localSettings.jumpLaneOpacity.toFixed(2)}</Label>
                   <Slider
