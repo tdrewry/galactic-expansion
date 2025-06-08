@@ -14,10 +14,14 @@ export const BlackHoleSelectionRing: React.FC<BlackHoleSelectionRingProps> = ({
 }) => {
   if (!isSelected) return null;
 
+  // Make the selection ring much larger than the black sphere (which is size * 0.1)
+  const ringInnerRadius = size * 0.15;
+  const ringOuterRadius = size * 0.2;
+
   return (
     <Billboard>
       <mesh>
-        <ringGeometry args={[size * 0.6, size * 0.65, 32]} />
+        <ringGeometry args={[ringInnerRadius, ringOuterRadius, 32]} />
         <meshBasicMaterial
           color="#00ffff"
           transparent

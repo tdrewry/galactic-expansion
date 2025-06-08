@@ -14,7 +14,7 @@ interface BlackHoleProps {
 export const BlackHole: React.FC<BlackHoleProps> = ({
   id,
   position,
-  size = 150, // Reduced from 400 to 150
+  size = 150,
   isSelected = false,
   onSelect
 }) => {
@@ -37,33 +37,32 @@ export const BlackHole: React.FC<BlackHoleProps> = ({
 
   return (
     <group position={position}>
-      {/* Large invisible collision sphere for easy selection */}
+      {/* Central black sphere - this is the only clickable element */}
       <mesh
         onClick={handleClick}
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}
-        visible={false}
       >
-        <sphereGeometry args={[size * 1.5, 8, 6]} />
-        <meshBasicMaterial transparent opacity={0} />
+        <sphereGeometry args={[size * 0.1, 16, 12]} />
+        <meshBasicMaterial color="#000000" />
       </mesh>
 
-      {/* First ring - vertical orientation */}
+      {/* First ring - vertical orientation (no click handlers) */}
       <BlackHoleMesh
         size={size}
-        onClick={handleClick}
-        onPointerOver={handlePointerOver}
-        onPointerOut={handlePointerOut}
+        onClick={() => {}} // No-op function
+        onPointerOver={() => {}}
+        onPointerOut={() => {}}
         disableBillboard={false}
       />
       
-      {/* Second ring - horizontal orientation (rotated 90 degrees around X-axis) */}
+      {/* Second ring - horizontal orientation (rotated 90 degrees around X-axis, no click handlers) */}
       <group rotation={[Math.PI / 2, 0, 0]}>
         <BlackHoleMesh
           size={size}
-          onClick={handleClick}
-          onPointerOver={handlePointerOver}
-          onPointerOut={handlePointerOut}
+          onClick={() => {}} // No-op function
+          onPointerOver={() => {}}
+          onPointerOut={() => {}}
           disableBillboard={true}
         />
       </group>
