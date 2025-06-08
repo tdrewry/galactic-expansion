@@ -35,7 +35,7 @@ export const BlackHole: React.FC<BlackHoleProps> = ({
 
   return (
     <group position={position}>
-      {/* Original ring orientation */}
+      {/* First ring - vertical orientation */}
       <BlackHoleMesh
         size={size}
         onClick={handleClick}
@@ -43,8 +43,8 @@ export const BlackHole: React.FC<BlackHoleProps> = ({
         onPointerOut={handlePointerOut}
       />
       
-      {/* Second ring rotated 90 degrees */}
-      <group rotation={[0, 0, Math.PI / 2]}>
+      {/* Second ring - horizontal orientation (rotated 90 degrees around X-axis) */}
+      <group rotation={[Math.PI / 2, 0, 0]}>
         <BlackHoleMesh
           size={size}
           onClick={handleClick}
