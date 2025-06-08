@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Zap } from 'lucide-react';
-import { StarSystem } from '../../../utils/galaxyGenerator';
+import { SelectableEntity } from '../../../utils/galaxyGenerator';
 
 interface NavigationActionsProps {
-  selectedSystem: StarSystem | null;
+  selectedSystem: SelectableEntity | null;
   currentSystemId: string | null;
   canJumpToSelected?: boolean;
   onJumpToSystem?: (systemId: string) => void;

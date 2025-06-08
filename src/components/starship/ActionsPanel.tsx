@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Ship } from 'lucide-react';
-import { StarSystem } from '../../utils/galaxyGenerator';
+import { SelectableEntity } from '../../utils/galaxyGenerator';
 import { ScannerButton } from '../galaxy/scanner/ScannerButton';
 import { ExplorationActions } from './actions/ExplorationActions';
 import { NavigationActions } from './actions/NavigationActions';
@@ -11,7 +10,7 @@ import { MarketActions } from './actions/MarketActions';
 import { GalaxyJumpActions } from './actions/GalaxyJumpActions';
 
 interface ActionsPanelProps {
-  selectedSystem: StarSystem | null;
+  selectedSystem: SelectableEntity | null;
   currentSystemId: string | null;
   isExplored: boolean;
   canBeExplored: boolean;

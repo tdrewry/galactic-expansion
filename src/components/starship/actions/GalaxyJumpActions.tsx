@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Sparkles } from 'lucide-react';
-import { StarSystem } from '../../../utils/galaxyGenerator';
+import { SelectableEntity } from '../../../utils/galaxyGenerator';
 
 interface GalaxyJumpActionsProps {
-  selectedSystem: StarSystem | null;
+  selectedSystem: SelectableEntity | null;
   currentSystemId: string | null;
   onJumpToNewGalaxy?: () => void;
 }

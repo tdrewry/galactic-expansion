@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stars, Billboard } from '@react-three/drei';
-import { Galaxy, StarSystem as StarSystemType, BlackHole } from '../../utils/galaxyGenerator';
+import { Galaxy, StarSystem as StarSystemType, BlackHole, SelectableEntity } from '../../utils/galaxyGenerator';
 import { StarSystem } from './StarSystem';
 import { Nebula } from './Nebula';
 import { InterstellarMaterial } from './InterstellarMaterial';
@@ -14,8 +14,8 @@ import { BlackHole as BlackHoleComponent } from './BlackHole';
 
 interface GalaxySceneProps {
   galaxy: Galaxy;
-  selectedSystem: StarSystemType | null;
-  onSystemSelect: (system: StarSystemType | null) => void;
+  selectedSystem: SelectableEntity | null;
+  onSystemSelect: (system: SelectableEntity | null) => void;
   showDustLanes?: boolean;
   showCosmicDust?: boolean;
   showBlackHoles?: boolean;
@@ -116,13 +116,13 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
     }
   }), [galaxy.starSystems, galaxy.blackHoles, camera]);
 
-  const handleBlackHoleSelect = (blackHole: { id: string; position: [number, number, number] }) => {
+const handleBlackHoleSelect = (blackHole: { id: string; position: [number, number, number] }) => {
     console.log('Black hole selected:', blackHole.id);
     // Find the actual black hole object from the galaxy
     const actualBlackHole = galaxy.blackHoles?.find(bh => bh.id === blackHole.id);
     if (actualBlackHole) {
       // Black holes are now proper system objects with starType 'blackhole'
-      onSystemSelect(actualBlackHole as any);
+      onSystemSelect(actualBlackHole);
     }
   };
 

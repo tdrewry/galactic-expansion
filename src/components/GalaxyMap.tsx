@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useRef, useImperativeHandle, forwardRef } from 'react';
-import { generateGalaxy, Galaxy, StarSystem } from '../utils/galaxyGenerator';
+import { generateGalaxy, Galaxy, StarSystem, SelectableEntity } from '../utils/galaxyGenerator';
 import { GalaxyMapCanvas } from './galaxy/GalaxyMapCanvas';
 import { GalaxyMapError } from './galaxy/GalaxyMapError';
 import { GalaxyMapLoading } from './galaxy/GalaxyMapLoading';
@@ -26,8 +26,8 @@ interface GalaxyMapProps {
   cosmicDustColorIntensity?: number;
   jumpLaneOpacity?: number;
   greenPathOpacity?: number;
-  onSystemSelect?: (system: StarSystem) => void;
-  selectedSystem?: StarSystem | null;
+  onSystemSelect?: (system: SelectableEntity) => void;
+  selectedSystem?: SelectableEntity | null;
   selectedStar?: 'primary' | 'binary' | 'trinary';
   onStarSelect?: (star: 'primary' | 'binary' | 'trinary') => void;
   exploredSystems?: Set<string>;
@@ -67,7 +67,7 @@ export const GalaxyMap = forwardRef<GalaxyMapRef, GalaxyMapProps>(({
   greenPathOpacity = 0.6,
   ...canvasProps
 }, ref) => {
-  const [selectedSystem, setSelectedSystem] = useState<StarSystem | null>(null);
+  const [selectedSystem, setSelectedSystem] = useState<SelectableEntity | null>(null);
   const [selectedStar, setSelectedStar] = useState<'primary' | 'binary' | 'trinary'>('primary');
   const [canvasError, setCanvasError] = useState<string | null>(null);
   const canvasRef = useRef<any>(null);
@@ -115,7 +115,7 @@ export const GalaxyMap = forwardRef<GalaxyMapRef, GalaxyMapProps>(({
     }
   }), []);
   
-  const handleSystemSelect = useCallback((system: StarSystem | null) => {
+  const handleSystemSelect = useCallback((system: SelectableEntity | null) => {
     console.log('Selected system:', system?.id || 'none');
     setSelectedSystem(system);
     if (system && onSystemSelect) {
