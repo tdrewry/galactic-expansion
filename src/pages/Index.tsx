@@ -1,6 +1,5 @@
-
 import React, { useState, useRef, useEffect } from 'react';
-import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
+import { StarSystem, Planet, Moon, BlackHole } from '../utils/galaxyGenerator';
 import { ExplorationDialog } from '../components/galaxy/ExplorationDialog';
 import { useExploration } from '../components/exploration/useExploration';
 import { generateStarship, generateShipOptions, Starship } from '../utils/starshipGenerator';
@@ -57,6 +56,9 @@ const Index = () => {
     setSelectedBody,
     handleSettingsChange
   } = useGalaxyState();
+
+  // Add state for galaxy data
+  const [galaxyData, setGalaxyData] = React.useState<{starSystems: StarSystem[], blackHoles: BlackHole[]} | null>(null);
   
   // Initialize ship stats
   const initialStarship = React.useMemo(() => generateStarship(galaxySeed), [galaxySeed]);
@@ -111,6 +113,17 @@ const Index = () => {
     resetAllExploration
   } = useExploration();
 
+  // Generate galaxy data when parameters change
+  React.useEffect(() => {
+    console.log('Index: Generating galaxy data with seed:', galaxySeed);
+    const newGalaxyData = generateGalaxy(galaxySeed, numSystems, numBlackHoles, binaryFrequency, trinaryFrequency);
+    setGalaxyData(newGalaxyData);
+    console.log('Index: Generated galaxy data:', {
+      starSystemsCount: newGalaxyData.starSystems.length,
+      blackHolesCount: newGalaxyData.blackHoles.length
+    });
+  }, [galaxySeed, numSystems, numBlackHoles, binaryFrequency, trinaryFrequency]);
+
   const generateRandomSeed = () => {
     const newSeed = Math.floor(Math.random() * 1000000);
     setGalaxySeed(newSeed);
@@ -161,10 +174,9 @@ const Index = () => {
 
   // Initialize starting system
   React.useEffect(() => {
-    if (!currentSystemId && numSystems > 0) {
-      // Generate systems and find a suitable starting system
-      const tempGalaxy = generateGalaxy(galaxySeed, numSystems, numBlackHoles, binaryFrequency, trinaryFrequency);
-      const startingSystem = selectStartingSystem(tempGalaxy.starSystems);
+    if (!currentSystemId && galaxyData && galaxyData.starSystems.length > 0) {
+      // Use the existing galaxy data instead of generating it again
+      const startingSystem = selectStartingSystem(galaxyData.starSystems);
       
       if (startingSystem) {
         jumpToSystem(startingSystem.id, false); // No interrupt for initial placement
@@ -177,7 +189,7 @@ const Index = () => {
         }
       }
     }
-  }, [galaxySeed, numSystems, numBlackHoles, binaryFrequency, trinaryFrequency, currentSystemId, jumpToSystem, shouldZoomToStarter]);
+  }, [galaxyData, currentSystemId, jumpToSystem, shouldZoomToStarter]);
 
   // Show ship selection on first load
   React.useEffect(() => {
@@ -193,14 +205,13 @@ const Index = () => {
 
   // Update selected system when selectedSystemId changes
   React.useEffect(() => {
-    if (selectedSystemId && numSystems > 0) {
-      const tempGalaxy = generateGalaxy(galaxySeed, numSystems, numBlackHoles, binaryFrequency, trinaryFrequency);
-      const system = tempGalaxy.starSystems.find(s => s.id === selectedSystemId);
+    if (selectedSystemId && galaxyData) {
+      const system = galaxyData.starSystems.find(s => s.id === selectedSystemId);
       if (system) {
         setSelectedSystem(system);
       }
     }
-  }, [selectedSystemId, galaxySeed, numSystems, numBlackHoles, binaryFrequency, trinaryFrequency]);
+  }, [selectedSystemId, galaxyData]);
 
   const handleSeedChange = () => {
     const newSeed = parseInt(inputSeed) || 12345;
@@ -372,18 +383,17 @@ const Index = () => {
 
   // Check if we can jump to selected system
   const canJumpToSelected = React.useMemo(() => {
-    if (!selectedSystem || !currentSystemId || selectedSystem.id === currentSystemId) {
+    if (!selectedSystem || !currentSystemId || selectedSystem.id === currentSystemId || !galaxyData) {
       return false;
     }
     
-    const tempGalaxy = generateGalaxy(galaxySeed, numSystems, numBlackHoles, binaryFrequency, trinaryFrequency);
-    const currentSystem = tempGalaxy.starSystems.find(s => s.id === currentSystemId);
+    const currentSystem = galaxyData.starSystems.find(s => s.id === currentSystemId);
     
     if (!currentSystem) return false;
     
-    const jumpableIds = getJumpableSystemIds(currentSystem, tempGalaxy.starSystems);
+    const jumpableIds = getJumpableSystemIds(currentSystem, galaxyData.starSystems);
     return jumpableIds.includes(selectedSystem.id);
-  }, [selectedSystem, currentSystemId, galaxySeed, numSystems, numBlackHoles, binaryFrequency, trinaryFrequency, getJumpableSystemIds]);
+  }, [selectedSystem, currentSystemId, galaxyData, getJumpableSystemIds]);
 
   return (
     <div className="h-screen bg-black text-white flex flex-col overflow-hidden">
@@ -469,6 +479,8 @@ const Index = () => {
         getJumpableSystemIds={getJumpableSystemIds}
         getScannerRangeSystemIds={getScannerRangeSystemIds}
         canJumpToSelected={canJumpToSelected}
+        allSystems={galaxyData?.starSystems || []}
+        allBlackHoles={galaxyData?.blackHoles || []}
         onSystemSelect={handleSystemSelect}
         onStarSelect={handleStarSelect}
         onBodySelect={handleBodySelect}
