@@ -2,53 +2,64 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Zap, AlertTriangle } from 'lucide-react';
-import { StarSystem } from '../../../utils/galaxyGenerator';
+import { StarSystem, BlackHole } from '../../../utils/galaxyGenerator';
 
 interface BlackHoleJumpActionsProps {
   selectedSystem: StarSystem | null;
   currentSystemId: string | null;
   onBlackHoleJumpBoost: () => void;
+  allSystems?: StarSystem[];
+  allBlackHoles?: BlackHole[];
+  shipStats?: any;
 }
 
 export const BlackHoleJumpActions: React.FC<BlackHoleJumpActionsProps> = ({
   selectedSystem,
   currentSystemId,
-  onBlackHoleJumpBoost
+  onBlackHoleJumpBoost,
+  allSystems = [],
+  allBlackHoles = [],
+  shipStats
 }) => {
-  const isBlackHole = selectedSystem?.starType === 'blackhole';
-  const isAtBlackHole = currentSystemId && selectedSystem?.id === currentSystemId && isBlackHole;
+  // Find the current system where the player is located
+  const currentSystem = currentSystemId ? 
+    allSystems.find(s => s.id === currentSystemId) || 
+    allBlackHoles.find(bh => bh.id === currentSystemId) : null;
+
+  // Check if we can draw purple lines to black holes (tech level 8+ requirement)
+  const canUseBlackHoleJumps = shipStats && shipStats.techLevel >= 8;
+  
+  // Check if there are any black holes within jump range
+  const hasBlackHoleInRange = React.useMemo(() => {
+    if (!currentSystem || !canUseBlackHoleJumps || !shipStats) return false;
+    
+    const galaxyWidth = 100000;
+    const maxJumpDistance = (shipStats.techLevel / 10) * (galaxyWidth / 16);
+    
+    return allBlackHoles.some(blackHole => {
+      if (blackHole.id === currentSystemId) return false;
+      
+      const dx = currentSystem.position[0] - blackHole.position[0];
+      const dy = currentSystem.position[1] - blackHole.position[1];
+      const dz = currentSystem.position[2] - blackHole.position[2];
+      const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      
+      return distance <= maxJumpDistance;
+    });
+  }, [currentSystem, currentSystemId, allBlackHoles, canUseBlackHoleJumps, shipStats]);
 
   console.log('BlackHoleJumpActions Debug:', {
-    selectedSystemId: selectedSystem?.id,
-    selectedSystemStarType: selectedSystem?.starType,
     currentSystemId,
-    isBlackHole,
-    isAtBlackHole
+    hasCurrentSystem: !!currentSystem,
+    canUseBlackHoleJumps,
+    hasBlackHoleInRange,
+    techLevel: shipStats?.techLevel,
+    blackHolesCount: allBlackHoles.length
   });
 
-  if (!isBlackHole) {
+  // Only show if we're at a system that can reach black holes
+  if (!hasBlackHoleInRange) {
     return null;
-  }
-
-  // Show different content based on whether we're at the black hole or just viewing it
-  if (!isAtBlackHole) {
-    return (
-      <div className="space-y-2">
-        <div className="bg-purple-900/20 border border-purple-600 rounded-lg p-3">
-          <div className="flex items-center gap-2 text-purple-400 font-medium mb-2">
-            <Zap className="h-4 w-4" />
-            Black Hole Jump Boost
-          </div>
-          <p className="text-purple-300 text-sm mb-3">
-            Travel to this black hole to use its gravitational field for experimental long-range jumps.
-          </p>
-          <div className="flex items-center gap-2 text-yellow-400 text-xs">
-            <AlertTriangle className="h-3 w-3" />
-            <span>Must be at black hole location to activate</span>
-          </div>
-        </div>
-      </div>
-    );
   }
 
   return (
@@ -59,8 +70,8 @@ export const BlackHoleJumpActions: React.FC<BlackHoleJumpActionsProps> = ({
           Black Hole Jump Boost
         </div>
         <p className="text-purple-300 text-sm mb-3">
-          Harness the black hole's gravitational field to perform an experimental long-range jump 
-          to a distant system near another black hole.
+          Your advanced technology can harness nearby black hole gravitational fields 
+          to perform experimental long-range jumps to distant systems.
         </p>
         <div className="flex items-center gap-2 text-yellow-400 text-xs mb-3">
           <AlertTriangle className="h-3 w-3" />

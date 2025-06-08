@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Ship } from 'lucide-react';
-import { StarSystem } from '../../utils/galaxyGenerator';
+import { StarSystem, BlackHole } from '../../utils/galaxyGenerator';
 import { ScannerButton } from '../galaxy/scanner/ScannerButton';
 import { ExplorationActions } from './actions/ExplorationActions';
 import { NavigationActions } from './actions/NavigationActions';
@@ -33,6 +33,9 @@ interface ActionsPanelProps {
   onJumpToSystem?: (systemId: string) => void;
   onJumpToNewGalaxy?: () => void;
   onBlackHoleJumpBoost?: () => void;
+  allSystems?: StarSystem[];
+  allBlackHoles?: BlackHole[];
+  shipStats?: any;
 }
 
 export const ActionsPanel: React.FC<ActionsPanelProps> = ({
@@ -52,7 +55,10 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
   canJumpToSelected = false,
   onJumpToSystem,
   onJumpToNewGalaxy,
-  onBlackHoleJumpBoost
+  onBlackHoleJumpBoost,
+  allSystems = [],
+  allBlackHoles = [],
+  shipStats
 }) => {
   const isBlackHole = selectedSystem?.starType === 'blackhole';
   const isCentralBlackHole = selectedSystem?.id === 'central-blackhole';
@@ -81,6 +87,9 @@ export const ActionsPanel: React.FC<ActionsPanelProps> = ({
               selectedSystem={selectedSystem}
               currentSystemId={currentSystemId}
               onBlackHoleJumpBoost={onBlackHoleJumpBoost}
+              allSystems={allSystems}
+              allBlackHoles={allBlackHoles}
+              shipStats={shipStats}
             />
 
             <SystemStatusDisplay

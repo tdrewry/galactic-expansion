@@ -4,7 +4,7 @@ import { generateStarship } from '../../utils/starshipGenerator';
 import { ActionsPanel } from './ActionsPanel';
 import { ShipLayoutDialog } from './ShipLayoutDialog';
 import { StarshipStats } from './StarshipStats';
-import { StarSystem } from '../../utils/galaxyGenerator';
+import { StarSystem, BlackHole } from '../../utils/galaxyGenerator';
 
 interface StarshipPanelProps {
   seed: number;
@@ -31,6 +31,8 @@ interface StarshipPanelProps {
   onRepairShields?: (cost: number) => void;
   onRepairCombatSystems?: (cost: number) => void;
   onBlackHoleJumpBoost?: () => void;
+  allSystems?: StarSystem[];
+  allBlackHoles?: BlackHole[];
 }
 
 export const StarshipPanel: React.FC<StarshipPanelProps> = ({ 
@@ -53,7 +55,9 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
   onRepairHull,
   onRepairShields,
   onRepairCombatSystems,
-  onBlackHoleJumpBoost
+  onBlackHoleJumpBoost,
+  allSystems,
+  allBlackHoles
 }) => {
   const starship = useMemo(() => generateStarship(seed), [seed]);
   const [isShipLayoutOpen, setIsShipLayoutOpen] = useState(false);
@@ -110,6 +114,9 @@ export const StarshipPanel: React.FC<StarshipPanelProps> = ({
               onTriggerScan={onTriggerScan}
               isScanning={isScanning}
               onBlackHoleJumpBoost={onBlackHoleJumpBoost}
+              allSystems={allSystems}
+              allBlackHoles={allBlackHoles}
+              shipStats={shipStats || currentStats}
             />
           </div>
         )}
