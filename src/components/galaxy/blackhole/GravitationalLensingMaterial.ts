@@ -33,6 +33,7 @@ export const createGravitationalLensingMaterial = () => {
         float alpha = 0.0;
         
         float distFromCenter = length(uv - center);
+        vec2 offset = uv - center;
         
         // Event horizon - solid black sphere
         if (distFromCenter < eventHorizonRadius) {
@@ -40,44 +41,43 @@ export const createGravitationalLensingMaterial = () => {
           alpha = 1.0;
         }
         // Ring 1: Gravitational halo (horizontal orientation)
-        else if (distFromCenter >= eventHorizonRadius && distFromCenter <= haloRadius) {
-          // Create horizontal ring effect
-          float ringDistance = abs(distFromCenter - (eventHorizonRadius + haloRadius) * 0.5);
-          float ringWidth = (haloRadius - eventHorizonRadius) * 0.3;
+        else if (distFromCenter > eventHorizonRadius && distFromCenter < haloRadius) {
+          // Create horizontal ring by checking distance from horizontal line
+          float horizontalDistance = abs(offset.y);
+          float ringThickness = 0.03;
           
-          if (ringDistance < ringWidth) {
-            float ringIntensity = 1.0 - (ringDistance / ringWidth);
-            ringIntensity = smoothstep(0.0, 1.0, ringIntensity);
+          if (horizontalDistance < ringThickness) {
+            float intensity = 1.0 - (horizontalDistance / ringThickness);
+            intensity = smoothstep(0.0, 1.0, intensity);
             
-            // Subtle gravitational lensing glow
-            color = vec3(0.4, 0.6, 1.0) * ringIntensity;
-            alpha = ringIntensity * 0.6;
+            // Blue gravitational lensing glow
+            color = vec3(0.3, 0.5, 1.0) * intensity;
+            alpha = intensity * 0.8;
           }
         }
         // Ring 2: Accretion disk (vertical orientation, 90 degrees rotated)
-        else if (distFromCenter >= eventHorizonRadius && distFromCenter <= accretionRadius) {
-          // Create vertical ring for accretion disk
-          vec2 offset = uv - center;
-          float verticalDistance = abs(offset.x); // Use x-component for vertical ring
+        else if (distFromCenter > eventHorizonRadius && distFromCenter < accretionRadius) {
+          // Create vertical ring by checking distance from vertical line
+          float verticalDistance = abs(offset.x);
           float diskThickness = 0.02;
           
           if (verticalDistance < diskThickness) {
-            float diskIntensity = 1.0 - (verticalDistance / diskThickness);
-            diskIntensity = smoothstep(0.0, 1.0, diskIntensity);
+            float intensity = 1.0 - (verticalDistance / diskThickness);
+            intensity = smoothstep(0.0, 1.0, intensity);
             
-            // Orange swirling pattern based on reference image
+            // Orange swirling pattern
             float angle = atan(offset.y, offset.x);
-            float swirl = sin(angle * 3.0 + time * 2.0 + distFromCenter * 10.0) * 0.5 + 0.5;
+            float swirl = sin(angle * 4.0 + time * 3.0 + distFromCenter * 15.0) * 0.5 + 0.5;
             
-            // Temperature-based colors - hot orange/red swirls
-            float temp = swirl * diskIntensity;
+            // Temperature-based colors - hot orange swirls
+            float temp = swirl * intensity;
             color = mix(
-              vec3(1.0, 0.3, 0.1), // Hot orange-red
-              vec3(1.0, 0.8, 0.2), // Bright yellow-orange
+              vec3(1.0, 0.4, 0.1), // Hot orange-red
+              vec3(1.0, 0.8, 0.3), // Bright yellow-orange
               temp
             );
             
-            alpha = diskIntensity * 0.8;
+            alpha = intensity * 0.9;
           }
         }
         
