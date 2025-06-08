@@ -4,22 +4,24 @@ import { BlackHoleMesh } from './blackhole/BlackHoleMesh';
 import { BlackHoleSelectionRing } from './blackhole/BlackHoleSelectionRing';
 
 interface BlackHoleProps {
+  id: string;
   position: [number, number, number];
   size?: number;
   isSelected?: boolean;
-  onSelect?: () => void;
+  onSelect?: (blackHole: { id: string; position: [number, number, number] }) => void;
 }
 
 export const BlackHole: React.FC<BlackHoleProps> = ({
+  id,
   position,
-  size = 400, // Reduced from 800 to make it half the size
+  size = 400,
   isSelected = false,
   onSelect
 }) => {
   const handleClick = (event: any) => {
     event.stopPropagation();
     if (onSelect) {
-      onSelect();
+      onSelect({ id, position });
     }
   };
 
@@ -35,6 +37,17 @@ export const BlackHole: React.FC<BlackHoleProps> = ({
 
   return (
     <group position={position}>
+      {/* Large invisible collision sphere for easy selection */}
+      <mesh
+        onClick={handleClick}
+        onPointerOver={handlePointerOver}
+        onPointerOut={handlePointerOut}
+        visible={false}
+      >
+        <sphereGeometry args={[size * 2, 8, 6]} />
+        <meshBasicMaterial transparent opacity={0} />
+      </mesh>
+
       {/* First ring - vertical orientation */}
       <BlackHoleMesh
         size={size}

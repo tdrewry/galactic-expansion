@@ -12,13 +12,16 @@ export const useJumpMechanics = () => {
     exploredSystemIds: Set<string>,
     travelHistory: string[]
   ) => {
+    // Black holes can always be jumped to if within range (they're mysterious and powerful)
+    const isBlackHole = toSystem.starType === 'blackhole';
+    
     // Can always jump to systems in travel history (green path)
     if (travelHistory.includes(toSystem.id)) {
       return true;
     }
     
-    // Can always jump to explored systems
-    if (exploredSystemIds.has(toSystem.id)) {
+    // Can always jump to explored systems (except black holes which are always accessible)
+    if (!isBlackHole && exploredSystemIds.has(toSystem.id)) {
       return true;
     }
     

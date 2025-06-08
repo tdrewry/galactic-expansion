@@ -18,6 +18,7 @@ export const NavigationActions: React.FC<NavigationActionsProps> = ({
   onJumpToSystem
 }) => {
   const isCurrentSystem = selectedSystem?.id === currentSystemId;
+  const isBlackHole = selectedSystem?.starType === 'blackhole';
 
   const handleJumpToSystem = () => {
     if (onJumpToSystem && selectedSystem) {
@@ -34,7 +35,7 @@ export const NavigationActions: React.FC<NavigationActionsProps> = ({
       size="sm"
     >
       <Zap className="h-4 w-4 mr-2" />
-      Jump to: {selectedSystem?.id}
+      {isBlackHole ? `Jump to Black Hole: ${selectedSystem?.id}` : `Jump to: ${selectedSystem?.id}`}
     </Button>
   );
 };

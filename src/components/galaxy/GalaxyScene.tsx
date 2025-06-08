@@ -113,36 +113,19 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
     }
   }), [galaxy.starSystems, camera]);
 
-  const handleScanComplete = () => {
-    setShowScannerIcons(true);
-    
-    if (currentSystem && getScannerRangeSystemIds) {
-      const scannerRangeIds = getScannerRangeSystemIds(currentSystem, galaxy.starSystems);
-      const newRevealedPOIs = new Set(revealedPOISystems);
-      
-      scannerRangeIds.forEach(systemId => {
-        const system = galaxy.starSystems.find(s => s.id === systemId);
-        if (system && systemHasPOI(system)) {
-          newRevealedPOIs.add(systemId);
-        }
-      });
-      
-      setRevealedPOISystems(newRevealedPOIs);
-    }
-    
-    if (scannerFadeTimer) {
-      clearTimeout(scannerFadeTimer);
-    }
-    
-    const timer = setTimeout(() => {
-      setShowScannerIcons(false);
-    }, 15000);
-    
-    setScannerFadeTimer(timer);
-    
-    if (onScanComplete) {
-      onScanComplete();
-    }
+  const handleBlackHoleSelect = (blackHole: { id: string; position: [number, number, number] }) => {
+    console.log('Black hole selected:', blackHole.id);
+    // Create a pseudo-system object for black holes to work with existing selection logic
+    const blackHoleAsSystem = {
+      id: blackHole.id,
+      position: blackHole.position,
+      starType: 'blackhole' as any,
+      planets: [],
+      binaryStarType: null,
+      trinaryStarType: null,
+      explored: false
+    };
+    onSystemSelect(blackHoleAsSystem);
   };
 
   useEffect(() => {
@@ -202,6 +185,38 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
   // Determine if selected system icons should be shown
   const shouldShowSelectedSystemIcons = selectedSystem && currentSystem && getScannerRangeSystemIds && 
     getScannerRangeSystemIds(currentSystem, galaxy.starSystems).includes(selectedSystem.id);
+
+  const handleScanComplete = () => {
+    setShowScannerIcons(true);
+    
+    if (currentSystem && getScannerRangeSystemIds) {
+      const scannerRangeIds = getScannerRangeSystemIds(currentSystem, galaxy.starSystems);
+      const newRevealedPOIs = new Set(revealedPOISystems);
+      
+      scannerRangeIds.forEach(systemId => {
+        const system = galaxy.starSystems.find(s => s.id === systemId);
+        if (system && systemHasPOI(system)) {
+          newRevealedPOIs.add(systemId);
+        }
+      });
+      
+      setRevealedPOISystems(newRevealedPOIs);
+    }
+    
+    if (scannerFadeTimer) {
+      clearTimeout(scannerFadeTimer);
+    }
+    
+    const timer = setTimeout(() => {
+      setShowScannerIcons(false);
+    }, 15000);
+    
+    setScannerFadeTimer(timer);
+    
+    if (onScanComplete) {
+      onScanComplete();
+    }
+  };
 
   return (
     <>
@@ -280,12 +295,11 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
       {showBlackHoles && galaxy.blackHoles?.map((blackHole) => (
         <BlackHole
           key={blackHole.id}
+          id={blackHole.id}
           position={blackHole.position}
           size={blackHole.size}
-          isSelected={false}
-          onSelect={() => {
-            console.log('Black hole selected:', blackHole.id);
-          }}
+          isSelected={selectedSystem?.id === blackHole.id}
+          onSelect={handleBlackHoleSelect}
         />
       ))}
       
