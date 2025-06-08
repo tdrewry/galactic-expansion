@@ -48,13 +48,18 @@ export const BlackHoleJumpActions: React.FC<BlackHoleJumpActionsProps> = ({
     });
   }, [currentSystem, currentSystemId, allBlackHoles, canUseBlackHoleJumps, shipStats]);
 
-  console.log('BlackHoleJumpActions Debug:', {
+  console.log('BlackHoleJumpActions Enhanced Debug:', {
     currentSystemId,
     hasCurrentSystem: !!currentSystem,
+    currentSystemPosition: currentSystem?.position,
     canUseBlackHoleJumps,
     hasBlackHoleInRange,
     techLevel: shipStats?.techLevel,
-    blackHolesCount: allBlackHoles.length
+    blackHolesCount: allBlackHoles.length,
+    blackHoleIds: allBlackHoles.map(bh => bh.id),
+    blackHolePositions: allBlackHoles.map(bh => ({ id: bh.id, position: bh.position })),
+    maxJumpDistance: shipStats ? (shipStats.techLevel / 10) * (100000 / 16) : 0,
+    allSystemsCount: allSystems.length
   });
 
   // Only show if we're at a system that can reach black holes
