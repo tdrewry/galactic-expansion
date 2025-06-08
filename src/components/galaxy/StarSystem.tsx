@@ -29,8 +29,9 @@ export const StarSystem: React.FC<StarSystemProps> = ({ system, isSelected, onSe
   const { color, glow } = useMemo(() => getStarColors(system.starType), [system.starType]);
   const { core, innerGlow, outerGlow, spikeLength } = useMemo(() => getStarSizes(system.starType), [system.starType]);
 
+  const showStarSystemLog = false
   // Log exploration status for debugging
-  console.log(`StarSystem ${system.id} - explored: ${system.explored}, isSelected: ${isSelected}`);
+  if (showStarSystemLog) console.log(`StarSystem ${system.id} - explored: ${system.explored}, isSelected: ${isSelected}`);
 
   // Twinkling animation
   useFrame((state) => {
