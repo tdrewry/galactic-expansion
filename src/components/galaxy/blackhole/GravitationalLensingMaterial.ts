@@ -27,30 +27,6 @@ export const createGravitationalLensingMaterial = () => {
       
       varying vec2 vUv;
       
-      // Gravitational lensing distortion for background elements
-      vec2 gravitationalLens(vec2 uv, vec2 blackHole, float radius) {
-        vec2 delta = uv - blackHole;
-        float dist = length(delta);
-        
-        if (dist < eventHorizonRadius) {
-          return vec2(-1.0); // Inside event horizon - no light escapes
-        }
-        
-        if (dist < radius && dist > eventHorizonRadius) {
-          // Apply realistic lensing based on distance from black hole
-          float lensStrength = (radius - dist) / (radius - eventHorizonRadius);
-          float bendAngle = lensStrength * 0.3; // Reduced bending for realism
-          
-          // Bend light rays around the black hole
-          float angle = atan(delta.y, delta.x);
-          vec2 bentDirection = vec2(cos(angle + bendAngle), sin(angle + bendAngle));
-          
-          return uv + bentDirection * lensStrength * 0.1;
-        }
-        
-        return uv;
-      }
-      
       void main() {
         vec2 uv = vUv;
         vec3 color = vec3(0.0);
@@ -63,48 +39,65 @@ export const createGravitationalLensingMaterial = () => {
           return;
         }
         
-        // Accretion disk - minimal and realistic
+        // Photon sphere - subtle gravitational redshift glow
+        if (distFromCenter >= eventHorizonRadius && distFromCenter <= eventHorizonRadius * 1.5) {
+          float photonSphereIntensity = smoothstep(eventHorizonRadius, eventHorizonRadius * 1.5, distFromCenter);
+          photonSphereIntensity = 1.0 - photonSphereIntensity;
+          photonSphereIntensity = pow(photonSphereIntensity, 2.0);
+          color += vec3(0.3, 0.4, 0.8) * photonSphereIntensity * 0.4;
+        }
+        
+        // Accretion disk - realistic orbital motion and temperature gradient
         if (distFromCenter > eventHorizonRadius && distFromCenter < accretionRadius) {
           float diskFactor = (distFromCenter - eventHorizonRadius) / (accretionRadius - eventHorizonRadius);
           
-          // Simple orbital motion
+          // Orbital motion - faster closer to black hole
           float angle = atan(uv.y - center.y, uv.x - center.x);
-          float orbital = sin(angle * 3.0 - time * 2.0 * (1.0 / distFromCenter));
+          float orbitalSpeed = 1.0 / (distFromCenter + 0.01);
+          float orbital = sin(angle * 4.0 + time * orbitalSpeed * 3.0);
           
-          // Temperature gradient (hotter closer to black hole)
-          float temperature = 1.0 - diskFactor;
+          // Temperature gradient (inverse square law approximation)
+          float temperature = 1.0 / (diskFactor * diskFactor + 0.1);
+          temperature = clamp(temperature, 0.0, 1.0);
+          
+          // Disk turbulence
+          float turbulence = sin(angle * 8.0 + time * 2.0) * 0.1 + 0.9;
           
           // Disk intensity with realistic orbital patterns
-          float intensity = (orbital * 0.2 + 0.8) * temperature;
-          intensity = smoothstep(0.3, 1.0, intensity);
+          float intensity = (orbital * 0.3 + 0.7) * temperature * turbulence;
+          intensity = smoothstep(0.2, 1.0, intensity);
           
-          // Realistic accretion disk colors based on temperature
-          if (temperature > 0.8) {
-            color += vec3(0.9, 0.95, 1.0) * intensity * 0.6; // Very hot - blue-white
-          } else if (temperature > 0.5) {
-            color += vec3(1.0, 0.9, 0.7) * intensity * 0.5; // Hot - white-yellow
+          // Temperature-based colors
+          if (temperature > 0.7) {
+            color += vec3(0.9, 0.95, 1.0) * intensity * 0.8; // Very hot - blue-white
+          } else if (temperature > 0.4) {
+            color += vec3(1.0, 0.9, 0.6) * intensity * 0.6; // Hot - white-yellow
           } else {
-            color += vec3(1.0, 0.6, 0.2) * intensity * 0.3; // Cooler - orange-red
+            color += vec3(1.0, 0.5, 0.1) * intensity * 0.4; // Cooler - orange-red
+          }
+          
+          // Add some disk thickness variation
+          float diskThickness = abs(sin(angle * 6.0)) * 0.02;
+          if (diskThickness > 0.015) {
+            color *= 0.7; // Darker areas where disk is thicker
           }
         }
         
-        // Einstein ring effect - visible when background objects align
-        float ringDist = abs(distFromCenter - lensingRadius * 0.85);
-        if (ringDist < 0.01) {
-          float ringIntensity = 1.0 - (ringDist / 0.01);
-          color += vec3(0.8, 0.9, 1.0) * ringIntensity * 0.3;
+        // Einstein ring - appears at specific lensing distance
+        float einsteinRingDist = lensingRadius * 0.8;
+        float ringWidth = 0.008;
+        if (abs(distFromCenter - einsteinRingDist) < ringWidth) {
+          float ringIntensity = 1.0 - (abs(distFromCenter - einsteinRingDist) / ringWidth);
+          ringIntensity = smoothstep(0.0, 1.0, ringIntensity);
+          color += vec3(0.6, 0.8, 1.0) * ringIntensity * 0.5;
         }
         
-        // Photon sphere - subtle gravitational redshift effect
-        if (distFromCenter > eventHorizonRadius && distFromCenter < eventHorizonRadius * 1.5) {
-          float photonSphereIntensity = 1.0 - (distFromCenter - eventHorizonRadius) / (eventHorizonRadius * 0.5);
-          photonSphereIntensity = pow(photonSphereIntensity, 3.0);
-          color += vec3(0.2, 0.3, 0.8) * photonSphereIntensity * 0.2;
+        // Outer gravitational glow - very subtle
+        if (distFromCenter > accretionRadius && distFromCenter < lensingRadius) {
+          float glowFactor = (lensingRadius - distFromCenter) / (lensingRadius - accretionRadius);
+          glowFactor = pow(glowFactor, 3.0);
+          color += vec3(0.1, 0.2, 0.4) * glowFactor * 0.1;
         }
-        
-        // Outside the black hole, we let background elements show through naturally
-        // The actual lensing of background stars/galaxies will be handled by 
-        // the overall scene rendering, not artificial generation here
         
         gl_FragColor = vec4(color, 1.0);
       }
