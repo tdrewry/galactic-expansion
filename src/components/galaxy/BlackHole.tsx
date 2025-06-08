@@ -35,12 +35,24 @@ export const BlackHole: React.FC<BlackHoleProps> = ({
 
   return (
     <group position={position}>
+      {/* Original ring orientation */}
       <BlackHoleMesh
         size={size}
         onClick={handleClick}
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}
       />
+      
+      {/* Second ring rotated 90 degrees */}
+      <group rotation={[0, 0, Math.PI / 2]}>
+        <BlackHoleMesh
+          size={size}
+          onClick={handleClick}
+          onPointerOver={handlePointerOver}
+          onPointerOut={handlePointerOut}
+        />
+      </group>
+      
       <BlackHoleSelectionRing size={size} isSelected={isSelected} />
     </group>
   );
