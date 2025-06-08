@@ -155,7 +155,8 @@ export const createGravitationalLensingMaterial = () => {
     transparent: true,
     side: THREE.DoubleSide,
     blending: THREE.NormalBlending,
-    depthWrite: false
+    depthWrite: true,
+    depthTest: true
   });
 };
 
