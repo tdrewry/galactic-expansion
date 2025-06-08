@@ -86,10 +86,6 @@ export const BlackHoleJumpActions: React.FC<BlackHoleJumpActionsProps> = ({
     <>
       <div className="space-y-2">
         <div className="bg-purple-900/20 border border-purple-600 rounded-lg p-3">
-          <div className="flex items-center gap-2 text-purple-400 font-medium mb-2">
-            <Zap className="h-4 w-4" />
-            Black Hole Jump Boost
-          </div>
           <div className="flex items-center gap-2 text-yellow-400 text-xs mb-3">
             <AlertTriangle className="h-3 w-3" />
             <span>Experimental technology - destination is random</span>
