@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
 import { ExplorationDialog } from '../components/galaxy/ExplorationDialog';
 import { useExploration } from '../components/exploration/useExploration';
-import { generateStarship } from '../utils/starshipGenerator';
+import { generateStarship, generateShipOptions } from '../utils/starshipGenerator';
 import { useShipStats } from '../hooks/useShipStats';
 import { Button } from '@/components/ui/button';
 import { useGalaxyState } from '../hooks/useGalaxyState';
@@ -118,6 +118,23 @@ const Index = () => {
     setShipOptions,
     setIsShipSelectionOpen
   });
+
+  const handleStartNewGameFromGameOver = useCallback(() => {
+    const newSeed = Math.floor(Math.random() * 1000000);
+    setGalaxySeed(newSeed);
+    setInputSeed(newSeed.toString());
+    setSelectedSystem(null);
+    setSelectedBody(null);
+    resetAllExploration();
+    
+    // Generate new ship options and show selection dialog
+    const options = generateShipOptions(newSeed);
+    setShipOptions(options);
+    setIsShipSelectionOpen(true);
+    
+    // Reset the game over state
+    resetStats(generateStarship(newSeed).stats);
+  }, [setGalaxySeed, setInputSeed, setSelectedSystem, setSelectedBody, resetAllExploration, setShipOptions, setIsShipSelectionOpen, resetStats]);
 
   // Initialize starting system
   useEffect(() => {
@@ -253,7 +270,7 @@ const Index = () => {
         <div className="text-center">
           <h1 className="text-4xl font-bold text-red-400 mb-4">GAME OVER</h1>
           <p className="text-xl text-gray-300 mb-8">Your ship has been destroyed</p>
-          <Button onClick={generateRandomSeed} className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={handleStartNewGameFromGameOver} className="bg-blue-600 hover:bg-blue-700">
             Start New Game
           </Button>
         </div>
