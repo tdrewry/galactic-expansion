@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Billboard } from '@react-three/drei';
@@ -35,10 +36,10 @@ export const BlackHoleMesh: React.FC<BlackHoleMeshProps> = ({
     }
   });
 
-  // Use ring geometry with inner and outer radius to create the ring effect
-  // Keep the ring size tight to the visual effect
-  const ringInnerRadius = size * 0.3;
-  const ringOuterRadius = size * 0.5;
+  // Make the ring much tighter to the black sphere
+  // Black sphere is size * 0.1, so start ring just outside it
+  const ringInnerRadius = size * 0.12;  // Just outside black sphere
+  const ringOuterRadius = size * 0.25;  // Keep it compact
 
   const meshElement = (
     <mesh
