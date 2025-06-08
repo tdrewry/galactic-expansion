@@ -1,4 +1,3 @@
-
 import * as THREE from 'three';
 
 // Constants for galaxy generation
@@ -9,6 +8,9 @@ const LIGHT_SPEED = 299792458; // Speed of light in m/s
 
 // Star types
 export type StarType = 'main-sequence' | 'red-giant' | 'white-dwarf' | 'neutron' | 'magnetar' | 'pulsar' | 'quasar' | 'blackhole';
+
+// Galaxy types
+export type GalaxyType = 'spiral' | 'barred-spiral' | 'elliptical' | 'globular';
 
 // Moon characteristics
 export interface Moon {
@@ -100,6 +102,7 @@ export interface Nebula {
 export interface Galaxy {
   name: string;
   seed: number;
+  galaxyType: GalaxyType;
   starSystems: StarSystem[];
   blackHoles?: BlackHole[];
   nebulae: Nebula[];
@@ -300,6 +303,21 @@ export function generateGalaxy(seed: number, numSystems: number, numBlackHoles: 
   // Use a seeded random number generator
   const random = mulberry32(seed);
 
+  // Generate galaxy type based on seed
+  const galaxyTypeRoll = random();
+  let galaxyType: GalaxyType;
+  if (galaxyTypeRoll < 0.4) {
+    galaxyType = 'spiral';
+  } else if (galaxyTypeRoll < 0.7) {
+    galaxyType = 'barred-spiral';
+  } else if (galaxyTypeRoll < 0.9) {
+    galaxyType = 'elliptical';
+  } else {
+    galaxyType = 'globular';
+  }
+
+  console.log(`Generated ${galaxyType} galaxy with seed ${seed}`);
+
   const starSystems: StarSystem[] = [];
   for (let i = 0; i < numSystems; i++) {
     starSystems.push(generateStarSystem(i, random, binaryFrequency, trinaryFrequency));
@@ -332,6 +350,7 @@ export function generateGalaxy(seed: number, numSystems: number, numBlackHoles: 
   return {
     name,
     seed,
+    galaxyType,
     starSystems,
     blackHoles,
     nebulae,
