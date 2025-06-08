@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
 import { ExplorationDialog } from '../components/galaxy/ExplorationDialog';
@@ -34,7 +33,7 @@ const Index = () => {
     setInputSeed,
     appTitle,
     numSystems,
-    numNebulae,
+    numBlackHoles,
     binaryFrequency,
     trinaryFrequency,
     showDustLanes,
@@ -164,7 +163,7 @@ const Index = () => {
   React.useEffect(() => {
     if (!currentSystemId && numSystems > 0) {
       // Generate systems and find a suitable starting system
-      const tempGalaxy = generateGalaxy(galaxySeed, numSystems, numNebulae, binaryFrequency, trinaryFrequency);
+      const tempGalaxy = generateGalaxy(galaxySeed, numSystems, numBlackHoles, binaryFrequency, trinaryFrequency);
       const startingSystem = selectStartingSystem(tempGalaxy.starSystems);
       
       if (startingSystem) {
@@ -178,7 +177,7 @@ const Index = () => {
         }
       }
     }
-  }, [galaxySeed, numSystems, numNebulae, binaryFrequency, trinaryFrequency, currentSystemId, jumpToSystem, shouldZoomToStarter]);
+  }, [galaxySeed, numSystems, numBlackHoles, binaryFrequency, trinaryFrequency, currentSystemId, jumpToSystem, shouldZoomToStarter]);
 
   // Show ship selection on first load
   React.useEffect(() => {
@@ -195,13 +194,13 @@ const Index = () => {
   // Update selected system when selectedSystemId changes
   React.useEffect(() => {
     if (selectedSystemId && numSystems > 0) {
-      const tempGalaxy = generateGalaxy(galaxySeed, numSystems, numNebulae, binaryFrequency, trinaryFrequency);
+      const tempGalaxy = generateGalaxy(galaxySeed, numSystems, numBlackHoles, binaryFrequency, trinaryFrequency);
       const system = tempGalaxy.starSystems.find(s => s.id === selectedSystemId);
       if (system) {
         setSelectedSystem(system);
       }
     }
-  }, [selectedSystemId, galaxySeed, numSystems, numNebulae, binaryFrequency, trinaryFrequency]);
+  }, [selectedSystemId, galaxySeed, numSystems, numBlackHoles, binaryFrequency, trinaryFrequency]);
 
   const handleSeedChange = () => {
     const newSeed = parseInt(inputSeed) || 12345;
@@ -377,14 +376,14 @@ const Index = () => {
       return false;
     }
     
-    const tempGalaxy = generateGalaxy(galaxySeed, numSystems, numNebulae, binaryFrequency, trinaryFrequency);
+    const tempGalaxy = generateGalaxy(galaxySeed, numSystems, numBlackHoles, binaryFrequency, trinaryFrequency);
     const currentSystem = tempGalaxy.starSystems.find(s => s.id === currentSystemId);
     
     if (!currentSystem) return false;
     
     const jumpableIds = getJumpableSystemIds(currentSystem, tempGalaxy.starSystems);
     return jumpableIds.includes(selectedSystem.id);
-  }, [selectedSystem, currentSystemId, galaxySeed, numSystems, numNebulae, binaryFrequency, trinaryFrequency, getJumpableSystemIds]);
+  }, [selectedSystem, currentSystemId, galaxySeed, numSystems, numBlackHoles, binaryFrequency, trinaryFrequency, getJumpableSystemIds]);
 
   return (
     <div className="h-screen bg-black text-white flex flex-col overflow-hidden">
@@ -410,7 +409,7 @@ const Index = () => {
           </div>
           <GalaxyControls
             numSystems={numSystems}
-            numNebulae={numNebulae}
+            numBlackHoles={numBlackHoles}
             binaryFrequency={binaryFrequency}
             trinaryFrequency={trinaryFrequency}
             showDustLanes={showDustLanes}
@@ -439,7 +438,7 @@ const Index = () => {
       <GalaxyLayout
         galaxySeed={galaxySeed}
         numSystems={numSystems}
-        numNebulae={numNebulae}
+        numBlackHoles={numBlackHoles}
         binaryFrequency={binaryFrequency}
         trinaryFrequency={trinaryFrequency}
         showDustLanes={showDustLanes}
@@ -488,7 +487,7 @@ const Index = () => {
       />
 
       <footer className="bg-gray-900 p-2 border-t border-gray-700 text-center text-sm text-gray-400 flex-shrink-0">
-        <p>Procedurally Generated Galaxy | Seed: {galaxySeed} | Systems: {numSystems} | Nebulae: {numNebulae} | Binary: {Math.round(binaryFrequency * 100)}% | Trinary: {Math.round(trinaryFrequency * 100)}% | Click and drag to navigate, scroll to zoom</p>
+        <p>Procedurally Generated Galaxy | Seed: {galaxySeed} | Systems: {numSystems} | Black Holes: {numBlackHoles} | Binary: {Math.round(binaryFrequency * 100)}% | Trinary: {Math.round(trinaryFrequency * 100)}% | Click and drag to navigate, scroll to zoom</p>
       </footer>
 
       <ShipSelectionDialog

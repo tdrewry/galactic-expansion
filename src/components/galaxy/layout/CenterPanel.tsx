@@ -22,7 +22,7 @@ interface SystemExplorationStatus {
 interface CenterPanelProps {
   galaxySeed: number;
   numSystems: number;
-  numNebulae: number;
+  numBlackHoles: number;
   binaryFrequency: number;
   trinaryFrequency: number;
   showDustLanes: boolean;
@@ -68,7 +68,7 @@ interface CenterPanelProps {
 export const CenterPanel: React.FC<CenterPanelProps> = ({
   galaxySeed,
   numSystems,
-  numNebulae,
+  numBlackHoles,
   binaryFrequency,
   trinaryFrequency,
   showDustLanes,
@@ -124,12 +124,11 @@ export const CenterPanel: React.FC<CenterPanelProps> = ({
           ref={galaxyMapRef}
           seed={galaxySeed}
           numSystems={numSystems}
-          numNebulae={numNebulae}
+          numBlackHoles={numBlackHoles}
           binaryFrequency={binaryFrequency}
           trinaryFrequency={trinaryFrequency}
           showDustLanes={showDustLanes}
           showCosmicDust={showCosmicDust}
-          showBlackHoles={showBlackHoles}
           dustLaneParticles={dustLaneParticles}
           cosmicDustParticles={cosmicDustParticles}
           dustLaneOpacity={dustLaneOpacity}

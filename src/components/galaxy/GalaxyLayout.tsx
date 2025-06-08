@@ -21,7 +21,7 @@ interface SystemExplorationStatus {
 interface GalaxyLayoutProps {
   galaxySeed: number;
   numSystems: number;
-  numNebulae: number;
+  numBlackHoles: number;
   binaryFrequency: number;
   trinaryFrequency: number;
   showDustLanes: boolean;
