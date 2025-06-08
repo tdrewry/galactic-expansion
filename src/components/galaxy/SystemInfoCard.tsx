@@ -66,6 +66,24 @@ export const SystemInfoCard: React.FC<SystemInfoCardProps> = ({
     }
   };
 
+  const getSpecialFeatureColor = (feature: string) => {
+    switch (feature.toLowerCase()) {
+      case 'asteroid-belt': return 'bg-amber-600';
+      case 'gas-giant': return 'bg-orange-600';
+      case 'binary-system': return 'bg-blue-600';
+      case 'trinary-system': return 'bg-purple-600';
+      case 'stellar-nursery': return 'bg-pink-600';
+      case 'neutron-star': return 'bg-violet-600';
+      case 'pulsar': return 'bg-cyan-600';
+      case 'magnetar': return 'bg-red-600';
+      case 'supernova-remnant': return 'bg-orange-700';
+      case 'planetary-nebula': return 'bg-green-600';
+      case 'dark-matter': return 'bg-gray-700';
+      case 'quantum-anomaly': return 'bg-indigo-600';
+      default: return 'bg-slate-600';
+    }
+  };
+
   // Find civilizations in the current star's planets
   const civilizations = currentStar.planets.filter(planet => planet.civilization);
 
@@ -184,7 +202,10 @@ export const SystemInfoCard: React.FC<SystemInfoCardProps> = ({
             <h4 className="text-white font-medium mb-2">Special Features</h4>
             <div className="flex flex-wrap gap-1">
               {system.specialFeatures.map((feature, index) => (
-                <Badge key={index} variant="outline" className="text-xs">
+                <Badge 
+                  key={index} 
+                  className={`${getSpecialFeatureColor(feature)} text-white text-xs`}
+                >
                   {feature.replace('-', ' ').toUpperCase()}
                 </Badge>
               ))}
