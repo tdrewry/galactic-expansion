@@ -7,7 +7,7 @@ export const createGravitationalLensingMaterial = () => {
       time: { value: 0 },
       center: { value: new THREE.Vector2(0.5, 0.5) },
       eventHorizonRadius: { value: 0.08 },
-      lensingRadius: { value: 0.25 },
+      haloRadius: { value: 0.25 },
       accretionRadius: { value: 0.15 },
     },
     vertexShader: `
@@ -22,7 +22,7 @@ export const createGravitationalLensingMaterial = () => {
       uniform float time;
       uniform vec2 center;
       uniform float eventHorizonRadius;
-      uniform float lensingRadius;
+      uniform float haloRadius;
       uniform float accretionRadius;
       
       varying vec2 vUv;
@@ -30,81 +30,63 @@ export const createGravitationalLensingMaterial = () => {
       void main() {
         vec2 uv = vUv;
         vec3 color = vec3(0.0);
+        float alpha = 0.0;
         
         float distFromCenter = length(uv - center);
         
-        // Event horizon - pure black, no light escapes
+        // Event horizon - solid black sphere
         if (distFromCenter < eventHorizonRadius) {
-          gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
-          return;
+          color = vec3(0.0, 0.0, 0.0);
+          alpha = 1.0;
         }
-        
-        // Photon sphere - subtle gravitational redshift glow
-        if (distFromCenter >= eventHorizonRadius && distFromCenter <= eventHorizonRadius * 1.5) {
-          float photonSphereIntensity = smoothstep(eventHorizonRadius, eventHorizonRadius * 1.5, distFromCenter);
-          photonSphereIntensity = 1.0 - photonSphereIntensity;
-          photonSphereIntensity = pow(photonSphereIntensity, 2.0);
-          color += vec3(0.3, 0.4, 0.8) * photonSphereIntensity * 0.4;
-        }
-        
-        // Accretion disk - realistic orbital motion and temperature gradient
-        if (distFromCenter > eventHorizonRadius && distFromCenter < accretionRadius) {
-          float diskFactor = (distFromCenter - eventHorizonRadius) / (accretionRadius - eventHorizonRadius);
+        // Ring 1: Gravitational halo (horizontal orientation)
+        else if (distFromCenter >= eventHorizonRadius && distFromCenter <= haloRadius) {
+          // Create horizontal ring effect
+          float ringDistance = abs(distFromCenter - (eventHorizonRadius + haloRadius) * 0.5);
+          float ringWidth = (haloRadius - eventHorizonRadius) * 0.3;
           
-          // Orbital motion - faster closer to black hole
-          float angle = atan(uv.y - center.y, uv.x - center.x);
-          float orbitalSpeed = 1.0 / (distFromCenter + 0.01);
-          float orbital = sin(angle * 4.0 + time * orbitalSpeed * 3.0);
-          
-          // Temperature gradient (inverse square law approximation)
-          float temperature = 1.0 / (diskFactor * diskFactor + 0.1);
-          temperature = clamp(temperature, 0.0, 1.0);
-          
-          // Disk turbulence
-          float turbulence = sin(angle * 8.0 + time * 2.0) * 0.1 + 0.9;
-          
-          // Disk intensity with realistic orbital patterns
-          float intensity = (orbital * 0.3 + 0.7) * temperature * turbulence;
-          intensity = smoothstep(0.2, 1.0, intensity);
-          
-          // Temperature-based colors
-          if (temperature > 0.7) {
-            color += vec3(0.9, 0.95, 1.0) * intensity * 0.8; // Very hot - blue-white
-          } else if (temperature > 0.4) {
-            color += vec3(1.0, 0.9, 0.6) * intensity * 0.6; // Hot - white-yellow
-          } else {
-            color += vec3(1.0, 0.5, 0.1) * intensity * 0.4; // Cooler - orange-red
+          if (ringDistance < ringWidth) {
+            float ringIntensity = 1.0 - (ringDistance / ringWidth);
+            ringIntensity = smoothstep(0.0, 1.0, ringIntensity);
+            
+            // Subtle gravitational lensing glow
+            color = vec3(0.4, 0.6, 1.0) * ringIntensity;
+            alpha = ringIntensity * 0.6;
           }
+        }
+        // Ring 2: Accretion disk (vertical orientation, 90 degrees rotated)
+        else if (distFromCenter >= eventHorizonRadius && distFromCenter <= accretionRadius) {
+          // Create vertical ring for accretion disk
+          vec2 offset = uv - center;
+          float verticalDistance = abs(offset.x); // Use x-component for vertical ring
+          float diskThickness = 0.02;
           
-          // Add some disk thickness variation
-          float diskThickness = abs(sin(angle * 6.0)) * 0.02;
-          if (diskThickness > 0.015) {
-            color *= 0.7; // Darker areas where disk is thicker
+          if (verticalDistance < diskThickness) {
+            float diskIntensity = 1.0 - (verticalDistance / diskThickness);
+            diskIntensity = smoothstep(0.0, 1.0, diskIntensity);
+            
+            // Orange swirling pattern based on reference image
+            float angle = atan(offset.y, offset.x);
+            float swirl = sin(angle * 3.0 + time * 2.0 + distFromCenter * 10.0) * 0.5 + 0.5;
+            
+            // Temperature-based colors - hot orange/red swirls
+            float temp = swirl * diskIntensity;
+            color = mix(
+              vec3(1.0, 0.3, 0.1), // Hot orange-red
+              vec3(1.0, 0.8, 0.2), // Bright yellow-orange
+              temp
+            );
+            
+            alpha = diskIntensity * 0.8;
           }
         }
         
-        // Einstein ring - appears at specific lensing distance
-        float einsteinRingDist = lensingRadius * 0.8;
-        float ringWidth = 0.008;
-        if (abs(distFromCenter - einsteinRingDist) < ringWidth) {
-          float ringIntensity = 1.0 - (abs(distFromCenter - einsteinRingDist) / ringWidth);
-          ringIntensity = smoothstep(0.0, 1.0, ringIntensity);
-          color += vec3(0.6, 0.8, 1.0) * ringIntensity * 0.5;
-        }
-        
-        // Outer gravitational glow - very subtle
-        if (distFromCenter > accretionRadius && distFromCenter < lensingRadius) {
-          float glowFactor = (lensingRadius - distFromCenter) / (lensingRadius - accretionRadius);
-          glowFactor = pow(glowFactor, 3.0);
-          color += vec3(0.1, 0.2, 0.4) * glowFactor * 0.1;
-        }
-        
-        gl_FragColor = vec4(color, 1.0);
+        gl_FragColor = vec4(color, alpha);
       }
     `,
     transparent: true,
     side: THREE.DoubleSide,
-    blending: THREE.AdditiveBlending
+    blending: THREE.NormalBlending
   });
 };
 
