@@ -63,6 +63,7 @@ interface CenterPanelProps {
   galaxyMapRef?: React.RefObject<GalaxyMapRef>;
   canJumpToSelected?: boolean;
   onTriggerScan?: () => void;
+  onBlackHoleJumpBoost?: () => void;
 }
 
 export const CenterPanel: React.FC<CenterPanelProps> = ({
@@ -106,7 +107,8 @@ export const CenterPanel: React.FC<CenterPanelProps> = ({
   onOpenMarket,
   onJumpToSystem,
   canJumpToSelected,
-  onTriggerScan
+  onTriggerScan,
+  onBlackHoleJumpBoost
 }) => {
   console.log('CenterPanel: onRepairCombatSystems prop received:', !!onRepairCombatSystems);
 
@@ -185,6 +187,7 @@ export const CenterPanel: React.FC<CenterPanelProps> = ({
           onRepairHull={onRepairHull}
           onRepairShields={onRepairShields}
           onRepairCombatSystems={onRepairCombatSystems}
+          onBlackHoleJumpBoost={onBlackHoleJumpBoost}
         />
       </div>
     </div>
