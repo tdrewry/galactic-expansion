@@ -77,6 +77,69 @@ export const useShipStats = (initialStats: StarshipStats) => {
     });
   }, [toast]);
 
+  const applyBlackHoleJumpDamage = useCallback((currentStats: StarshipStats): StarshipStats => {
+    // Base damage amounts for black hole jump
+    const baseDamage = 15 + Math.floor(Math.random() * 20); // 15-35 damage
+    let remainingDamage = baseDamage;
+    let newStats = { ...currentStats };
+    
+    // Apply damage to shields first
+    if (newStats.shields > 0) {
+      const shieldDamage = Math.min(remainingDamage, newStats.shields);
+      newStats.shields -= shieldDamage;
+      remainingDamage -= shieldDamage;
+    }
+    
+    // If damage remains after shields are down
+    if (remainingDamage > 0) {
+      // Apply hull damage
+      const hullDamage = Math.floor(remainingDamage * 0.7); // 70% of remaining damage to hull
+      newStats.hull = Math.max(0, newStats.hull - hullDamage);
+      
+      // Check if hull is critically low
+      if (newStats.hull <= 10) {
+        setIsGameOver(true);
+        toast({
+          title: "Ship Destroyed",
+          description: "The black hole jump caused catastrophic hull failure!",
+          variant: "destructive",
+        });
+        return newStats;
+      }
+      
+      // Remaining damage applied to systems (30% chance for each system)
+      const systemDamage = remainingDamage - hullDamage;
+      
+      if (systemDamage > 0) {
+        // Combat systems damage (30% chance)
+        if (Math.random() < 0.3) {
+          const combatDamage = Math.floor(systemDamage * 0.4);
+          newStats.combatPower = Math.max(0, newStats.combatPower - combatDamage);
+        }
+        
+        // Crew damage (25% chance)
+        if (Math.random() < 0.25) {
+          const crewDamage = Math.floor(systemDamage * 0.3);
+          newStats.crew = Math.max(1, newStats.crew - crewDamage); // Never go below 1 crew
+        }
+        
+        // Scanner damage (20% chance)
+        if (Math.random() < 0.2) {
+          const scannerDamage = Math.floor(systemDamage * 0.3);
+          newStats.scanners = Math.max(0, newStats.scanners - scannerDamage);
+        }
+        
+        // Cargo damage (15% chance - represents lost cargo)
+        if (Math.random() < 0.15) {
+          const cargoDamage = Math.floor(systemDamage * 0.5);
+          newStats.cargo = Math.max(0, newStats.cargo - cargoDamage);
+        }
+      }
+    }
+    
+    return newStats;
+  }, [toast]);
+
   const blackHoleJumpBoost = useCallback(() => {
     // This function now returns a callback that accepts the required parameters
     return (allSystems: StarSystem[], allBlackHoles: BlackHole[]) => {
@@ -107,6 +170,12 @@ export const useShipStats = (initialStats: StarshipStats) => {
         return null;
       }
       
+      // Apply damage from the dangerous jump
+      setStats(prevStats => {
+        const damagedStats = applyBlackHoleJumpDamage(prevStats);
+        return damagedStats;
+      });
+      
       // Select a random system from the candidates
       const randomIndex = Math.floor(Math.random() * systemsNearBlackHoles.length);
       const targetSystem = systemsNearBlackHoles[randomIndex];
@@ -124,12 +193,12 @@ export const useShipStats = (initialStats: StarshipStats) => {
       
       toast({
         title: "Black Hole Jump Boost Complete!",
-        description: `Used gravitational assistance to jump to system ${targetSystem.id} near a black hole.`,
+        description: `Used gravitational assistance to jump to system ${targetSystem.id}. Ship sustained damage from the experimental jump.`,
       });
       
       return targetSystem.id;
     };
-  }, [currentSystemId, toast]);
+  }, [currentSystemId, toast, applyBlackHoleJumpDamage]);
 
   const sellCargo = useCallback((amount: number, isMarket: boolean = false) => {
     setStats(prevStats => {
