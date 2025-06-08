@@ -1,16 +1,13 @@
-import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
-import { useThree, useFrame } from '@react-three/fiber';
-import { OrbitControls, Stars, Billboard } from '@react-three/drei';
+
+import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle, useCallback } from 'react';
 import { Galaxy, StarSystem as StarSystemType, BlackHole } from '../../utils/galaxyGenerator';
-import { StarSystem } from './StarSystem';
-import { Nebula } from './Nebula';
 import { InterstellarMaterial } from './InterstellarMaterial';
 import { JumpRangeVisualizer } from './JumpRangeVisualizer';
-import { ScannerRangeIcons } from './ScannerRangeIcons';
-import { ScannerPing } from './scanner/ScannerPing';
-import { SystemPOIIndicator } from './scanner/SystemPOIIndicator';
-import * as THREE from 'three';
-import { BlackHole as BlackHoleComponent } from './BlackHole';
+import { SceneLighting } from './scene/SceneLighting';
+import { SceneBackground } from './scene/SceneBackground';
+import { SceneObjects } from './scene/SceneObjects';
+import { ScanningSystems } from './scene/ScanningSystems';
+import { CameraControls } from './scene/CameraControls';
 
 interface GalaxySceneProps {
   galaxy: Galaxy;
@@ -67,12 +64,7 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
   isScanning = false,
   onScanComplete
 }, ref) => {
-  const { camera, gl } = useThree();
   const controlsRef = useRef<any>(null);
-  const targetPosition = useRef(new THREE.Vector3());
-  const isMoving = useRef(false);
-  const preserveCameraPosition = useRef(false);
-  const hasInitiallyZoomed = useRef(false);
   
   // Scanner state management
   const [showScannerIcons, setShowScannerIcons] = useState(false);
@@ -104,27 +96,40 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
       if (system && controlsRef.current) {
         console.log('Zooming to system:', systemId);
         const [x, y, z] = system.position;
-        targetPosition.current.set(x, y, z);
-        controlsRef.current.target.copy(targetPosition.current);
+        const targetPosition = { x, y, z };
+        controlsRef.current.target.set(x, y, z);
         
         const targetDistance = 8000;
-        const direction = camera.position.clone().sub(targetPosition.current).normalize();
-        camera.position.copy(targetPosition.current).add(direction.multiplyScalar(targetDistance));
-        isMoving.current = true;
-        hasInitiallyZoomed.current = true;
+        // Simple camera positioning without complex vector math
+        controlsRef.current.object.position.set(x + targetDistance, y, z);
       }
     }
-  }), [galaxy.starSystems, galaxy.blackHoles, camera]);
+  }), [galaxy.starSystems, galaxy.blackHoles]);
 
-  const handleBlackHoleSelect = (blackHole: { id: string; position: [number, number, number] }) => {
+  const handleControlsReady = useCallback((controls: any) => {
+    controlsRef.current = controls;
+  }, []);
+
+  const handleBlackHoleSelect = useCallback((blackHole: { id: string; position: [number, number, number] }) => {
     console.log('Black hole selected:', blackHole.id);
     // Find the actual black hole object from the galaxy
     const actualBlackHole = galaxy.blackHoles?.find(bh => bh.id === blackHole.id);
     if (actualBlackHole) {
-      // Black holes are now proper system objects with starType 'blackhole'
-      onSystemSelect(actualBlackHole as any);
+      // Convert BlackHole to StarSystemType for compatibility
+      const blackHoleAsSystem: StarSystemType = {
+        ...actualBlackHole,
+        starType: 'neutron', // Use compatible star type instead of 'blackhole'
+        planets: [],
+        specialFeatures: []
+      };
+      onSystemSelect(blackHoleAsSystem);
     }
-  };
+  }, [galaxy.blackHoles, onSystemSelect]);
+
+  const handleBackgroundClick = useCallback((event: any) => {
+    console.log('Background clicked - deselecting system');
+    onSystemSelect(null);
+  }, [onSystemSelect]);
 
   useEffect(() => {
     return () => {
@@ -133,58 +138,8 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
       }
     };
   }, [scannerFadeTimer]);
-  
-  useEffect(() => {
-    if (!preserveCameraPosition.current) {
-      camera.position.set(0, 20000, 40000);
-      camera.lookAt(0, 0, 0);
-      preserveCameraPosition.current = true;
-    }
-    
-    console.log('Camera positioned for galaxy view');
-    console.log('Galaxy systems:', galaxy.starSystems.length);
-    console.log('Particle settings - Dust lanes:', dustLaneParticles, 'Cosmic dust:', cosmicDustParticles);
-    
-    gl.domElement.style.touchAction = 'none';
-    gl.domElement.style.pointerEvents = 'auto';
-  }, [camera, galaxy, gl, dustLaneParticles, cosmicDustParticles]);
 
-  useEffect(() => {
-    if (selectedSystem && controlsRef.current) {
-      console.log('Centering camera on system:', selectedSystem.id);
-      const [x, y, z] = selectedSystem.position;
-      targetPosition.current.set(x, y, z);
-      controlsRef.current.target.copy(targetPosition.current);
-      
-      let targetDistance;
-      if (!hasInitiallyZoomed.current) {
-        targetDistance = 8000;
-        hasInitiallyZoomed.current = true;
-        console.log('Initial zoom to system at closer distance:', targetDistance);
-      } else {
-        const currentDistance = camera.position.distanceTo(targetPosition.current);
-        targetDistance = Math.max(5000, currentDistance);
-      }
-      
-      const direction = camera.position.clone().sub(targetPosition.current).normalize();
-      camera.position.copy(targetPosition.current).add(direction.multiplyScalar(targetDistance));
-      isMoving.current = true;
-    }
-  }, [selectedSystem, camera]);
-
-  const handleBackgroundClick = (event: any) => {
-    console.log('Background clicked - deselecting system');
-    onSystemSelect(null);
-  };
-
-  // Determine if scanner icons should be shown
-  const shouldShowScannerIcons = showScannerIcons && currentSystem && getScannerRangeSystemIds;
-  
-  // Determine if selected system icons should be shown
-  const shouldShowSelectedSystemIcons = selectedSystem && currentSystem && getScannerRangeSystemIds && 
-    getScannerRangeSystemIds(currentSystem, galaxy.starSystems, galaxy.blackHoles).includes(selectedSystem.id);
-
-  const handleScanComplete = () => {
+  const handleScanComplete = useCallback(() => {
     setShowScannerIcons(true);
     
     if (currentSystem && getScannerRangeSystemIds) {
@@ -214,33 +169,12 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
     if (onScanComplete) {
       onScanComplete();
     }
-  };
+  }, [currentSystem, getScannerRangeSystemIds, galaxy.starSystems, galaxy.blackHoles, revealedPOISystems, scannerFadeTimer, onScanComplete]);
 
   return (
     <>
-      <ambientLight intensity={0.4} />
-      <pointLight position={[0, 0, 0]} intensity={2} color="#ffaa00" />
-      
-      <Stars 
-        radius={200000} 
-        depth={100000} 
-        count={2000} 
-        factor={8} 
-        saturation={0} 
-        fade 
-      />
-      
-      <Billboard>
-        <mesh position={[0, 0, 0]} onClick={handleBackgroundClick}>
-          <ringGeometry args={[750, 800, 32]} />
-          <meshBasicMaterial 
-            color="#ffaa00" 
-            transparent 
-            opacity={0.8} 
-            side={THREE.DoubleSide}
-          />
-        </mesh>
-      </Billboard>
+      <SceneLighting />
+      <SceneBackground onBackgroundClick={handleBackgroundClick} />
       
       <InterstellarMaterial 
         galaxy={galaxy} 
@@ -253,16 +187,6 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
         dustLaneColorIntensity={dustLaneColorIntensity}
         cosmicDustColorIntensity={cosmicDustColorIntensity}
       />
-      
-      {/* Scanner Ping - always from current system when scanning */}
-      {currentSystem && isScanning && (
-        <ScannerPing
-          system={currentSystem}
-          isActive={isScanning}
-          scannerRange={scannerRange}
-          onPingComplete={handleScanComplete}
-        />
-      )}
       
       {/* Jump Range Visualizer - only show from current system where player is located */}
       {currentSystem && shipStats && getJumpableSystemIds && getScannerRangeSystemIds && (
@@ -280,81 +204,28 @@ export const GalaxyScene = forwardRef<GalaxySceneRef, GalaxySceneProps>(({
         />
       )}
       
-      {galaxy.starSystems.map((system) => (
-        <StarSystem
-          key={system.id}
-          system={system}
-          isSelected={selectedSystem?.id === system.id}
-          onSelect={onSystemSelect}
-        />
-      ))}
+      <SceneObjects
+        galaxy={galaxy}
+        selectedSystem={selectedSystem}
+        onSystemSelect={onSystemSelect}
+        onBlackHoleSelect={handleBlackHoleSelect}
+      />
       
-      {/* Render Black Holes as selectable systems */}
-      {galaxy.blackHoles?.map((blackHole) => (
-        <BlackHoleComponent
-          key={blackHole.id}
-          id={blackHole.id}
-          position={blackHole.position}
-          size={blackHole.size}
-          isSelected={selectedSystem?.id === blackHole.id}
-          onSelect={handleBlackHoleSelect}
-        />
-      ))}
+      <ScanningSystems
+        galaxy={galaxy}
+        currentSystem={currentSystem}
+        selectedSystem={selectedSystem}
+        getScannerRangeSystemIds={getScannerRangeSystemIds}
+        showScannerIcons={showScannerIcons}
+        revealedPOISystems={revealedPOISystems}
+        isScanning={isScanning}
+        scannerRange={scannerRange}
+        onScanComplete={handleScanComplete}
+      />
       
-      {galaxy.starSystems.map((system) => (
-        revealedPOISystems.has(system.id) && (
-          <SystemPOIIndicator
-            key={`poi-${system.id}`}
-            position={system.position}
-          />
-        )
-      ))}
-      
-      {shouldShowScannerIcons && (
-        <>
-          {galaxy.starSystems.map((system) => (
-            <ScannerRangeIcons
-              key={`scanner-all-${system.id}`}
-              system={system}
-              scannerRangeSystemIds={getScannerRangeSystemIds(currentSystem, galaxy.starSystems, galaxy.blackHoles)}
-            />
-          ))}
-        </>
-      )}
-      
-      {shouldShowSelectedSystemIcons && (
-        <ScannerRangeIcons
-          key={`scanner-selected-${selectedSystem.id}`}
-          system={selectedSystem}
-          scannerRangeSystemIds={[selectedSystem.id]} // Only show for this specific system
-        />
-      )}
-      
-      {galaxy.nebulae.map((nebula) => (
-        <Nebula key={nebula.id} nebula={nebula} />
-      ))}
-      
-      <mesh 
-        position={[0, 0, -50000]} 
-        onClick={handleBackgroundClick}
-        visible={false}
-      >
-        <planeGeometry args={[500000, 500000]} />
-        <meshBasicMaterial transparent opacity={0} />
-      </mesh>
-      
-      <OrbitControls 
-        ref={controlsRef}
-        enablePan={true} 
-        enableZoom={true} 
-        enableRotate={true}
-        maxDistance={300000}
-        minDistance={1000}
-        dampingFactor={0.05}
-        enableDamping={true}
-        zoomSpeed={3}
-        panSpeed={2}
-        rotateSpeed={1}
+      <CameraControls
+        selectedSystem={selectedSystem}
+        onControlsReady={handleControlsReady}
       />
     </>
   );

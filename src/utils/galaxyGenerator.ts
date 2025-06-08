@@ -1,20 +1,21 @@
+
 export interface StarSystem {
   id: string;
   position: [number, number, number];
-  starType: 'main-sequence' | 'red-giant' | 'white-dwarf' | 'neutron' | 'magnetar' | 'pulsar' | 'quasar';
+  starType: 'main-sequence' | 'red-giant' | 'white-dwarf' | 'neutron' | 'magnetar' | 'pulsar' | 'quasar' | 'blackhole';
   temperature: number;
   mass: number;
   explored: boolean;
   planets: Planet[];
   specialFeatures: string[];
   binaryCompanion?: {
-    starType: 'main-sequence' | 'red-giant' | 'white-dwarf' | 'neutron' | 'magnetar' | 'pulsar' | 'quasar';
+    starType: 'main-sequence' | 'red-giant' | 'white-dwarf' | 'neutron' | 'magnetar' | 'pulsar' | 'quasar' | 'blackhole';
     temperature: number;
     mass: number;
     planets: Planet[];
   };
   trinaryCompanion?: {
-    starType: 'main-sequence' | 'red-giant' | 'white-dwarf' | 'neutron' | 'magnetar' | 'pulsar' | 'quasar';
+    starType: 'main-sequence' | 'red-giant' | 'white-dwarf' | 'neutron' | 'magnetar' | 'pulsar' | 'quasar' | 'blackhole';
     temperature: number;
     mass: number;
     planets: Planet[];
