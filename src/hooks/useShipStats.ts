@@ -140,63 +140,122 @@ export const useShipStats = (initialStats: StarshipStats) => {
     return newStats;
   }, [toast]);
 
-  const blackHoleJumpBoost = useCallback(() => {
-    // This function now returns a callback that accepts the required parameters
+  const blackHoleJumpBoost = useCallback((jumpData: { mode: 'local' | 'newGalaxy' | 'knownGalaxy'; seed?: number }) => {
     return (allSystems: StarSystem[], allBlackHoles: BlackHole[]) => {
-      // Find all systems near black holes (within a certain distance)
-      const systemsNearBlackHoles: StarSystem[] = [];
-      const searchRadius = 5000; // Distance to consider "near" a black hole
-      
-      allSystems.forEach(system => {
-        const isNearBlackHole = allBlackHoles.some(blackHole => {
-          const dx = system.position[0] - blackHole.position[0];
-          const dy = system.position[1] - blackHole.position[1];
-          const dz = system.position[2] - blackHole.position[2];
-          const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-          return distance <= searchRadius;
+      if (jumpData.mode === 'newGalaxy' || jumpData.mode === 'knownGalaxy') {
+        // Apply damage from the dangerous jump
+        setStats(prevStats => {
+          const damagedStats = applyBlackHoleJumpDamage(prevStats);
+          return damagedStats;
+        });
+
+        // For galaxy jumps, we'll trigger a galaxy change
+        if (jumpData.mode === 'newGalaxy') {
+          const newGalaxySeed = jumpData.seed || Math.floor(Math.random() * 1000000);
+          
+          // Reset location but keep ship stats
+          setCurrentSystemId(null);
+          setSelectedSystemId(null);
+          setExploredSystemIds(new Set());
+          setTravelHistory([]);
+          
+          toast({
+            title: "Intergalactic Jump Complete!",
+            description: `Jumped to new galaxy (Seed: ${newGalaxySeed}). Your ship sustained damage from the experimental jump.`,
+          });
+          
+          // Trigger galaxy regeneration by dispatching a custom event
+          const galaxyJumpEvent = new CustomEvent('galaxyJump', { 
+            detail: { 
+              newSeed: newGalaxySeed, 
+              jumpType: 'new' 
+            } 
+          });
+          window.dispatchEvent(galaxyJumpEvent);
+          
+          return newGalaxySeed.toString();
+        } else if (jumpData.mode === 'knownGalaxy' && jumpData.seed) {
+          // Reset location but keep ship stats
+          setCurrentSystemId(null);
+          setSelectedSystemId(null);
+          setExploredSystemIds(new Set());
+          setTravelHistory([]);
+          
+          toast({
+            title: "Intergalactic Jump Complete!",
+            description: `Jumped to known galaxy (Seed: ${jumpData.seed}). Your ship sustained damage from the experimental jump.`,
+          });
+          
+          // Trigger galaxy regeneration by dispatching a custom event
+          const galaxyJumpEvent = new CustomEvent('galaxyJump', { 
+            detail: { 
+              newSeed: jumpData.seed, 
+              jumpType: 'known' 
+            } 
+          });
+          window.dispatchEvent(galaxyJumpEvent);
+          
+          return jumpData.seed.toString();
+        }
+      } else {
+        // Local galaxy jump (existing functionality)
+        // Find all systems near black holes (within a certain distance)
+        const systemsNearBlackHoles: StarSystem[] = [];
+        const searchRadius = 5000; // Distance to consider "near" a black hole
+        
+        allSystems.forEach(system => {
+          const isNearBlackHole = allBlackHoles.some(blackHole => {
+            const dx = system.position[0] - blackHole.position[0];
+            const dy = system.position[1] - blackHole.position[1];
+            const dz = system.position[2] - blackHole.position[2];
+            const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            return distance <= searchRadius;
+          });
+          
+          if (isNearBlackHole && system.id !== currentSystemId) {
+            systemsNearBlackHoles.push(system);
+          }
         });
         
-        if (isNearBlackHole && system.id !== currentSystemId) {
-          systemsNearBlackHoles.push(system);
+        if (systemsNearBlackHoles.length === 0) {
+          toast({
+            title: "Jump Boost Failed",
+            description: "No suitable destination systems detected near black holes.",
+            variant: "destructive",
+          });
+          return null;
         }
-      });
-      
-      if (systemsNearBlackHoles.length === 0) {
-        toast({
-          title: "Jump Boost Failed",
-          description: "No suitable destination systems detected near black holes.",
-          variant: "destructive",
+        
+        // Apply damage from the dangerous jump
+        setStats(prevStats => {
+          const damagedStats = applyBlackHoleJumpDamage(prevStats);
+          return damagedStats;
         });
-        return null;
+        
+        // Select a random system from the candidates
+        const randomIndex = Math.floor(Math.random() * systemsNearBlackHoles.length);
+        const targetSystem = systemsNearBlackHoles[randomIndex];
+        
+        // Perform the jump
+        setCurrentSystemId(targetSystem.id);
+        setSelectedSystemId(targetSystem.id);
+        setExploredSystemIds(prev => new Set([...prev, targetSystem.id]));
+        setTravelHistory(prev => {
+          if (!prev.includes(targetSystem.id)) {
+            return [...prev, targetSystem.id];
+          }
+          return prev;
+        });
+        
+        toast({
+          title: "Black Hole Jump Boost Complete!",
+          description: `Used gravitational assistance to jump to system ${targetSystem.id}. Ship sustained damage from the experimental jump.`,
+        });
+        
+        return targetSystem.id;
       }
       
-      // Apply damage from the dangerous jump
-      setStats(prevStats => {
-        const damagedStats = applyBlackHoleJumpDamage(prevStats);
-        return damagedStats;
-      });
-      
-      // Select a random system from the candidates
-      const randomIndex = Math.floor(Math.random() * systemsNearBlackHoles.length);
-      const targetSystem = systemsNearBlackHoles[randomIndex];
-      
-      // Perform the jump
-      setCurrentSystemId(targetSystem.id);
-      setSelectedSystemId(targetSystem.id);
-      setExploredSystemIds(prev => new Set([...prev, targetSystem.id]));
-      setTravelHistory(prev => {
-        if (!prev.includes(targetSystem.id)) {
-          return [...prev, targetSystem.id];
-        }
-        return prev;
-      });
-      
-      toast({
-        title: "Black Hole Jump Boost Complete!",
-        description: `Used gravitational assistance to jump to system ${targetSystem.id}. Ship sustained damage from the experimental jump.`,
-      });
-      
-      return targetSystem.id;
+      return null;
     };
   }, [currentSystemId, toast, applyBlackHoleJumpDamage]);
 

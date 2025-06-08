@@ -264,6 +264,33 @@ const Index = () => {
     return jumpableIds.includes(selectedSystem.id);
   }, [selectedSystem, currentSystemId, galaxyData, getJumpableSystemIds]);
 
+  // Listen for galaxy jump events
+  useEffect(() => {
+    const handleGalaxyJump = (event: CustomEvent) => {
+      const { newSeed, jumpType } = event.detail;
+      console.log(`Galaxy jump detected: ${jumpType} galaxy with seed ${newSeed}`);
+      
+      // Update galaxy seed to trigger regeneration
+      setGalaxySeed(newSeed);
+      setInputSeed(newSeed.toString());
+      setSelectedSystem(null);
+      setSelectedBody(null);
+      resetAllExploration();
+    };
+
+    window.addEventListener('galaxyJump', handleGalaxyJump as EventListener);
+    return () => {
+      window.removeEventListener('galaxyJump', handleGalaxyJump as EventListener);
+    };
+  }, [setGalaxySeed, setInputSeed, setSelectedSystem, setSelectedBody, resetAllExploration]);
+
+  const handleBlackHoleJumpBoost = useCallback((jumpData: { mode: 'local' | 'newGalaxy' | 'knownGalaxy'; seed?: number }) => {
+    if (galaxyData) {
+      const jumpBoostFunction = blackHoleJumpBoost(jumpData);
+      jumpBoostFunction(galaxyData.starSystems, galaxyData.blackHoles);
+    }
+  }, [blackHoleJumpBoost, galaxyData]);
+
   if (isGameOver) {
     return (
       <div className="h-screen bg-black text-white flex items-center justify-center">
@@ -357,7 +384,7 @@ const Index = () => {
         onOpenMarket={() => handleOpenMarket(selectedSystem)}
         onJumpToSystem={handleJumpToSystem}
         onUpdateShipName={updateShipName}
-        onBlackHoleJumpBoost={blackHoleJumpBoost}
+        onBlackHoleJumpBoost={handleBlackHoleJumpBoost}
         handleCompleteExploration={handleCompleteExploration}
         handleContinueExploration={handleContinueExploration}
         onZoomToStarterSystem={handleZoomToStarterSystem}

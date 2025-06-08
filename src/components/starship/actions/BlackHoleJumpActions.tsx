@@ -8,7 +8,7 @@ import { BlackHoleJumpDialog } from './BlackHoleJumpDialog';
 interface BlackHoleJumpActionsProps {
   selectedSystem: StarSystem | null;
   currentSystemId: string | null;
-  onBlackHoleJumpBoost: () => void;
+  onBlackHoleJumpBoost: (jumpData: { mode: 'local' | 'newGalaxy' | 'knownGalaxy'; seed?: number }) => void;
   allSystems?: StarSystem[];
   allBlackHoles?: BlackHole[];
   shipStats?: any;
@@ -99,8 +99,8 @@ export const BlackHoleJumpActions: React.FC<BlackHoleJumpActionsProps> = ({
     setIsDialogOpen(false);
   };
 
-  const handleConfirmJump = () => {
-    onBlackHoleJumpBoost();
+  const handleConfirmJump = (jumpData: { mode: 'local' | 'newGalaxy' | 'knownGalaxy'; seed?: number }) => {
+    onBlackHoleJumpBoost(jumpData);
   };
 
   return (

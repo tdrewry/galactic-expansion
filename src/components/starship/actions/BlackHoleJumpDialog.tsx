@@ -8,7 +8,7 @@ import { Zap, AlertTriangle, Globe, MapPin } from 'lucide-react';
 interface BlackHoleJumpDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: (jumpData: { mode: 'local' | 'newGalaxy' | 'knownGalaxy'; seed?: number }) => void;
   hasGalacticCenterInRange?: boolean;
 }
 
@@ -40,14 +40,16 @@ export const BlackHoleJumpDialog: React.FC<BlackHoleJumpDialogProps> = ({
         return; // Don't proceed if the result isn't a valid number
       }
       
-      // TODO: Pass the custom seed to the jump function
-      console.log('Jumping to known galaxy with seed:', numericSeed);
+      onConfirm({ mode: 'knownGalaxy', seed: numericSeed });
     } else if (jumpMode === 'newGalaxy') {
-      // TODO: Generate random seed and jump to new galaxy
-      console.log('Jumping to new random galaxy');
+      // Generate random seed for new galaxy
+      const randomSeed = Math.floor(Math.random() * 1000000);
+      onConfirm({ mode: 'newGalaxy', seed: randomSeed });
+    } else {
+      // Local galaxy jump
+      onConfirm({ mode: 'local' });
     }
     
-    onConfirm();
     onClose();
     
     // Reset state for next time
