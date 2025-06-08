@@ -28,7 +28,7 @@ interface StarshipPanelProps {
   onUpdateShipName?: (newName: string) => void;
   onRepairHull?: (cost: number) => void;
   onRepairShields?: (cost: number) => void;
-  onRepairCombatSystems?: () => void;
+  onRepairCombatSystems?: (cost: number) => void;
   onBlackHoleJumpBoost?: () => void;
   allSystems?: StarSystem[];
   allBlackHoles?: BlackHole[];
