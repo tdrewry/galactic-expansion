@@ -285,11 +285,8 @@ const Index = () => {
   }, [setGalaxySeed, setInputSeed, setSelectedSystem, setSelectedBody, resetAllExploration]);
 
   const handleBlackHoleJumpBoost = useCallback((jumpData: { mode: 'local' | 'newGalaxy' | 'knownGalaxy'; seed?: number }) => {
-    if (galaxyData) {
-      const jumpBoostFunction = blackHoleJumpBoost(jumpData);
-      jumpBoostFunction(galaxyData.starSystems, galaxyData.blackHoles);
-    }
-  }, [blackHoleJumpBoost, galaxyData]);
+    blackHoleJumpBoost(jumpData);
+  }, [blackHoleJumpBoost]);
 
   if (isGameOver) {
     return (
