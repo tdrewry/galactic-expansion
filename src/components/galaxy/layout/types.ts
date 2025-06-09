@@ -57,7 +57,7 @@ export interface GalaxyLayoutBaseProps {
   onJumpToSystem: (systemId: string) => void;
   onUpdateShipName?: (newName: string) => void;
   canJumpToSelected?: boolean;
-  onBlackHoleJumpBoost?: (jumpData: { mode: 'local' | 'newGalaxy' | 'knownGalaxy'; seed?: number }) => (allSystems: StarSystem[], allBlackHoles: BlackHole[]) => string | null;
+  onBlackHoleJumpBoost?: (jumpData: { mode: 'local' | 'newGalaxy' | 'knownGalaxy'; seed?: number }) => void;
   allSystems?: StarSystem[];
   allBlackHoles?: BlackHole[];
 }

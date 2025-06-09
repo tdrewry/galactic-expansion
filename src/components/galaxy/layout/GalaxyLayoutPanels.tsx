@@ -1,18 +1,19 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { LeftPanel } from './LeftPanel';
 import { CenterPanel } from './CenterPanel';
 import { RightPanel } from './RightPanel';
 import { GalaxyMapRef } from '../../GalaxyMap';
 import { GalaxyLayoutBaseProps } from './types';
+import { useScannerState } from './ScannerState';
 
 interface GalaxyLayoutPanelsProps extends GalaxyLayoutBaseProps {
   galaxyMapRef?: React.RefObject<GalaxyMapRef>;
 }
 
 export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => {
-  const [isScanning, setIsScanning] = useState(false);
+  const { isScanning, handleTriggerScan, handleScanComplete } = useScannerState(props.selectedSystem);
 
   console.log('GalaxyLayoutPanels: onRepairCombatSystems prop received:', !!props.onRepairCombatSystems);
   console.log('GalaxyLayoutPanels Debug - Props received:', {
@@ -21,16 +22,6 @@ export const GalaxyLayoutPanels: React.FC<GalaxyLayoutPanelsProps> = (props) => 
     allSystemsReceived: !!props.allSystems,
     allBlackHolesReceived: !!props.allBlackHoles
   });
-
-  const handleTriggerScan = () => {
-    if (props.selectedSystem) {
-      setIsScanning(true);
-    }
-  };
-
-  const handleScanComplete = () => {
-    setIsScanning(false);
-  };
 
   return (
     <ResizablePanelGroup direction="horizontal" className="flex-1">
