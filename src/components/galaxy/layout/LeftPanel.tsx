@@ -1,13 +1,7 @@
 
 import React from 'react';
 import { ExplorationLog } from '../../exploration/ExplorationLog';
-
-interface ExplorationLogEntry {
-  id: string;
-  systemId: string;
-  event: any;
-  timestamp: Date;
-}
+import { ExplorationLogEntry } from './types';
 
 interface LeftPanelProps {
   explorationHistory: ExplorationLogEntry[];

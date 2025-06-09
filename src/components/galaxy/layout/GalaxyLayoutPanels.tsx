@@ -1,11 +1,10 @@
-
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
-import { StarSystem, Planet, Moon, BlackHole } from '../../../utils/galaxyGenerator';
 import { LeftPanel } from './LeftPanel';
 import { CenterPanel } from './CenterPanel';
 import { RightPanel } from './RightPanel';
 import { GalaxyMapRef } from '../../GalaxyMap';
+import { StarSystem, Planet, Moon, BlackHole } from '../../../utils/galaxyGenerator';
 
 interface ExplorationLogEntry {
   id: string;
