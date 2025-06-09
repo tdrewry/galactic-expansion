@@ -8,6 +8,15 @@ export const useShipStatsCore = (initialStats: StarshipStats) => {
   const [isGameOver, setIsGameOver] = useState(false);
   const { toast } = useToast();
 
+  const triggerGameOver = useCallback(() => {
+    setIsGameOver(true);
+    toast({
+      title: "Retirement",
+      description: "You have chosen to retire from exploration.",
+      variant: "default",
+    });
+  }, [toast]);
+
   const updateShipName = useCallback((newName: string) => {
     setStats(prevStats => ({
       ...prevStats,
@@ -20,21 +29,18 @@ export const useShipStatsCore = (initialStats: StarshipStats) => {
     });
   }, [toast]);
 
-  const triggerGameOver = useCallback(() => {
-    setIsGameOver(true);
-    toast({
-      title: "Retirement",
-      description: "You have chosen to retire from exploration.",
-      variant: "default",
-    });
-  }, [toast]);
+  const resetStats = useCallback((newStats: StarshipStats, startingSystemId?: string) => {
+    setStats(newStats);
+    setIsGameOver(false);
+  }, []);
 
   return {
     stats,
     setStats,
     isGameOver,
     setIsGameOver,
+    triggerGameOver,
     updateShipName,
-    triggerGameOver
+    resetStats
   };
 };

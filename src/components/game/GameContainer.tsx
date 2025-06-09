@@ -20,7 +20,7 @@ interface GameContainerProps extends GalaxyLayoutBaseProps {
   handleCompleteExploration: () => void;
   handleContinueExploration: () => void;
   onZoomToStarterSystem: () => void;
-  onSettingsChange: (key: string, value: any) => void;
+  onSettingsChange: (newSettings: any) => void;
   onGenerateRandomSeed: () => void;
   onTriggerGameOver: () => void;
   onSaveGame: () => void;

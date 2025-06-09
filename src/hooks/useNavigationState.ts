@@ -15,8 +15,9 @@ export const useNavigationState = () => {
   }, []);
 
   const jumpToSystem = useCallback((systemId: string, allowInterrupt: boolean = true) => {
-    if (allowInterrupt && Math.random() < 0.1) {
+    if (allowInterrupt && Math.random() < 0.1) { // 10% chance of interrupt for future use
       console.log('Jump interrupt triggered - stub for future implementation');
+      // TODO: Implement jump interrupt events
     }
     
     setCurrentSystemId(systemId);
