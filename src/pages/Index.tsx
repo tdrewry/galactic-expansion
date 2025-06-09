@@ -1,21 +1,17 @@
+
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { StarSystem, Planet, Moon } from '../utils/galaxyGenerator';
-import { ExplorationDialog } from '../components/galaxy/ExplorationDialog';
-import { useExploration } from '../components/exploration/useExploration';
 import { generateStarship, generateShipOptions } from '../utils/starshipGenerator';
+import { useExploration } from '../components/exploration/useExploration';
 import { useShipStats } from '../hooks/useShipStats';
-import { Button } from '@/components/ui/button';
 import { useGalaxyState } from '../hooks/useGalaxyState';
-import { GalaxyLayout } from '../components/galaxy/GalaxyLayout';
-import { selectStartingSystem } from '../utils/startingSystemSelector';
-import { MarketDialog } from '../components/starship/MarketDialog';
-import { ShipSelectionDialog } from '../components/starship/ShipSelectionDialog';
-import { GameHeader } from '../components/game/GameHeader';
-import { GameFooter } from '../components/game/GameFooter';
 import { useGameFlow } from '../hooks/useGameFlow';
 import { useGalaxyData } from '../hooks/useGalaxyData';
-import { useMarketDialog } from '../hooks/useMarketDialog';
 import { useShipSelection } from '../hooks/useShipSelection';
+import { useDialogManagement } from '../hooks/useDialogManagement';
+import { useGameInitialization } from '../hooks/useGameInitialization';
+import { useGameEventHandlers } from '../hooks/useGameEventHandlers';
+import { GameOverScreen } from '../components/game/GameOverScreen';
+import { GameContainer } from '../components/game/GameContainer';
 
 const Index = () => {
   const galaxyState = useGalaxyState();
@@ -106,7 +102,7 @@ const Index = () => {
     handleSelectShip
   } = useShipSelection(galaxySeed, numSystems, currentSystemId);
 
-  const { isMarketDialogOpen, currentMarketInfo, handleOpenMarket, handleCloseMarket } = useMarketDialog();
+  const { handleOpenMarketForSystem, isMarketDialogOpen, currentMarketInfo, handleCloseMarket } = useDialogManagement();
 
   const { generateRandomSeed, handleSeedChange } = useGameFlow({
     galaxySeed,
@@ -117,6 +113,48 @@ const Index = () => {
     resetAllExploration,
     setShipOptions,
     setIsShipSelectionOpen
+  });
+
+  const { handleZoomToStarterSystem } = useGameInitialization({
+    currentSystemId,
+    galaxyData,
+    jumpToSystem,
+    setSelectedSystem,
+    shouldZoomToStarter,
+    setShouldZoomToStarter
+  });
+
+  const {
+    handleSystemSelect,
+    handleStarSelect,
+    handleBodySelect,
+    handleBeginExploration,
+    handleContinueExploration,
+    handleCompleteExploration,
+    handleResetExploration,
+    handleJumpToSystem,
+    handleRepairHull,
+    handleRepairShields,
+    handleRepairCombatSystems
+  } = useGameEventHandlers({
+    selectedSystem,
+    selectedSystemId,
+    galaxyData,
+    explorationEvent,
+    setSelectedSystem,
+    setSelectedStar,
+    setSelectedBody,
+    selectSystem,
+    beginExploration,
+    resetExploration,
+    updateStatsFromExploration,
+    completeCurrentExploration,
+    continueExploration,
+    closeExplorationDialog,
+    jumpToSystem,
+    repairHull,
+    repairShields,
+    repairCombatSystems
   });
 
   const handleStartNewGameFromGameOver = useCallback(() => {
@@ -136,32 +174,6 @@ const Index = () => {
     resetStats(generateStarship(newSeed).stats);
   }, [setGalaxySeed, setInputSeed, setSelectedSystem, setSelectedBody, resetAllExploration, setShipOptions, setIsShipSelectionOpen, resetStats]);
 
-  // Initialize starting system
-  useEffect(() => {
-    if (!currentSystemId && galaxyData && galaxyData.starSystems.length > 0) {
-      const startingSystem = selectStartingSystem(galaxyData.starSystems);
-      
-      if (startingSystem) {
-        jumpToSystem(startingSystem.id, false);
-        setSelectedSystem(startingSystem);
-        
-        if (shouldZoomToStarter) {
-          setShouldZoomToStarter(false);
-        }
-      }
-    }
-  }, [galaxyData, currentSystemId, jumpToSystem, shouldZoomToStarter, setShouldZoomToStarter, setSelectedSystem]);
-
-  // Update selected system when selectedSystemId changes
-  useEffect(() => {
-    if (selectedSystemId && galaxyData) {
-      const system = galaxyData.starSystems.find(s => s.id === selectedSystemId);
-      if (system) {
-        setSelectedSystem(system);
-      }
-    }
-  }, [selectedSystemId, galaxyData, setSelectedSystem]);
-
   const handleSaveGame = useCallback(() => {
     saveGame(galaxySeed);
   }, [saveGame, galaxySeed]);
@@ -177,77 +189,6 @@ const Index = () => {
     }
   }, [loadGame, setGalaxySeed, setInputSeed, setSelectedSystem, setSelectedBody, resetAllExploration]);
 
-  const handleSystemSelect = useCallback((system: StarSystem) => {
-    console.log('Index: System selected:', system.id);
-    selectSystem(system.id);
-    setSelectedStar('primary');
-    setSelectedBody(null);
-  }, [selectSystem, setSelectedStar, setSelectedBody]);
-
-  const handleStarSelect = useCallback((star: 'primary' | 'binary' | 'trinary') => {
-    console.log('Index: Star selected:', star);
-    setSelectedStar(star);
-    setSelectedBody(null);
-  }, [setSelectedStar, setSelectedBody]);
-
-  const handleBodySelect = useCallback((body: Planet | Moon | null) => {
-    console.log('Index: Body selected:', body?.id || 'none');
-    setSelectedBody(body);
-  }, [setSelectedBody]);
-
-  const handleBeginExploration = useCallback(() => {
-    if (!selectedSystem) return;
-    const updatedSystem = beginExploration(selectedSystem);
-    setSelectedSystem(updatedSystem);
-  }, [selectedSystem, beginExploration, setSelectedSystem]);
-
-  const handleContinueExploration = useCallback(() => {
-    if (!selectedSystem) return;
-    if (explorationEvent) {
-      updateStatsFromExploration(explorationEvent);
-    }
-    completeCurrentExploration(selectedSystem);
-    continueExploration(selectedSystem);
-  }, [selectedSystem, explorationEvent, updateStatsFromExploration, completeCurrentExploration, continueExploration]);
-
-  const handleCompleteExploration = useCallback(() => {
-    if (!selectedSystem) return;
-    if (explorationEvent) {
-      updateStatsFromExploration(explorationEvent);
-    }
-    completeCurrentExploration(selectedSystem);
-    closeExplorationDialog();
-  }, [selectedSystem, explorationEvent, updateStatsFromExploration, completeCurrentExploration, closeExplorationDialog]);
-
-  const handleResetExploration = useCallback(() => {
-    if (!selectedSystem) return;
-    const updatedSystem = resetExploration(selectedSystem);
-    setSelectedSystem(updatedSystem);
-  }, [selectedSystem, resetExploration, setSelectedSystem]);
-
-  const handleJumpToSystem = useCallback((systemId: string) => {
-    jumpToSystem(systemId);
-  }, [jumpToSystem]);
-
-  const handleRepairHull = useCallback(() => {
-    const repairCost = 800;
-    repairHull(repairCost);
-  }, [repairHull]);
-
-  const handleRepairShields = useCallback(() => {
-    const repairCost = 600;
-    repairShields(repairCost);
-  }, [repairShields]);
-
-  const handleRepairCombatSystems = useCallback(() => {
-    const repairCost = 1500;
-    repairCombatSystems(repairCost);
-  }, [repairCombatSystems]);
-
-  const handleZoomToStarterSystem = useCallback(() => {
-    // This will be called by GalaxyLayout when it needs to zoom
-  }, []);
-
   const handleShipSelect = useCallback((selectedShip: any) => {
     handleSelectShip(selectedShip, resetStats);
   }, [handleSelectShip, resetStats]);
@@ -257,7 +198,7 @@ const Index = () => {
       return false;
     }
     
-    const currentSystem = galaxyData.starSystems.find(s => s.id === currentSystemId);
+    const currentSystem = galaxyData.starSystems.find((s: any) => s.id === currentSystemId);
     if (!currentSystem) return false;
     
     const jumpableIds = getJumpableSystemIds(currentSystem, galaxyData.starSystems);
@@ -292,132 +233,81 @@ const Index = () => {
   }, [blackHoleJumpBoost, galaxyData]);
 
   if (isGameOver) {
-    return (
-      <div className="h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-red-400 mb-4">GAME OVER</h1>
-          <p className="text-xl text-gray-300 mb-8">Your ship has been destroyed</p>
-          <Button onClick={handleStartNewGameFromGameOver} className="bg-blue-600 hover:bg-blue-700">
-            Start New Game
-          </Button>
-        </div>
-      </div>
-    );
+    return <GameOverScreen onStartNewGame={handleStartNewGameFromGameOver} />;
   }
 
   return (
-    <div className="h-screen bg-black text-white flex flex-col overflow-hidden">
-      <GameHeader
-        appTitle={appTitle}
-        onGenerateRandomSeed={generateRandomSeed}
-        onTriggerGameOver={triggerGameOver}
-        onSaveGame={handleSaveGame}
-        onLoadGame={handleLoadGame}
-        numSystems={numSystems}
-        numBlackHoles={numBlackHoles}
-        binaryFrequency={binaryFrequency}
-        trinaryFrequency={trinaryFrequency}
-        showDustLanes={showDustLanes}
-        showCosmicDust={showCosmicDust}
-        dustLaneParticles={dustLaneParticles}
-        cosmicDustParticles={cosmicDustParticles}
-        dustLaneOpacity={dustLaneOpacity}
-        cosmicDustOpacity={cosmicDustOpacity}
-        dustLaneColorIntensity={dustLaneColorIntensity}
-        cosmicDustColorIntensity={cosmicDustColorIntensity}
-        jumpLaneOpacity={jumpLaneOpacity}
-        greenPathOpacity={greenPathOpacity}
-        visitedJumpLaneOpacity={visitedJumpLaneOpacity}
-        defaultShipStats={defaultShipStats}
-        inputSeed={inputSeed}
-        setInputSeed={setInputSeed}
-        galaxySeed={galaxySeed}
-        setGalaxySeed={setGalaxySeed}
-        onSettingsChange={handleSettingsChange}
-      />
-
-      <GalaxyLayout
-        galaxySeed={galaxySeed}
-        numSystems={numSystems}
-        numBlackHoles={numBlackHoles}
-        binaryFrequency={binaryFrequency}
-        trinaryFrequency={trinaryFrequency}
-        showDustLanes={showDustLanes}
-        showCosmicDust={showCosmicDust}
-        showBlackHoles={true}
-        dustLaneParticles={dustLaneParticles}
-        cosmicDustParticles={cosmicDustParticles}
-        dustLaneOpacity={dustLaneOpacity}
-        cosmicDustOpacity={cosmicDustOpacity}
-        dustLaneColorIntensity={dustLaneColorIntensity}
-        cosmicDustColorIntensity={cosmicDustColorIntensity}
-        jumpLaneOpacity={jumpLaneOpacity}
-        greenPathOpacity={greenPathOpacity}
-        selectedSystem={selectedSystem}
-        selectedStar={selectedStar}
-        exploredSystems={exploredSystems}
-        explorationHistory={explorationHistory}
-        highlightedBodyId={highlightedBodyId}
-        isExplorationDialogOpen={isExplorationDialogOpen}
-        explorationEvent={explorationEvent}
-        canContinueExploration={canContinueExploration}
-        shipStats={shipStats}
-        currentSystemId={currentSystemId}
-        exploredSystemIds={exploredSystemIds}
-        travelHistory={travelHistory}
-        isSystemExplored={isSystemExplored}
-        canSystemBeExplored={canSystemBeExplored}
-        getSystemExplorationStatus={getSystemExplorationStatus}
-        getJumpableSystemIds={getJumpableSystemIds}
-        getScannerRangeSystemIds={getScannerRangeSystemIds}
-        canJumpToSelected={canJumpToSelected}
-        allSystems={galaxyData?.starSystems || []}
-        allBlackHoles={galaxyData?.blackHoles || []}
-        onSystemSelect={handleSystemSelect}
-        onStarSelect={handleStarSelect}
-        onBodySelect={handleBodySelect}
-        onBeginExploration={handleBeginExploration}
-        onResetExploration={handleResetExploration}
-        onRepairHull={handleRepairHull}
-        onRepairShields={handleRepairShields}
-        onRepairCombatSystems={handleRepairCombatSystems}
-        onOpenMarket={() => handleOpenMarket(selectedSystem)}
-        onJumpToSystem={handleJumpToSystem}
-        onUpdateShipName={updateShipName}
-        onBlackHoleJumpBoost={handleBlackHoleJumpBoost}
-        handleCompleteExploration={handleCompleteExploration}
-        handleContinueExploration={handleContinueExploration}
-        onZoomToStarterSystem={handleZoomToStarterSystem}
-      />
-
-      <GameFooter
-        galaxySeed={galaxySeed}
-        numSystems={numSystems}
-        numBlackHoles={numBlackHoles}
-        binaryFrequency={binaryFrequency}
-        trinaryFrequency={trinaryFrequency}
-      />
-
-      <ShipSelectionDialog
-        isOpen={isShipSelectionOpen}
-        shipOptions={shipOptions}
-        onSelectShip={handleShipSelect}
-      />
-
-      {currentMarketInfo && (
-        <MarketDialog
-          isOpen={isMarketDialogOpen}
-          onClose={handleCloseMarket}
-          marketInfo={currentMarketInfo}
-          shipStats={shipStats}
-          onSellCargo={(amount) => sellCargo(amount, true)}
-          onUpgradeSystem={upgradeSystem}
-          onRepairHull={repairHull}
-          onRepairShields={repairShields}
-          onRepairCombatSystems={repairCombatSystems}
-        />
-      )}
-    </div>
+    <GameContainer
+      appTitle={appTitle}
+      inputSeed={inputSeed}
+      setInputSeed={setInputSeed}
+      setGalaxySeed={setGalaxySeed}
+      defaultShipStats={defaultShipStats}
+      visitedJumpLaneOpacity={visitedJumpLaneOpacity}
+      isExplorationDialogOpen={isExplorationDialogOpen}
+      explorationEvent={explorationEvent}
+      canContinueExploration={canContinueExploration}
+      handleCompleteExploration={handleCompleteExploration}
+      handleContinueExploration={handleContinueExploration}
+      onZoomToStarterSystem={handleZoomToStarterSystem}
+      onSettingsChange={handleSettingsChange}
+      onGenerateRandomSeed={generateRandomSeed}
+      onTriggerGameOver={triggerGameOver}
+      onSaveGame={handleSaveGame}
+      onLoadGame={handleLoadGame}
+      isShipSelectionOpen={isShipSelectionOpen}
+      shipOptions={shipOptions}
+      onSelectShip={handleShipSelect}
+      isMarketDialogOpen={isMarketDialogOpen}
+      currentMarketInfo={currentMarketInfo}
+      onCloseMarket={handleCloseMarket}
+      onSellCargo={(amount) => sellCargo(amount, true)}
+      onUpgradeSystem={upgradeSystem}
+      galaxySeed={galaxySeed}
+      numSystems={numSystems}
+      numBlackHoles={numBlackHoles}
+      binaryFrequency={binaryFrequency}
+      trinaryFrequency={trinaryFrequency}
+      showDustLanes={showDustLanes}
+      showCosmicDust={showCosmicDust}
+      dustLaneParticles={dustLaneParticles}
+      cosmicDustParticles={cosmicDustParticles}
+      dustLaneOpacity={dustLaneOpacity}
+      cosmicDustOpacity={cosmicDustOpacity}
+      dustLaneColorIntensity={dustLaneColorIntensity}
+      cosmicDustColorIntensity={cosmicDustColorIntensity}
+      jumpLaneOpacity={jumpLaneOpacity}
+      greenPathOpacity={greenPathOpacity}
+      selectedSystem={selectedSystem}
+      selectedStar={selectedStar}
+      exploredSystems={exploredSystems}
+      explorationHistory={explorationHistory}
+      highlightedBodyId={highlightedBodyId}
+      shipStats={shipStats}
+      currentSystemId={currentSystemId}
+      exploredSystemIds={exploredSystemIds}
+      travelHistory={travelHistory}
+      getJumpableSystemIds={getJumpableSystemIds}
+      getScannerRangeSystemIds={getScannerRangeSystemIds}
+      isSystemExplored={isSystemExplored}
+      canSystemBeExplored={canSystemBeExplored}
+      getSystemExplorationStatus={getSystemExplorationStatus}
+      onSystemSelect={handleSystemSelect}
+      onStarSelect={handleStarSelect}
+      onBodySelect={handleBodySelect}
+      onBeginExploration={handleBeginExploration}
+      onResetExploration={handleResetExploration}
+      onRepairHull={handleRepairHull}
+      onRepairShields={handleRepairShields}
+      onRepairCombatSystems={handleRepairCombatSystems}
+      onOpenMarket={() => handleOpenMarketForSystem(selectedSystem)}
+      onJumpToSystem={handleJumpToSystem}
+      onUpdateShipName={updateShipName}
+      canJumpToSelected={canJumpToSelected}
+      onBlackHoleJumpBoost={handleBlackHoleJumpBoost}
+      allSystems={galaxyData?.starSystems || []}
+      allBlackHoles={galaxyData?.blackHoles || []}
+    />
   );
 };
 
